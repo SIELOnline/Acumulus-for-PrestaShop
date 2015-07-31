@@ -1,0 +1,22 @@
+Dear madam, sir,
+
+On sending an invoice to Acumulus, some errors or warnings occurred.
+
+If the send state below equals "2 {status_2_text}",
+warnings were returned, but the invoice has been created in Acumulus. However,
+we advice you to check the invoice in Acumulus for correctness.
+
+If the send state equals "1 {status_1_text}" or
+"3 {status_3_text}", errors were returned and the invpoice has NOT been created.
+You will have to manually create the incvoice in Acumulus or adapt it in your
+web shop and resend it to Acumulus.
+
+Send state: {status} {status_text}.
+Order:      {order_id}
+Invoice:    {invoice_id}
+
+Messages:
+{messages}
+
+At https://apidoc.sielsystems.nl/node/16 you can find more information regarding
+any error codes mentioned above.

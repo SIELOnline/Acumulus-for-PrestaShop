@@ -1,0 +1,24 @@
+.margin-form * {
+  vertical-align: top;
+}
+
+input[type="radio"], input[type="checkbox"] {
+  float: none;
+  clear: both;
+  margin-bottom: 3px;
+  display: inline-block;
+  width: 3%;
+}
+
+label.t {
+  float: none;
+  text-align: left;
+  margin-bottom: 3px;
+  display: inline-block;
+  width: 95%;
+}
+
+.acumulus-version-info {
+  font-size: larger;
+  font-weight: bolder;
+}

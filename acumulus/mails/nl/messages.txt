@@ -1,0 +1,24 @@
+Geachte heer/mevrouw,
+
+Bij het verzenden van een order naar Acumulus zijn er foutmeldingen of
+waarschuwingen terug gestuurd.
+
+Als de verzendstatus gelijk aan "2 {status_2_text}" is,
+zijn er alleen waarschuwingen. Het versturen is dan wel gelukt en is er een
+factuur aangemaakt in Acumulus. We raden u aan om de factuur in Acumulus op te
+zoeken en deze extra goed te controleren.
+
+Als de verzendstatus "1 {status_1_text}" of
+"3 {status_3_text}" is, dan is het versturen niet gelukt.
+U dient de factuur dan handmatig aan te maken in Acumulus of deze aan te passen
+en nogmaals te versturen.
+
+Verzendstatus: {status} {status_text}.
+Order:         {order_id}
+Factuur:       {invoice_id}
+
+Berichten:
+{messages}
+
+Meer informatie betreffende de vermeldde foutcodes kunt u vinden op
+https://apidoc.sielsystems.nl/node/16.
