@@ -34,10 +34,16 @@ class Acumulus extends Module {
   /** @var array */
   protected $options = array();
 
-  /** @var Siel\Acumulus\PrestaShop\PrestaShopAcumulusConfig */
+  /** @var Siel\Acumulus\Helpers\TranslatorInterface */
+  protected $translator;
+
+  /** @var \Siel\Acumulus\Shop\Config */
   protected $acumulusConfig;
 
-  /** @var Siel\Acumulus\Common\WebAPI */
+  /** @var \Siel\Acumulus\Shop\ConfigStoreInterface */
+  protected $configStore;
+
+  /** @var \Siel\Acumulus\Web\Service */
   protected $webAPI;
 
   public function __construct() {
@@ -54,9 +60,10 @@ class Acumulus extends Module {
     // Initialization.
     $this->init();
 
-    $this->displayName = $this->acumulusConfig->t('module_name');
-    $this->description = $this->acumulusConfig->t('module_description');
-    $this->confirmUninstall = $this->acumulusConfig->t('message_uninstall');
+    // @todo: check where to put the translations.
+    $this->displayName = $this->translator->get('module_name');
+    $this->description = $this->translator->get('module_description');
+    $this->confirmUninstall = $this->translator->get('message_uninstall');
   }
 
   /**
@@ -64,17 +71,11 @@ class Acumulus extends Module {
    */
   protected function init() {
     if (!$this->acumulusConfig) {
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/TranslatorInterface.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/BaseTranslator.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/ConfigInterface.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/BaseConfig.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/WebAPICommunication.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/Common/WebAPI.php');
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/PrestaShop/PrestaShopAcumulusConfig.php');
-
       $language = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-      $this->acumulusConfig = new Siel\Acumulus\PrestaShop\PrestaShopAcumulusConfig($language);
-      $this->webAPI = new Siel\Acumulus\Common\WebAPI($this->acumulusConfig);
+      $this->translator = new \Siel\Acumulus\Helpers\Translator($language);
+      $this->configStore = new \Siel\Acumulus\PrestaShop\Shop\ConfigStore();
+      $this->acumulusConfig = new Siel\Acumulus\Shop\Config($this->configStore, $this->translator);
+      $this->webAPI = new Siel\Acumulus\Web\Service($this->acumulusConfig, $this->translator);
 
       // Requirements checking. Not sure if this is the right place.
       foreach ($this->webAPI->checkRequirements() as $error) {
@@ -315,13 +316,12 @@ class Acumulus extends Module {
   }
 
   /**
-   * @return \Siel\Acumulus\PrestaShop\AcumulusEntry
+   * @return \Siel\Acumulus\PrestaShop\Shop\AcumulusEntryModel
    */
   protected function getAcumulusEntryModel() {
     static $model = null;
     if ($model === null) {
-      require_once(dirname(__FILE__) . '/Siel/Acumulus/PrestaShop/AcumulusEntry.php');
-      $model = new Siel\Acumulus\PrestaShop\AcumulusEntry();
+      $model = new Siel\Acumulus\PrestaShop\Shop\AcumulusEntryModel($this->acumulusConfig);
     }
     return $model;
   }

@@ -1,24 +1,29 @@
 Acumulus module events
 =======================
 
-This file documents the events that the Acumulus module defines. Currently only
-1 event is defined:
-
-
-actionAcumulusInvoiceAdd
-------------------------
-
 Warning
 -------
-This event is experimental. Depending on feedback from actual usage, details
+These events are experimental. Depending on feedback from actual usage, details
 may change in future versions.
+
+Introduction
+------------
+This file documents the events that the Acumulus module defines. Currently, the
+following events are defined:
+
+- actionAcumulusInvoiceCreated
+- actionAcumulusInvoiceCompleted
+- actionAcumulusInvoiceSent
+
+actionAcumulusInvoiceCreated
+----------------------------
 
 Description
 -----------
-The "actionAcumulusInvoiceAdd" event is used to change the invoice that will be
-sent to Acumulus. The Acumulus plugin has created the invoice and is about to
-send it to Acumulus. But just before doing so, this event allows you to change
-details of the invoice as will be sent to Acumulus.
+The "actionAcumulusInvoiceCreated" event is used to change the invoice that will
+be sent to Acumulus. The Acumulus plugin has created the invoice and is about to
+complete and send it to Acumulus. But just before doing so, this event allows
+you to do your own completion beforechange details of the invoice as will be sent to Acumulus.
 
 Usage
 -----
@@ -34,7 +39,6 @@ in the $params argument:
   Some keys will be missing, if they are still missing after this event has
   been applied, they will be filled in (not overwritten) by the module before
   the actual sending takes place:
-  - ['customer']['locationcode']
   - ['customer']['overwriteifexists']
   - ['customer']['type']
   - ['customer']['invoice']['concept']

@@ -15,7 +15,7 @@ acumulus/libraries/Siel/*
 changelog*.txt
 license.txt
 licentie-nl.pdf
-readme-nl.txt
+leesmij.txt
 
 # Resulting installer files
 /*.zip
