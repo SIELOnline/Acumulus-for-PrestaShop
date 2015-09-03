@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains the Acumulus class, the base of our PrestaShop module.
@@ -8,17 +9,16 @@
  *
  * http://doc.prestashop.com/display/PS16/Creating+a+PrestaShop+module
  *
- * Do not use the keywords namespace and use here, as on occasion PrestaShop
+ * DO NOT USE the keywords namespace and use here, as on occasion PrestaShop
  * loads and eval()'s this code, leading to E_WARNINGs...
  */
-
 if (!defined('_PS_VERSION_')) {
   exit;
 }
 
 /**
- * Class Acumulus defines a PrestaShop module that can interact with the
- * Acumulus webAPI to a.o. automatically send invoices to Acumulus.
+ * Acumulus defines a PrestaShop module that can interact with the
+ * Acumulus webAPI to send invoices to Acumulus.
  */
 class Acumulus extends Module {
   /**
@@ -27,14 +27,16 @@ class Acumulus extends Module {
    * - minor version: addition of minor features, backwards compatible
    * - major version: major or backwards incompatible changes
    *
+   * Note: maximum version length = 8.
+   *
    * @var string
    */
-  public static $module_version = '4.0.0-alpha1';
+  public static $module_version = '4.0.0-a1';
 
   /** @var array */
   protected $options = array();
 
-  /** @var Siel\Acumulus\Helpers\TranslatorInterface */
+  /** @var \Siel\Acumulus\Helpers\TranslatorInterface */
   protected $translator;
 
   /** @var \Siel\Acumulus\Shop\Config */
@@ -42,9 +44,6 @@ class Acumulus extends Module {
 
   /** @var \Siel\Acumulus\Shop\ConfigStoreInterface */
   protected $configStore;
-
-  /** @var \Siel\Acumulus\Web\Service */
-  protected $webAPI;
 
   public function __construct() {
     $this->name = 'acumulus';
@@ -60,7 +59,6 @@ class Acumulus extends Module {
     // Initialization.
     $this->init();
 
-    // @todo: check where to put the translations.
     $this->displayName = $this->translator->get('module_name');
     $this->description = $this->translator->get('module_description');
     $this->confirmUninstall = $this->translator->get('message_uninstall');
@@ -70,17 +68,18 @@ class Acumulus extends Module {
    * Initializes the properties
    */
   protected function init() {
-    if (!$this->acumulusConfig) {
-      $language = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-      $this->translator = new \Siel\Acumulus\Helpers\Translator($language);
-      $this->configStore = new \Siel\Acumulus\PrestaShop\Shop\ConfigStore();
-      $this->acumulusConfig = new Siel\Acumulus\Shop\Config($this->configStore, $this->translator);
-      $this->webAPI = new Siel\Acumulus\Web\Service($this->acumulusConfig, $this->translator);
+    if ($this->translator === null) {
+      // Load autoloader
+      require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
 
-      // Requirements checking. Not sure if this is the right place.
-      foreach ($this->webAPI->checkRequirements() as $error) {
-        $this->warning = $this->acumulusConfig->t($error['message']);
-      }
+      $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
+
+      \Siel\Acumulus\PrestaShop\Helpers\Log::createInstance();
+      $this->translator = new \Siel\Acumulus\Helpers\Translator($languageCode);
+      $translations = new \Siel\Acumulus\Shop\ModuleTranslations();
+      $this->translator->add($translations);
+
+      $this->acumulusConfig = new \Siel\Acumulus\Shop\Config(new \Siel\Acumulus\PrestaShop\Shop\ConfigStore(), $this->translator);
     }
   }
 
@@ -90,14 +89,12 @@ class Acumulus extends Module {
    * @return bool
    */
   public function install() {
-    if (!parent::install()
-      || !$this->registerHook('actionOrderHistoryAddAfter')
-      || !$this->createTables()
-      || !$this->installTab()
-    ) {
-      return false;
-    }
-    return true;
+    return $this->checkRequirements()
+      && parent::install()
+      && $this->createTables()
+      && $this->installTab()
+      && $this->registerHook('actionOrderHistoryAddAfter')
+      ;
   }
 
   /**
@@ -113,6 +110,25 @@ class Acumulus extends Module {
     $this->dropTables();
     $this->uninstallTab();
     return parent::uninstall();
+  }
+
+  /**
+   * Checks the requirements for this module (CURL, DOMXML, ...).
+   *
+   * @return bool
+   *   Success.
+   */
+  public function checkRequirements() {
+    $requirements = new \Siel\Acumulus\Helpers\Requirements();
+    $messages = $requirements->check();
+    foreach ($messages as $key => $message) {
+      $translatedMessage = $this->translator->get($key);
+      if ($translatedMessage === $key) {
+        $translatedMessage = $message;
+      }
+      $this->displayError($translatedMessage);
+    }
+    return empty($this->messages);
   }
 
   /**
@@ -144,15 +160,94 @@ class Acumulus extends Module {
   }
 
   /**
-   * Renders the configuration page.
+   * Renders the configuration form.
    *
    * @return string
    */
   public function getContent() {
-    $this->context->controller->addCSS($this->_path . 'config-form.css');
-    require_once(dirname(__FILE__) . '/Siel/Acumulus/PrestaShop/AcumulusConfigForm.php');
-    $form = new Siel\Acumulus\PrestaShop\AcumulusConfigForm($this->acumulusConfig, $this);
-    return $form->getContent();
+    // @todo: check if this is still needed.
+    //$this->context->controller->addCSS($this->_path . 'config-form.css');
+
+    $form = new \Siel\Acumulus\PrestaShop\Shop\ConfigForm($this->translator, $this->acumulusConfig, $this->name);
+    $output = '';
+    $output .= $this->processForm($form);
+    $output .= $this->renderForm($form);
+    return $output;
+  }
+
+  /**
+   * Processes the form (if it was submitted).
+   *
+   * @param \Siel\Acumulus\PrestaShop\Shop\ConfigForm$form
+   *
+   * @return string
+   *   Any output from the processing stage that has to be rendered: error or
+   *   success messages.
+   */
+  protected function processForm(Siel\Acumulus\PrestaShop\Shop\ConfigForm $form) {
+    $output = '';
+    $form->process();
+    foreach ($form->getErrorMessages() as $message) {
+      $output .= $this->displayError($message);
+    }
+    foreach ($form->getSuccessMessages() as $message) {
+      $output .= $this->displayConfirmation($message);
+    }
+    return $output;
+  }
+
+  /**
+   * Renders the HTML for the form.
+   *
+   * @param \Siel\Acumulus\PrestaShop\Shop\ConfigForm $form
+   *
+   * @return string
+   *   The rendered form HTML.
+   */
+  protected function renderForm(Siel\Acumulus\PrestaShop\Shop\ConfigForm $form) {
+    // Create and initialize form helper.
+    $helper = new HelperForm();
+
+    // Module, token and currentIndex.
+    $helper->module = $this;
+    $helper->name_controller = $this->name;
+    $helper->token = Tools::getAdminTokenLite('AdminModules');
+    $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+
+    // Language.
+    $default_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+    $helper->default_form_language = $default_lang;
+    $helper->allow_employee_form_lang = $default_lang;
+
+    // Title and toolbar.
+    $helper->title = $this->displayName;
+    $helper->show_toolbar = true; // false -> remove toolbar
+    $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
+    $helper->submit_action = 'submit' . $this->name;
+    $helper->toolbar_btn = array(
+      'save' => array(
+        'desc' => $this->translator->get('button_save'),
+        'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&save' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules'),
+      ),
+      'back' => array(
+        'href' => AdminController::$currentIndex . '&token=' . Tools::getAdminTokenLite('AdminModules'),
+        'desc' => $this->translator->get('button_back')
+      )
+    );
+
+    // Define form fields and its values and render the form.
+    $fields_form[0]['form'] = array(
+      'legend' => array(
+        'title' => $this->translator->get('button_settings'),
+      ),
+      'input' => $form->getFields(),
+      'submit' => array(
+        'title' => $this->translator->get('button_save'),
+        'class' => 'button'
+      )
+    );
+    $helper->fields_value = $form->getFormValues();
+    return $helper->generateForm($fields_form);
   }
 
   /**
@@ -163,88 +258,13 @@ class Acumulus extends Module {
    * @return bool
    */
   public function hookactionOrderHistoryAddAfter(array $params) {
+    // @todo: check how to handle refunds (OrderReturn): upon creation? do they trigger this hook at all?
     $this->init();
-    if ($params['order_history']->id_order_state == $this->acumulusConfig->get('triggerOrderStatus')) {
-      // We cannot know if an admin, a user or a batch triggered this hook.
-      // So we assume the process to be not interactive and will send a mail
-      // upon failure.
-      return $this->sendOrderToAcumulus(new Order($params['order_history']->id_order));
-    }
+    $order = new Order($params['order_history']->id_order);
+    $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
+    $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $order);
+    $this->acumulusConfig->getManager()->sourceStatusChange($source, $params['order_history']->id_order_state);
     return true;
-  }
-
-  /**
-   * @param Order $order
-   *   The order to send to Acumulus.
-   *
-   * @return bool
-   *   Success.
-   */
-  public function sendOrderToAcumulus(Order $order) {
-    // Do not use a use statement as that leads to a:
-    // [PrestaShop] Fatal error in module Module.php(1080) : eval()'d : syntax error, unexpected 'use' (T_USE)
-    // (In PS 1.6 it gives a different error, but still an error.)
-    $this->webAPI = new \Siel\Acumulus\Common\WebAPI($this->acumulusConfig);
-    require_once(dirname(__FILE__) . '/Siel/Acumulus/PrestaShop/InvoiceAdd.php');
-
-    $addInvoice = new Siel\Acumulus\PrestaShop\InvoiceAdd($this->acumulusConfig, $this);
-    $invoice = $addInvoice->convertOrderToAcumulusInvoice($order);
-    Hook::exec('actionAcumulusInvoiceAdd', array('invoice' => &$invoice, 'order' => $order), null, true);
-    $result = $this->webAPI->invoiceAdd($invoice, $order->id);
-
-    // Store entry id and token.
-    if (!empty($result['invoice'])) {
-      $this->saveAcumulusEntry($result['invoice'], $order);
-    }
-
-    // Send a mail if there are messages.
-    $messages = $this->webAPI->resultToMessages($result);
-    if (!empty($messages)) {
-      $this->sendMail($result, $messages, $order);
-    }
-
-    return !empty($result['invoice']['invoicenumber']);
-  }
-
-  /**
-   * @param array $invoice
-   * @param Order $order
-   *
-   * @return bool
-   */
-  public function saveAcumulusEntry(array $invoice, Order $order) {
-    $model = $this->getAcumulusEntryModel();
-    return $model->save($invoice, $order);
-  }
-
-  /**
-   * @param array$result
-   * @param array $messages
-   * @param Order $order
-   */
-  protected function sendMail(array $result, array $messages, Order $order) {
-    $id_lang = Context::getContext()->language->id;
-    $mailDir = dirname(__FILE__) . '/mails/';
-    $template_name = 'messages';
-    $title = $this->acumulusConfig->t('mail_subject');
-    $templateVars = array(
-      '{order_id}' => $order->id,
-      '{invoice_id}' => isset($result['invoice']['invoicenumber']) ? $result['invoice']['invoicenumber'] : $this->acumulusConfig->t('message_no_invoice'),
-      '{status}' => $result['status'],
-      '{status_text}' => $this->webAPI->getStatusText($result['status']),
-      '{status_1_text}' => $this->webAPI->getStatusText(1),
-      '{status_2_text}' => $this->webAPI->getStatusText(2),
-      '{status_3_text}' => $this->webAPI->getStatusText(3),
-      '{messages}' => $this->webAPI->messagesToText($messages),
-      '{messages_html}' => htmlspecialchars($this->webAPI->messagesToHtml($messages), ENT_NOQUOTES),
-    );
-    $credentials = $this->acumulusConfig->getCredentials();
-    $toEmail = !empty($credentials['emailonerror']) ? $credentials['emailonerror'] : Configuration::get('PS_SHOP_EMAIL');
-    $toName = Configuration::get('PS_SHOP_NAME');
-    $from = Configuration::get('PS_SHOP_EMAIL');
-    $fromName = Configuration::get('PS_SHOP_NAME');
-
-    Mail::Send($id_lang, $template_name, $title, $templateVars, $toEmail, $toName, $from, $fromName, NULL, NULL, $mailDir);
   }
 
   /**
@@ -254,9 +274,8 @@ class Acumulus extends Module {
    *
    * @return bool
    */
-  public function createTables() {
-    $model = $this->getAcumulusEntryModel();
-    return $model->install();
+  protected function createTables() {
+    return $this->acumulusConfig->getAcumulusEntryModel()->install();
   }
 
   /**
@@ -266,64 +285,8 @@ class Acumulus extends Module {
    *
    * @return bool
    */
-  public function dropTables() {
-    $model = $this->getAcumulusEntryModel();
-    return $model->uninstall();
-  }
-
-  /**
-   * Send a collection of orders to Acumulus.
-   *
-   * @param array $orderIds
-   *  The collection of order ids to send.
-   * @param bool $forceSend
-   *   Whether invoices that already have been sent to Acumulus, should be send
-   *   again.
-   * @param array $log
-   *   Will receive a log of results, 1 entry per order keyed by order-id.
-   *
-   * @return bool true on success, false otherwise.
-   * true on success, false otherwise.
-   */
-  public function sendOrders($orderIds, $forceSend, array &$log) {
-    $success = true;
-    $entryModel = $this->getAcumulusEntryModel();
-    $time_limit = ini_get('max_execution_time');
-    foreach ($orderIds as $orderId) {
-      // Try to keep the script running, but note that other systems involved,
-      // think the (Apache) web server, may have their own time-out.
-      set_time_limit($time_limit);
-      if ($forceSend || !$entryModel->getByOrderId($orderId)) {
-        $order = new Order($orderId);
-        if (!empty($order->id) && $order->id == $orderId) {
-          if ($this->sendOrderToAcumulus($order)) {
-            $log[$orderId] = sprintf($this->acumulusConfig->t('message_batch_send_1_success'), $orderId);
-          }
-          else {
-            $log[$orderId] = sprintf($this->acumulusConfig->t('message_batch_send_1_error'), $orderId);
-            $success       = FALSE;
-          }
-        }
-        else {
-          $log[$orderId] = sprintf($this->acumulusConfig->t('message_batch_send_1_not_found'), $orderId);
-        }
-      }
-      else {
-        $log[$orderId] = sprintf($this->acumulusConfig->t('message_batch_send_1_skipped'), $orderId);
-      }
-    }
-    return $success;
-  }
-
-  /**
-   * @return \Siel\Acumulus\PrestaShop\Shop\AcumulusEntryModel
-   */
-  protected function getAcumulusEntryModel() {
-    static $model = null;
-    if ($model === null) {
-      $model = new Siel\Acumulus\PrestaShop\Shop\AcumulusEntryModel($this->acumulusConfig);
-    }
-    return $model;
+  protected function dropTables() {
+    return $this->acumulusConfig->getAcumulusEntryModel()->uninstall();
   }
 
 }

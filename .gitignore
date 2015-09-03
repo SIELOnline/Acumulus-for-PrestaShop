@@ -19,3 +19,7 @@ leesmij.txt
 
 # Resulting installer files
 /*.zip
+
+#Generated files
+acumulus/config.xml
+acumulus/config_nl.xml
