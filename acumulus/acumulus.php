@@ -19,6 +19,8 @@ if (!defined('_PS_VERSION_')) {
 /**
  * Acumulus defines a PrestaShop module that can interact with the
  * Acumulus webAPI to send invoices to Acumulus.
+ *
+ * @property string $confirmUninstall
  */
 class Acumulus extends Module {
   /**
@@ -53,35 +55,53 @@ class Acumulus extends Module {
     $this->need_instance = 0;
     $this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.9');
     $this->dependencies = array();
+    $this->bootstrap = true;
 
     parent::__construct();
 
-    // Initialization.
-    $this->init();
-
-    $this->displayName = $this->translator->get('module_name');
-    $this->description = $this->translator->get('module_description');
-    $this->confirmUninstall = $this->translator->get('message_uninstall');
+    // This object can get created quite often: try to prevent initialization.
+    // (in fact: as we don't attach tour module name to the tab, it does not
+    // get created anymore that often, but we still keep this code.
+    if ($_GET['controller'] === 'AdminModules') {
+      $this->init();
+    }
   }
 
   /**
    * Initializes the properties
    */
-  protected function init() {
+  public function init() {
     if ($this->translator === null) {
       // Load autoloader
       require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
 
       $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-
       \Siel\Acumulus\PrestaShop\Helpers\Log::createInstance();
       $this->translator = new \Siel\Acumulus\Helpers\Translator($languageCode);
       $translations = new \Siel\Acumulus\Shop\ModuleTranslations();
       $this->translator->add($translations);
 
+      $this->displayName = $this->translator->get('module_name');
+      $this->description = $this->translator->get('module_description');
+
       $this->acumulusConfig = new \Siel\Acumulus\Shop\Config(new \Siel\Acumulus\PrestaShop\Shop\ConfigStore(), $this->translator);
     }
   }
+
+  /**
+   * @return \Siel\Acumulus\Helpers\TranslatorInterface
+   */
+  public function getTranslator() {
+    return $this->translator;
+  }
+
+  /**
+   * @return \Siel\Acumulus\Shop\Config
+   */
+  public function getAcumulusConfig() {
+    return $this->acumulusConfig;
+  }
+
 
   /**
    * Install module.
@@ -89,6 +109,7 @@ class Acumulus extends Module {
    * @return bool
    */
   public function install() {
+    $this->init();
     return $this->checkRequirements()
       && parent::install()
       && $this->createTables()
@@ -103,12 +124,16 @@ class Acumulus extends Module {
    * @return bool
    */
   public function uninstall() {
+    $this->init();
+    $this->confirmUninstall = $this->translator->get('message_uninstall');
+
     // Delete our config values
     foreach ($this->acumulusConfig->getKeys() as $key) {
       Configuration::deleteByName("ACUMULUS_$key");
     }
     $this->dropTables();
     $this->uninstallTab();
+
     return parent::uninstall();
   }
 
@@ -119,6 +144,7 @@ class Acumulus extends Module {
    *   Success.
    */
   public function checkRequirements() {
+    $this->init();
     $requirements = new \Siel\Acumulus\Helpers\Requirements();
     $messages = $requirements->check();
     foreach ($messages as $key => $message) {
@@ -165,8 +191,12 @@ class Acumulus extends Module {
    * @return string
    */
   public function getContent() {
-    // @todo: check if this is still needed.
-    //$this->context->controller->addCSS($this->_path . 'config-form.css');
+    $this->init();
+
+    // Ádd some styling in PS 1.5.
+    if (version_compare(_PS_VERSION_, 1.6, '<')) {
+      $this->context->controller->addCSS($this->_path . 'config-form.css');
+    }
 
     $form = new \Siel\Acumulus\PrestaShop\Shop\ConfigForm($this->translator, $this->acumulusConfig, $this->name);
     $output = '';
@@ -221,7 +251,7 @@ class Acumulus extends Module {
 
     // Title and toolbar.
     $helper->title = $this->displayName;
-    $helper->show_toolbar = true; // false -> remove toolbar
+    $helper->show_toolbar = false; // false -> remove toolbar
     $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
     $helper->submit_action = 'submit' . $this->name;
     $helper->toolbar_btn = array(
@@ -235,19 +265,31 @@ class Acumulus extends Module {
       )
     );
 
+    $helper->multiple_fieldsets = true;
+    $formMapper = new \Siel\Acumulus\PrestaShop\Helpers\FormMapper();
+    $fields_form_input = $formMapper->map($form);
     // Define form fields and its values and render the form.
-    $fields_form[0]['form'] = array(
-      'legend' => array(
-        'title' => $this->translator->get('button_settings'),
-      ),
-      'input' => $form->getFields(),
-      'submit' => array(
-        'title' => $this->translator->get('button_save'),
-        'class' => 'button'
+    $fields_form = array(
+      array(
+        'form' => array(
+          'legend' => array(
+            'title' => $this->translator->get('button_settings'),
+            'icon' => 'icon-cogs',
+          ),
+          'input' => $fields_form_input,
+          'submit' => array(
+            'title' => $this->translator->get('button_save'),
+          )
+        )
       )
     );
-    $helper->fields_value = $form->getFormValues();
-    return $helper->generateForm($fields_form);
+    $helper->tpl_vars = array(
+      'fields_value' => $form->getFormValues(),
+      'languages' => $this->context->controller->getLanguages(),
+      'id_language' => $this->context->language->id
+    );
+    return $helper->generateForm($fields_form_input);
+//    return $helper->generateForm($fields_form);
   }
 
   /**
@@ -270,11 +312,14 @@ class Acumulus extends Module {
   /**
    * Creates the tables this module uses. Called during install or update.
    *
-   * Actual creation is done by the models.
+   * Actual creation is done by the models. This method might get called via an
+   * install or update script: make it public and call init().
    *
    * @return bool
    */
-  protected function createTables() {
+  public function createTables() {
+    //
+    $this->init();
     return $this->acumulusConfig->getAcumulusEntryModel()->install();
   }
 

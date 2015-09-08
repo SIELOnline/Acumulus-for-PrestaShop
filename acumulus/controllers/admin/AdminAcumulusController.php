@@ -4,18 +4,27 @@
  * Contains the Acumulus Controller class that provides additional features.
  * Proudly copied from AdminPreferencesController.
  */
+use Siel\Acumulus\PrestaShop\Helpers\FormMapper;
+use Siel\Acumulus\PrestaShop\Helpers\FormMapperMultiple;
+use Siel\Acumulus\PrestaShop\Shop\BatchForm;
 
+/**
+ * Class AdminAcumulusController provides the send batch form feature.
+ */
 class AdminAcumulusController extends AdminController
 {
 
-  /** @var Siel\Acumulus\PrestaShop\PrestaShopAcumulusConfig */
+  /** @var \Siel\Acumulus\Shop\Config */
   protected $acumulusConfig;
 
-  /** @var Siel\Acumulus\Common\WebAPI */
+  /** @var \Siel\Acumulus\Web\Service */
   protected $webAPI;
 
   /** @var Acumulus */
-  protected $module;
+  protected $module = null;
+
+  /** @var \Siel\Acumulus\PrestaShop\Shop\BatchForm */
+  protected $form;
 
   public function __construct() {
     $this->className = '';
@@ -30,24 +39,28 @@ class AdminAcumulusController extends AdminController
   }
 
   /**
+   * Helper method to translate strings.
+   *
+   * @param string $key
+   *  The key to get a translation for.
+   *
+   * @return string
+   *   The translation for the given key or the key itself if no translation
+   *   could be found.
+   */
+  protected function t($key) {
+    return $this->module->getTranslator()->get($key);
+  }
+
+  /**
    * Initializes the properties
    */
   protected function initAcumulus() {
-    if (!$this->acumulusConfig) {
+    if (!$this->module) {
       require_once(dirname(__FILE__) . '/../../acumulus.php');
-      $path = dirname(__FILE__) . '/../../Siel/Acumulus/';
-      require_once($path . 'Common/TranslatorInterface.php');
-      require_once($path . 'Common/BaseTranslator.php');
-      require_once($path . 'Common/ConfigInterface.php');
-      require_once($path . 'Common/BaseConfig.php');
-      require_once($path . 'Common/WebAPICommunication.php');
-      require_once($path . 'Common/WebAPI.php');
-      require_once($path . 'PrestaShop/PrestaShopAcumulusConfig.php');
-
-      $language = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-      $this->acumulusConfig = new Siel\Acumulus\PrestaShop\PrestaShopAcumulusConfig($language);
-      $this->webAPI = new Siel\Acumulus\Common\WebAPI($this->acumulusConfig);
       $this->module = new Acumulus();
+      $this->module->init();
+      $this->form = new BatchForm($this->module->getTranslator(), $this->module->getAcumulusConfig()->getManager());
     }
   }
 
@@ -58,13 +71,15 @@ class AdminAcumulusController extends AdminController
     switch ($this->display)
     {
       case 'add':
-        $this->toolbar_title[] = $this->acumulusConfig->t('batchSendTitle');
+        $this->toolbar_title[] = $this->t('batch_form_title');
         break;
     }
   }
 
   /**
    * Overridden to make it accessible by the form class
+   *
+   * @param string $msg
    */
   public function displayWarning($msg) {
     parent::displayWarning($msg);
@@ -72,65 +87,59 @@ class AdminAcumulusController extends AdminController
 
   /**
    * Overridden to make it accessible by the form class
+   *
+   * @param string $msg
    */
   public function displayInformation($msg) {
     parent::displayInformation($msg);
   }
 
+  /**
+   * Renders the form.
+   *
+   * @return string
+   *   The rendered form.
+   */
   public function renderForm() {
     $this->show_form_cancel_button = true;
-
+    $this->multiple_fieldsets = true;
     $form = $this->getForm();
-    $this->fields_form = $form->getFormFields();
-
+    $formMapper = new FormMapper();
+    $this->fields_form = $formMapper->map($form);
     return parent::renderForm();
   }
 
+  /**
+   * Processes the form (if it was submitted).
+   */
   public function processSave() {
     $form = $this->getForm();
-    if ($form->isSubmitted()) {
-      $form->processSubmit();
+    $form->process();
+    foreach ($form->getErrorMessages() as $message) {
+      $this->displayWarning($message);
+    }
+    foreach ($form->getSuccessMessages() as $message) {
+      $this->displayInformation($message);
     }
     $this->display = 'add';
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getFieldsValue($obj) {
     parent::getFieldsValue($obj);
-    $form = $this->getForm();
-    $form->getFieldValues($this->fields_value);
+    $this->fields_value = $this->getForm()->getFormValues();
     return $this->fields_value;
   }
 
-
-  /**
-   * Send a collection of orders to Acumulus.
-   *
-   * @param array $orderIds
-   *  The collection of order ids to send.
-   * @param bool $forceSend
-   *   Whether invoices that already have been sent to Acumulus, should be send
-   *   again.
-   * @param array $log
-   *
-   * @return bool
-   *   true on success, false otherwise.
-   */
-  public function sendOrders($orderIds, $forceSend, array &$log) {
-    return $this->module->sendOrders($orderIds, $forceSend, $log);
-  }
-
   /**
    *
-   * @return \Siel\Acumulus\PrestaShop\AcumulusSendForm
+   * @return \Siel\Acumulus\Shop\BatchForm
    *
    */
   protected function getForm() {
-    static $form = null;
-    if ($form === null) {
-      require_once(dirname(__FILE__) . '/../../Siel/Acumulus/PrestaShop/AcumulusSendForm.php');
-      $form = new Siel\Acumulus\PrestaShop\AcumulusSendForm($this, $this->acumulusConfig);
-    }
-    return $form;
+    return $this->form;
   }
 
 }
