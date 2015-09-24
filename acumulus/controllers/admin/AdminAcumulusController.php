@@ -5,7 +5,6 @@
  * Proudly copied from AdminPreferencesController.
  */
 use Siel\Acumulus\PrestaShop\Helpers\FormMapper;
-use Siel\Acumulus\PrestaShop\Helpers\FormMapperMultiple;
 use Siel\Acumulus\PrestaShop\Shop\BatchForm;
 
 /**
@@ -105,7 +104,14 @@ class AdminAcumulusController extends AdminController
     $this->multiple_fieldsets = true;
     $form = $this->getForm();
     $formMapper = new FormMapper();
-    $this->fields_form = $formMapper->map($form);
+    $fields_form = $formMapper->map($form);
+    reset($fields_form);
+    $firstFieldsetKey = key($fields_form);
+    $fields_form[$firstFieldsetKey]['form']['submit'] = array(
+      'title' => $this->t('button_send'),
+    );
+    $this->fields_form = $fields_form;
+
     return parent::renderForm();
   }
 
@@ -129,6 +135,7 @@ class AdminAcumulusController extends AdminController
    */
   public function getFieldsValue($obj) {
     parent::getFieldsValue($obj);
+    // @todo: review this when Form has been refactored.
     $this->fields_value = $this->getForm()->getFormValues();
     return $this->fields_value;
   }

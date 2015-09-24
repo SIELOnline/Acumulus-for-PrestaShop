@@ -23,6 +23,7 @@ if (!defined('_PS_VERSION_')) {
  * @property string $confirmUninstall
  */
 class Acumulus extends Module {
+
   /**
    * Increase this value on each change:
    * - point release: bug fixes
@@ -55,7 +56,7 @@ class Acumulus extends Module {
     $this->need_instance = 0;
     $this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.9');
     $this->dependencies = array();
-    $this->bootstrap = true;
+    $this->bootstrap = TRUE;
 
     parent::__construct();
 
@@ -71,7 +72,7 @@ class Acumulus extends Module {
    * Initializes the properties
    */
   public function init() {
-    if ($this->translator === null) {
+    if ($this->translator === NULL) {
       // Load autoloader
       require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
 
@@ -111,11 +112,10 @@ class Acumulus extends Module {
   public function install() {
     $this->init();
     return $this->checkRequirements()
-      && parent::install()
-      && $this->createTables()
-      && $this->installTab()
-      && $this->registerHook('actionOrderHistoryAddAfter')
-      ;
+    && parent::install()
+    && $this->createTables()
+    && $this->installTab()
+    && $this->registerHook('actionOrderHistoryAddAfter');
   }
 
   /**
@@ -165,7 +165,7 @@ class Acumulus extends Module {
     $tab->active = 1;
     $tab->class_name = 'AdminAcumulus';
     $tab->name = array();
-    foreach (Language::getLanguages(true) as $lang) {
+    foreach (Language::getLanguages(TRUE) as $lang) {
       $tab->name[$lang['id_lang']] = 'Acumulus';
     }
     $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
@@ -181,7 +181,7 @@ class Acumulus extends Module {
       return $tab->delete();
     }
     else {
-      return false;
+      return FALSE;
     }
   }
 
@@ -193,7 +193,7 @@ class Acumulus extends Module {
   public function getContent() {
     $this->init();
 
-    // Ádd some styling in PS 1.5.
+    // Add some styling in PS 1.5.
     if (version_compare(_PS_VERSION_, 1.6, '<')) {
       $this->context->controller->addCSS($this->_path . 'config-form.css');
     }
@@ -208,7 +208,7 @@ class Acumulus extends Module {
   /**
    * Processes the form (if it was submitted).
    *
-   * @param \Siel\Acumulus\PrestaShop\Shop\ConfigForm$form
+   * @param \Siel\Acumulus\PrestaShop\Shop\ConfigForm $form
    *
    * @return string
    *   Any output from the processing stage that has to be rendered: error or
@@ -251,8 +251,8 @@ class Acumulus extends Module {
 
     // Title and toolbar.
     $helper->title = $this->displayName;
-    $helper->show_toolbar = false; // false -> remove toolbar
-    $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
+    $helper->show_toolbar = TRUE; // false -> remove toolbar
+    $helper->toolbar_scroll = TRUE; // yes - > Toolbar is always visible on the top of the screen.
     $helper->submit_action = 'submit' . $this->name;
     $helper->toolbar_btn = array(
       'save' => array(
@@ -265,31 +265,22 @@ class Acumulus extends Module {
       )
     );
 
-    $helper->multiple_fieldsets = true;
+    $helper->multiple_fieldsets = TRUE;
     $formMapper = new \Siel\Acumulus\PrestaShop\Helpers\FormMapper();
-    $fields_form_input = $formMapper->map($form);
-    // Define form fields and its values and render the form.
-    $fields_form = array(
-      array(
-        'form' => array(
-          'legend' => array(
-            'title' => $this->translator->get('button_settings'),
-            'icon' => 'icon-cogs',
-          ),
-          'input' => $fields_form_input,
-          'submit' => array(
-            'title' => $this->translator->get('button_save'),
-          )
-        )
-      )
+    $fields_form = $formMapper->map($form);
+    end($fields_form);
+    $lastFieldsetKey = key($fields_form);
+    $fields_form[$lastFieldsetKey]['form']['submit'] = array(
+      'title' => $this->translator->get('button_save'),
     );
+    $helper->show_cancel_button = TRUE;
     $helper->tpl_vars = array(
+      // @todo: review this when Form has been refactored.
       'fields_value' => $form->getFormValues(),
       'languages' => $this->context->controller->getLanguages(),
       'id_language' => $this->context->language->id
     );
-    return $helper->generateForm($fields_form_input);
-//    return $helper->generateForm($fields_form);
+    return $helper->generateForm($fields_form);
   }
 
   /**
@@ -300,13 +291,13 @@ class Acumulus extends Module {
    * @return bool
    */
   public function hookactionOrderHistoryAddAfter(array $params) {
-    // @todo: check how to handle refunds (OrderReturn): upon creation? do they trigger this hook at all?
+    // @todo: check how to handle refunds (OrderSlip): upon creation? do they trigger this hook at all?
     $this->init();
     $order = new Order($params['order_history']->id_order);
     $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
     $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $order);
     $this->acumulusConfig->getManager()->sourceStatusChange($source, $params['order_history']->id_order_state);
-    return true;
+    return TRUE;
   }
 
   /**
