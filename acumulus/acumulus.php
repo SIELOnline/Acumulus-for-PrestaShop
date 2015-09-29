@@ -11,6 +11,9 @@
  *
  * DO NOT USE the keywords namespace and use here, as on occasion PrestaShop
  * loads and eval()'s this code, leading to E_WARNINGs...
+ *
+ * @todo: can we use hook actionPaymentConfirmation. (ws een set van statussen die
+ * aangeeft dat de betaling binnen is.
  */
 if (!defined('_PS_VERSION_')) {
   exit;
@@ -115,7 +118,8 @@ class Acumulus extends Module {
     && parent::install()
     && $this->createTables()
     && $this->installTab()
-    && $this->registerHook('actionOrderHistoryAddAfter');
+    && $this->registerHook('actionOrderHistoryAddAfter')
+    && $this->registerHook('actionOrderSlipAdd');
   }
 
   /**
@@ -287,16 +291,47 @@ class Acumulus extends Module {
    * Hook actionOrderHistoryAddAfter.
    *
    * @param array $params
+   *   Array with the following entries:
+   *   - order_history: OrderHistory
    *
    * @return bool
    */
   public function hookactionOrderHistoryAddAfter(array $params) {
-    // @todo: check how to handle refunds (OrderSlip): upon creation? do they trigger this hook at all?
     $this->init();
     $order = new Order($params['order_history']->id_order);
     $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
     $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $order);
     $this->acumulusConfig->getManager()->sourceStatusChange($source, $params['order_history']->id_order_state);
+    return TRUE;
+  }
+
+  /**
+   * Hook actionOrderSlipAdd.
+   *
+   * @param array $params
+   *   Array with the following entries:
+   *   - order: Order
+   *   - productList: array
+   *   - qtyList: array
+   *
+   * @return bool
+   */
+  public function hookactionOrderSlipAdd(array $params) {
+    $this->init();
+    /** @var Order $order */
+    $order = $params['order'];
+    $orderSlips = $order->getOrderSlipsCollection();
+    /** @var OrderSLip $newestOrderSlip */
+    $newestOrderSlip = null;
+    foreach ($orderSlips as $orderSlip) {
+      /** @var OrderSlip $orderSlip */
+      if ($newestOrderSlip === null || $orderSlip->date_add > $newestOrderSlip->date_add) {
+        $newestOrderSlip = $orderSlip;
+      }
+    }
+    $type = \Siel\Acumulus\PrestaShop\Invoice\Source::CreditNote;
+    $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $newestOrderSlip);
+    $this->acumulusConfig->getManager()->sourceStatusChange($source, FALSE);
     return TRUE;
   }
 
