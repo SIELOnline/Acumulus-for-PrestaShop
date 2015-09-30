@@ -109,6 +109,7 @@ class AdminAcumulusController extends AdminController
     $firstFieldsetKey = key($fields_form);
     $fields_form[$firstFieldsetKey]['form']['submit'] = array(
       'title' => $this->t('button_send'),
+      'icon' => 'process-icon-envelope',
     );
     $this->fields_form = $fields_form;
 
