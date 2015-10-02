@@ -136,7 +136,6 @@ class AdminAcumulusController extends AdminController
    */
   public function getFieldsValue($obj) {
     parent::getFieldsValue($obj);
-    // @todo: review this when Form has been refactored.
     $this->fields_value = $this->getForm()->getFormValues();
     return $this->fields_value;
   }

@@ -37,7 +37,7 @@ class Acumulus extends Module {
    *
    * @var string
    */
-  public static $module_version = '4.0.0-a1';
+  public static $module_version = '4.0.0';
 
   /** @var array */
   protected $options = array();
@@ -269,6 +269,7 @@ class Acumulus extends Module {
       )
     );
 
+    /** @noinspection PhpUndefinedFieldInspection */
     $helper->multiple_fieldsets = TRUE;
     $formMapper = new \Siel\Acumulus\PrestaShop\Helpers\FormMapper();
     $fields_form = $formMapper->map($form);
@@ -279,7 +280,6 @@ class Acumulus extends Module {
     );
     $helper->show_cancel_button = TRUE;
     $helper->tpl_vars = array(
-      // @todo: review this when Form has been refactored.
       'fields_value' => $form->getFormValues(),
       'languages' => $this->context->controller->getLanguages(),
       'id_language' => $this->context->language->id
