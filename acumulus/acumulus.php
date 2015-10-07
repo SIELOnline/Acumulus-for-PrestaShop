@@ -37,7 +37,7 @@ class Acumulus extends Module {
    *
    * @var string
    */
-  public static $module_version = '4.0.0';
+  public static $module_version = '4.0.2';
 
   /** @var array */
   protected $options = array();
