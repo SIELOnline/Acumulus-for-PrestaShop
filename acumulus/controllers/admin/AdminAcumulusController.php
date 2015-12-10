@@ -48,7 +48,7 @@ class AdminAcumulusController extends AdminController
    *   could be found.
    */
   protected function t($key) {
-    return $this->module->getTranslator()->get($key);
+    return $this->module->getAcumulusConfig()->getTranslator()->get($key);
   }
 
   /**
@@ -59,7 +59,7 @@ class AdminAcumulusController extends AdminController
       require_once(dirname(__FILE__) . '/../../acumulus.php');
       $this->module = new Acumulus();
       $this->module->init();
-      $this->form = new BatchForm($this->module->getTranslator(), $this->module->getAcumulusConfig()->getManager());
+      $this->form = new BatchForm($this->module->getAcumulusConfig()->getTranslator(), $this->module->getAcumulusConfig()->getManager());
     }
   }
 

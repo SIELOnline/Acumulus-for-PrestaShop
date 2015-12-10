@@ -37,16 +37,13 @@ class Acumulus extends Module {
    *
    * @var string
    */
-  public static $module_version = '4.1.1';
+  public static $module_version = '4.2.1';
 
   /** @var array */
   protected $options = array();
 
-  /** @var \Siel\Acumulus\Helpers\TranslatorInterface */
-  protected $translator;
-
   /** @var \Siel\Acumulus\Shop\Config */
-  protected $acumulusConfig;
+  protected $acumulusConfig = NULL;
 
   /** @var \Siel\Acumulus\Shop\ConfigStoreInterface */
   protected $configStore;
@@ -57,7 +54,7 @@ class Acumulus extends Module {
     $this->version = static::$module_version;
     $this->author = 'Acumulus';
     $this->need_instance = 0;
-    $this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.9');
+    $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
     $this->dependencies = array();
     $this->bootstrap = TRUE;
 
@@ -72,31 +69,34 @@ class Acumulus extends Module {
   }
 
   /**
+   * Helper method to translate strings.
+   *
+   * @param string $key
+   *  The key to get a translation for.
+   *
+   * @return string
+   *   The translation for the given key or the key itself if no translation
+   *   could be found.
+   */
+  protected function t($key) {
+    return $this->acumulusConfig->getTranslator()->get($key);
+  }
+
+  /**
    * Initializes the properties
    */
   public function init() {
-    if ($this->translator === NULL) {
+    if ($this->acumulusConfig === NULL) {
       // Load autoloader
       require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
 
       $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-      \Siel\Acumulus\PrestaShop\Helpers\Log::createInstance();
-      $this->translator = new \Siel\Acumulus\Helpers\Translator($languageCode);
-      $translations = new \Siel\Acumulus\Shop\ModuleTranslations();
-      $this->translator->add($translations);
+      $this->acumulusConfig = new \Siel\Acumulus\Shop\Config('PrestaShop', $languageCode);
+      $this->acumulusConfig->getTranslator()->add(new \Siel\Acumulus\Shop\ModuleTranslations());
 
-      $this->displayName = $this->translator->get('module_name');
-      $this->description = $this->translator->get('module_description');
-
-      $this->acumulusConfig = new \Siel\Acumulus\Shop\Config(new \Siel\Acumulus\PrestaShop\Shop\ConfigStore(), $this->translator);
+      $this->displayName = $this->t('module_name');
+      $this->description = $this->t('module_description');
     }
-  }
-
-  /**
-   * @return \Siel\Acumulus\Helpers\TranslatorInterface
-   */
-  public function getTranslator() {
-    return $this->translator;
   }
 
   /**
@@ -129,7 +129,7 @@ class Acumulus extends Module {
    */
   public function uninstall() {
     $this->init();
-    $this->confirmUninstall = $this->translator->get('message_uninstall');
+    $this->confirmUninstall = $this->t('message_uninstall');
 
     // Delete our config values
     foreach ($this->acumulusConfig->getKeys() as $key) {
@@ -152,7 +152,7 @@ class Acumulus extends Module {
     $requirements = new \Siel\Acumulus\Helpers\Requirements();
     $messages = $requirements->check();
     foreach ($messages as $key => $message) {
-      $translatedMessage = $this->translator->get($key);
+      $translatedMessage = $this->t($key);
       if ($translatedMessage === $key) {
         $translatedMessage = $message;
       }
@@ -202,7 +202,7 @@ class Acumulus extends Module {
       $this->context->controller->addCSS($this->_path . 'config-form.css');
     }
 
-    $form = new \Siel\Acumulus\PrestaShop\Shop\ConfigForm($this->translator, $this->acumulusConfig, $this->name);
+    $form = new \Siel\Acumulus\PrestaShop\Shop\ConfigForm($this->acumulusConfig->getTranslator(), $this->acumulusConfig, $this->name);
     $output = '';
     $output .= $this->processForm($form);
     $output .= $this->renderForm($form);
@@ -260,12 +260,12 @@ class Acumulus extends Module {
     $helper->submit_action = 'submit' . $this->name;
     $helper->toolbar_btn = array(
       'save' => array(
-        'desc' => $this->translator->get('button_save'),
+        'desc' => $this->t('button_save'),
         'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&save' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules'),
       ),
       'back' => array(
         'href' => AdminController::$currentIndex . '&token=' . Tools::getAdminTokenLite('AdminModules'),
-        'desc' => $this->translator->get('button_back')
+        'desc' => $this->t('button_back')
       )
     );
 
@@ -276,7 +276,7 @@ class Acumulus extends Module {
     end($fields_form);
     $lastFieldsetKey = key($fields_form);
     $fields_form[$lastFieldsetKey]['form']['submit'] = array(
-      'title' => $this->translator->get('button_save'),
+      'title' => $this->t('button_save'),
     );
     $helper->show_cancel_button = TRUE;
     $helper->tpl_vars = array(
