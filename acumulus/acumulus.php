@@ -37,7 +37,7 @@ class Acumulus extends Module {
    *
    * @var string
    */
-  public static $module_version = '4.2.1';
+  public static $module_version = '4.2.0-bx';
 
   /** @var array */
   protected $options = array();
@@ -85,7 +85,7 @@ class Acumulus extends Module {
   /**
    * Initializes the properties
    */
-  public function init() {
+  protected function init() {
     if ($this->acumulusConfig === NULL) {
       // Load autoloader
       require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
@@ -103,6 +103,7 @@ class Acumulus extends Module {
    * @return \Siel\Acumulus\Shop\Config
    */
   public function getAcumulusConfig() {
+    $this->init();
     return $this->acumulusConfig;
   }
 
@@ -147,8 +148,7 @@ class Acumulus extends Module {
    * @return bool
    *   Success.
    */
-  public function checkRequirements() {
-    $this->init();
+  protected function checkRequirements() {
     $requirements = new \Siel\Acumulus\Helpers\Requirements();
     $messages = $requirements->check();
     foreach ($messages as $key => $message) {
@@ -164,7 +164,7 @@ class Acumulus extends Module {
   /**
    * Adds a menu-item: proudly copied from gamification.
    */
-  public function installTab() {
+  protected function installTab() {
     $tab = new Tab();
     $tab->active = 1;
     $tab->class_name = 'AdminAcumulus';
@@ -178,7 +178,7 @@ class Acumulus extends Module {
     return $tab->add();
   }
 
-  public function uninstallTab() {
+  protected function uninstallTab() {
     $id_tab = (int) Tab::getIdFromClassName('AdminAcumulus');
     if ($id_tab) {
       $tab = new Tab($id_tab);
@@ -202,7 +202,7 @@ class Acumulus extends Module {
       $this->context->controller->addCSS($this->_path . 'config-form.css');
     }
 
-    $form = new \Siel\Acumulus\PrestaShop\Shop\ConfigForm($this->acumulusConfig->getTranslator(), $this->acumulusConfig, $this->name);
+    $form = $this->acumulusConfig->getForm('config');
     $output = '';
     $output .= $this->processForm($form);
     $output .= $this->renderForm($form);
@@ -212,13 +212,13 @@ class Acumulus extends Module {
   /**
    * Processes the form (if it was submitted).
    *
-   * @param \Siel\Acumulus\PrestaShop\Shop\ConfigForm $form
+   * @param \Siel\Acumulus\Helpers\Form $form
    *
    * @return string
    *   Any output from the processing stage that has to be rendered: error or
    *   success messages.
    */
-  protected function processForm(Siel\Acumulus\PrestaShop\Shop\ConfigForm $form) {
+  protected function processForm(Siel\Acumulus\Helpers\Form $form) {
     $output = '';
     $form->process();
     foreach ($form->getErrorMessages() as $message) {
@@ -233,12 +233,12 @@ class Acumulus extends Module {
   /**
    * Renders the HTML for the form.
    *
-   * @param \Siel\Acumulus\PrestaShop\Shop\ConfigForm $form
+   * @param \Siel\Acumulus\Helpers\Form $form
    *
    * @return string
    *   The rendered form HTML.
    */
-  protected function renderForm(Siel\Acumulus\PrestaShop\Shop\ConfigForm $form) {
+  protected function renderForm(Siel\Acumulus\Helpers\Form $form) {
     // Create and initialize form helper.
     $helper = new HelperForm();
 
@@ -336,7 +336,8 @@ class Acumulus extends Module {
   }
 
   /**
-   * Creates the tables this module uses. Called during install or update.
+   * Creates the tables this module uses. Called during install() or update
+   * (install-4.0.2.php).
    *
    * Actual creation is done by the models. This method might get called via an
    * install or update script: make it public and call init().
@@ -344,7 +345,6 @@ class Acumulus extends Module {
    * @return bool
    */
   public function createTables() {
-    //
     $this->init();
     return $this->acumulusConfig->getAcumulusEntryModel()->install();
   }

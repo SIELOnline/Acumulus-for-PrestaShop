@@ -5,25 +5,14 @@
  * Proudly copied from AdminPreferencesController.
  */
 use Siel\Acumulus\PrestaShop\Helpers\FormMapper;
-use Siel\Acumulus\PrestaShop\Shop\BatchForm;
 
 /**
  * Class AdminAcumulusController provides the send batch form feature.
  */
 class AdminAcumulusController extends AdminController
 {
-
-  /** @var \Siel\Acumulus\Shop\Config */
-  protected $acumulusConfig;
-
-  /** @var \Siel\Acumulus\Web\Service */
-  protected $webAPI;
-
   /** @var Acumulus */
   protected $module = null;
-
-  /** @var \Siel\Acumulus\PrestaShop\Shop\BatchForm */
-  protected $form;
 
   public function __construct() {
     $this->className = '';
@@ -32,7 +21,8 @@ class AdminAcumulusController extends AdminController
     $this->bootstrap = true;
 
     // Initialization.
-    $this->initAcumulus();
+    require_once(dirname(__FILE__) . '/../../acumulus.php');
+    $this->module = new Acumulus();
 
     parent::__construct();
   }
@@ -51,20 +41,15 @@ class AdminAcumulusController extends AdminController
     return $this->module->getAcumulusConfig()->getTranslator()->get($key);
   }
 
+
   /**
-   * Initializes the properties
+   * @return \Siel\Acumulus\Shop\BatchForm
    */
-  protected function initAcumulus() {
-    if (!$this->module) {
-      require_once(dirname(__FILE__) . '/../../acumulus.php');
-      $this->module = new Acumulus();
-      $this->module->init();
-      $this->form = new BatchForm($this->module->getAcumulusConfig()->getTranslator(), $this->module->getAcumulusConfig()->getManager());
-    }
+  protected function getForm() {
+    return $this->module->getAcumulusConfig()->getForm('batch');
   }
 
-  public function initToolbarTitle()
-  {
+  public function initToolbarTitle() {
     parent::initToolbarTitle();
 
     switch ($this->display)
@@ -73,24 +58,6 @@ class AdminAcumulusController extends AdminController
         $this->toolbar_title[] = $this->t('batch_form_title');
         break;
     }
-  }
-
-  /**
-   * Overridden to make it accessible by the form class
-   *
-   * @param string $msg
-   */
-  public function displayWarning($msg) {
-    parent::displayWarning($msg);
-  }
-
-  /**
-   * Overridden to make it accessible by the form class
-   *
-   * @param string $msg
-   */
-  public function displayInformation($msg) {
-    parent::displayInformation($msg);
   }
 
   /**
@@ -138,15 +105,6 @@ class AdminAcumulusController extends AdminController
     parent::getFieldsValue($obj);
     $this->fields_value = $this->getForm()->getFormValues();
     return $this->fields_value;
-  }
-
-  /**
-   *
-   * @return \Siel\Acumulus\Shop\BatchForm
-   *
-   */
-  protected function getForm() {
-    return $this->form;
   }
 
 }
