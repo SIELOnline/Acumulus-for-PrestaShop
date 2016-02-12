@@ -298,10 +298,9 @@ class Acumulus extends Module {
    */
   public function hookactionOrderHistoryAddAfter(array $params) {
     $this->init();
-    $order = new Order($params['order_history']->id_order);
     $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
-    $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $order);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source, $params['order_history']->id_order_state);
+    $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $params['order_history']->id_order);
+    $this->acumulusConfig->getManager()->sourceStatusChange($source);
     return TRUE;
   }
 
@@ -331,7 +330,7 @@ class Acumulus extends Module {
     }
     $type = \Siel\Acumulus\PrestaShop\Invoice\Source::CreditNote;
     $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $newestOrderSlip);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source, FALSE);
+    $this->acumulusConfig->getManager()->sourceStatusChange($source);
     return TRUE;
   }
 
