@@ -12,8 +12,8 @@
  * DO NOT USE the keywords namespace and use here, as on occasion PrestaShop
  * loads and eval()'s this code, leading to E_WARNINGs...
  *
- * @todo: can we use hook actionPaymentConfirmation. (ws een set van statussen die
- * aangeeft dat de betaling binnen is.
+ * @todo: can we use hook actionPaymentConfirmation. (ws een set van statussen
+ *  die aangeeft dat de betaling binnen is).
  */
 if (!defined('_PS_VERSION_')) {
   exit;
@@ -57,6 +57,7 @@ class Acumulus extends Module {
     $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
     $this->dependencies = array();
     $this->bootstrap = TRUE;
+    $this->module_key = '89693e3902e3d283a89fde3673dd3513';
 
     parent::__construct();
 
