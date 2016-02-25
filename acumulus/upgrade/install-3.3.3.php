@@ -1,8 +1,11 @@
 <?php
-
 if (!defined('_PS_VERSION_')) {
   exit;
 }
+
+/**
+ * @license see license.txt
+ */
 
 /**
  * param Acumulus $object

@@ -1,4 +1,6 @@
 <?php
+if (!defined('_PS_VERSION_'))
+  exit;
 
 /**
  * @file
@@ -14,10 +16,9 @@
  *
  * @todo: can we use hook actionPaymentConfirmation. (ws een set van statussen
  *  die aangeeft dat de betaling binnen is).
+ *
+ * @license see license.txt.
  */
-if (!defined('_PS_VERSION_')) {
-  exit;
-}
 
 /**
  * Acumulus defines a PrestaShop module that can interact with the
@@ -62,9 +63,10 @@ class Acumulus extends Module {
     parent::__construct();
 
     // This object can get created quite often: try to prevent initialization.
-    // (in fact: as we don't attach tour module name to the tab, it does not
-    // get created anymore that often, but we still keep this code.
-    if ($_GET['controller'] === 'AdminModules') {
+    // (in fact: as we don't attach our module name to the tab, it does not
+    // get created anymore that often, but we still keep this code.)
+    // @todo: still neede? init() gets called on other places as well.
+    if (Tools::getValue('controller') === 'AdminModules') {
       $this->init();
     }
   }
@@ -200,7 +202,7 @@ class Acumulus extends Module {
 
     // Add some styling in PS 1.5.
     if (version_compare(_PS_VERSION_, 1.6, '<')) {
-      $this->context->controller->addCSS($this->_path . 'config-form.css');
+      $this->context->controller->addCSS($this->_path . 'views/css/config-form.css');
     }
 
     $form = $this->acumulusConfig->getForm('config');

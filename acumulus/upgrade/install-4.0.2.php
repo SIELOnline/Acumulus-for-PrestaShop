@@ -4,6 +4,10 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
+ * @license see license.txt
+ */
+
+/**
  * @param Acumulus $object
  *
  * Also see http://doc.prestashop.com/display/PS15/Auto-updating+modules.

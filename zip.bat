@@ -10,4 +10,5 @@ del PrestaShop-1.6.x-Acumulus-%version%.zip 2> nul
 
 rem zip package.
 "C:\Program Files\7-Zip\7z.exe" a -tzip PrestaShop-1.6.x-Acumulus-%version%.zip acumulus | findstr /i "Failed Error"
+"C:\Program Files\7-Zip\7z.exe" d PrestaShop-1.6.x-Acumulus-%version%.zip config_nl.xml -r | findstr /i "Failed Error"
 "C:\Program Files\7-Zip\7z.exe" t PrestaShop-1.6.x-Acumulus-%version%.zip | findstr /i "Processing Everything Failed Error"

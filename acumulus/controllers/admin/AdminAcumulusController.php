@@ -1,8 +1,14 @@
 <?php
-/*
+if (!defined('_PS_VERSION_')) {
+  exit;
+}
+
+/**
  * @file
  * Contains the Acumulus Controller class that provides additional features.
  * Proudly copied from AdminPreferencesController.
+ *
+ * @license see license.txt
  */
 use Siel\Acumulus\PrestaShop\Helpers\FormMapper;
 
