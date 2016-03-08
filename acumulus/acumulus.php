@@ -1,365 +1,367 @@
 <?php
-if (!defined('_PS_VERSION_'))
-  exit;
+/**
+ * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s this code, leading to E_WARNINGs...
+ * 
+ * @author    Buro RaDer / SIEL Acumulus
+ * @copyright 2016 Buro RaDer
+ * @license   see license.txt
+ */
 
 /**
- * @file
- * Contains the Acumulus class, the base of our PrestaShop module.
+ * Acumulus defines a PrestaShop module that can interact with the Acumulus
+ * webAPI to send invoices to Acumulus.
  *
  * More information for non-PrestaShop developers that might have to maintain
  * this module's code can be found on the PrestaShop documentation site:
- *
  * http://doc.prestashop.com/display/PS16/Creating+a+PrestaShop+module
  *
- * DO NOT USE the keywords namespace and use here, as on occasion PrestaShop
- * loads and eval()'s this code, leading to E_WARNINGs...
- *
- * @todo: can we use hook actionPaymentConfirmation. (ws een set van statussen
- *  die aangeeft dat de betaling binnen is).
- *
- * @license see license.txt.
  */
+class Acumulus extends Module
+{
+    /**
+     * Increase this value on each change:
+     * - point release: bug fixes
+     * - minor version: addition of minor features, backwards compatible
+     * - major version: major or backwards incompatible changes
+     *
+     * PrestaShop Note: maximum version length = 8.
+     *
+     * @var string
+     */
+    public static $module_version = '4.3.0';
 
-/**
- * Acumulus defines a PrestaShop module that can interact with the
- * Acumulus webAPI to send invoices to Acumulus.
- *
- * @property string $confirmUninstall
- */
-class Acumulus extends Module {
+    /** @var array */
+    protected $options = array();
 
-  /**
-   * Increase this value on each change:
-   * - point release: bug fixes
-   * - minor version: addition of minor features, backwards compatible
-   * - major version: major or backwards incompatible changes
-   *
-   * Note: maximum version length = 8.
-   *
-   * @var string
-   */
-  public static $module_version = '4.2.1';
+    /** @var \Siel\Acumulus\Shop\Config */
+    protected $acumulusConfig = null;
 
-  /** @var array */
-  protected $options = array();
+    /** @var \Siel\Acumulus\Shop\ConfigStoreInterface */
+    protected $configStore;
 
-  /** @var \Siel\Acumulus\Shop\Config */
-  protected $acumulusConfig = NULL;
+    /** @var string */
+    protected $confirmUninstall;
 
-  /** @var \Siel\Acumulus\Shop\ConfigStoreInterface */
-  protected $configStore;
+    public function __construct()
+    {
+        $this->name = 'acumulus';
+        $this->tab = 'billing_invoicing';
+        $this->version = '4.3.0';
+        $this->author = 'Acumulus';
+        $this->need_instance = 0;
+        $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
+        $this->dependencies = array();
+        $this->bootstrap = true;
+        $this->module_key = '89693e3902e3d283a89fde3673dd3513';
 
-  public function __construct() {
-    $this->name = 'acumulus';
-    $this->tab = 'billing_invoicing';
-    $this->version = static::$module_version;
-    $this->author = 'Acumulus';
-    $this->need_instance = 0;
-    $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
-    $this->dependencies = array();
-    $this->bootstrap = TRUE;
-    $this->module_key = '89693e3902e3d283a89fde3673dd3513';
-
-    parent::__construct();
-
-    // This object can get created quite often: try to prevent initialization.
-    // (in fact: as we don't attach our module name to the tab, it does not
-    // get created anymore that often, but we still keep this code.)
-    // @todo: still neede? init() gets called on other places as well.
-    if (Tools::getValue('controller') === 'AdminModules') {
-      $this->init();
-    }
-  }
-
-  /**
-   * Helper method to translate strings.
-   *
-   * @param string $key
-   *  The key to get a translation for.
-   *
-   * @return string
-   *   The translation for the given key or the key itself if no translation
-   *   could be found.
-   */
-  protected function t($key) {
-    return $this->acumulusConfig->getTranslator()->get($key);
-  }
-
-  /**
-   * Initializes the properties
-   */
-  protected function init() {
-    if ($this->acumulusConfig === NULL) {
-      // Load autoloader
-      require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
-
-      $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-      $this->acumulusConfig = new \Siel\Acumulus\Shop\Config('PrestaShop', $languageCode);
-      $this->acumulusConfig->getTranslator()->add(new \Siel\Acumulus\Shop\ModuleTranslations());
-
-      $this->displayName = $this->t('module_name');
-      $this->description = $this->t('module_description');
-    }
-  }
-
-  /**
-   * @return \Siel\Acumulus\Shop\Config
-   */
-  public function getAcumulusConfig() {
-    $this->init();
-    return $this->acumulusConfig;
-  }
-
-
-  /**
-   * Install module.
-   *
-   * @return bool
-   */
-  public function install() {
-    $this->init();
-    return $this->checkRequirements()
-    && parent::install()
-    && $this->createTables()
-    && $this->installTab()
-    && $this->registerHook('actionOrderHistoryAddAfter')
-    && $this->registerHook('actionOrderSlipAdd');
-  }
-
-  /**
-   * Uninstall module.
-   *
-   * @return bool
-   */
-  public function uninstall() {
-    $this->init();
-    $this->confirmUninstall = $this->t('message_uninstall');
-
-    // Delete our config values
-    foreach ($this->acumulusConfig->getKeys() as $key) {
-      Configuration::deleteByName("ACUMULUS_$key");
-    }
-    $this->dropTables();
-    $this->uninstallTab();
-
-    return parent::uninstall();
-  }
-
-  /**
-   * Checks the requirements for this module (CURL, DOMXML, ...).
-   *
-   * @return bool
-   *   Success.
-   */
-  protected function checkRequirements() {
-    $requirements = new \Siel\Acumulus\Helpers\Requirements();
-    $messages = $requirements->check();
-    foreach ($messages as $key => $message) {
-      $translatedMessage = $this->t($key);
-      if ($translatedMessage === $key) {
-        $translatedMessage = $message;
-      }
-      $this->displayError($translatedMessage);
-    }
-    return empty($this->messages);
-  }
-
-  /**
-   * Adds a menu-item: proudly copied from gamification.
-   */
-  protected function installTab() {
-    $tab = new Tab();
-    $tab->active = 1;
-    $tab->class_name = 'AdminAcumulus';
-    $tab->name = array();
-    foreach (Language::getLanguages(TRUE) as $lang) {
-      $tab->name[$lang['id_lang']] = 'Acumulus';
-    }
-    $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
-    $tab->module = $this->name;
-    $tab->position = 1001;
-    return $tab->add();
-  }
-
-  protected function uninstallTab() {
-    $id_tab = (int) Tab::getIdFromClassName('AdminAcumulus');
-    if ($id_tab) {
-      $tab = new Tab($id_tab);
-      return $tab->delete();
-    }
-    else {
-      return FALSE;
-    }
-  }
-
-  /**
-   * Renders the configuration form.
-   *
-   * @return string
-   */
-  public function getContent() {
-    $this->init();
-
-    // Add some styling in PS 1.5.
-    if (version_compare(_PS_VERSION_, 1.6, '<')) {
-      $this->context->controller->addCSS($this->_path . 'views/css/config-form.css');
+        parent::__construct();
     }
 
-    $form = $this->acumulusConfig->getForm('config');
-    $output = '';
-    $output .= $this->processForm($form);
-    $output .= $this->renderForm($form);
-    return $output;
-  }
-
-  /**
-   * Processes the form (if it was submitted).
-   *
-   * @param \Siel\Acumulus\Helpers\Form $form
-   *
-   * @return string
-   *   Any output from the processing stage that has to be rendered: error or
-   *   success messages.
-   */
-  protected function processForm(Siel\Acumulus\Helpers\Form $form) {
-    $output = '';
-    $form->process();
-    foreach ($form->getErrorMessages() as $message) {
-      $output .= $this->displayError($message);
+    /**
+     * Helper method to translate strings.
+     *
+     * @param string $key
+     *  The key to get a translation for.
+     *
+     * @return string
+     *   The translation for the given key or the key itself if no translation
+     *   could be found.
+     */
+    protected function t($key)
+    {
+        return $this->acumulusConfig->getTranslator()->get($key);
     }
-    foreach ($form->getSuccessMessages() as $message) {
-      $output .= $this->displayConfirmation($message);
+
+    /**
+     * Initializes the properties
+     */
+    protected function init()
+    {
+        if ($this->acumulusConfig === null) {
+            // Load autoloader
+            require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
+
+            $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
+            $this->acumulusConfig = new \Siel\Acumulus\Shop\Config('PrestaShop', $languageCode);
+            $this->acumulusConfig->getTranslator()->add(new \Siel\Acumulus\Shop\ModuleTranslations());
+
+            $this->displayName = $this->t('module_name');
+            $this->description = $this->t('module_description');
+        }
     }
-    return $output;
-  }
 
-  /**
-   * Renders the HTML for the form.
-   *
-   * @param \Siel\Acumulus\Helpers\Form $form
-   *
-   * @return string
-   *   The rendered form HTML.
-   */
-  protected function renderForm(Siel\Acumulus\Helpers\Form $form) {
-    // Create and initialize form helper.
-    $helper = new HelperForm();
-
-    // Module, token and currentIndex.
-    $helper->module = $this;
-    $helper->name_controller = $this->name;
-    $helper->token = Tools::getAdminTokenLite('AdminModules');
-    $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
-
-    // Language.
-    $default_lang = (int) Configuration::get('PS_LANG_DEFAULT');
-    $helper->default_form_language = $default_lang;
-    $helper->allow_employee_form_lang = $default_lang;
-
-    // Title and toolbar.
-    $helper->title = $this->displayName;
-    $helper->show_toolbar = TRUE; // false -> remove toolbar
-    $helper->toolbar_scroll = TRUE; // yes - > Toolbar is always visible on the top of the screen.
-    $helper->submit_action = 'submit' . $this->name;
-    $helper->toolbar_btn = array(
-      'save' => array(
-        'desc' => $this->t('button_save'),
-        'href' => AdminController::$currentIndex . '&configure=' . $this->name . '&save' . $this->name . '&token=' . Tools::getAdminTokenLite('AdminModules'),
-      ),
-      'back' => array(
-        'href' => AdminController::$currentIndex . '&token=' . Tools::getAdminTokenLite('AdminModules'),
-        'desc' => $this->t('button_back')
-      )
-    );
-
-    /** @noinspection PhpUndefinedFieldInspection */
-    $helper->multiple_fieldsets = TRUE;
-    $formMapper = new \Siel\Acumulus\PrestaShop\Helpers\FormMapper();
-    $fields_form = $formMapper->map($form);
-    end($fields_form);
-    $lastFieldsetKey = key($fields_form);
-    $fields_form[$lastFieldsetKey]['form']['submit'] = array(
-      'title' => $this->t('button_save'),
-    );
-    $helper->show_cancel_button = TRUE;
-    $helper->tpl_vars = array(
-      'fields_value' => $form->getFormValues(),
-      'languages' => $this->context->controller->getLanguages(),
-      'id_language' => $this->context->language->id
-    );
-    return $helper->generateForm($fields_form);
-  }
-
-  /**
-   * Hook actionOrderHistoryAddAfter.
-   *
-   * @param array $params
-   *   Array with the following entries:
-   *   - order_history: OrderHistory
-   *
-   * @return bool
-   */
-  public function hookactionOrderHistoryAddAfter(array $params) {
-    $this->init();
-    $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
-    $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $params['order_history']->id_order);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source);
-    return TRUE;
-  }
-
-  /**
-   * Hook actionOrderSlipAdd.
-   *
-   * @param array $params
-   *   Array with the following entries:
-   *   - order: Order
-   *   - productList: array
-   *   - qtyList: array
-   *
-   * @return bool
-   */
-  public function hookactionOrderSlipAdd(array $params) {
-    $this->init();
-    /** @var Order $order */
-    $order = $params['order'];
-    $orderSlips = $order->getOrderSlipsCollection();
-    /** @var OrderSLip $newestOrderSlip */
-    $newestOrderSlip = null;
-    foreach ($orderSlips as $orderSlip) {
-      /** @var OrderSlip $orderSlip */
-      if ($newestOrderSlip === null || $orderSlip->date_add > $newestOrderSlip->date_add) {
-        $newestOrderSlip = $orderSlip;
-      }
+    /**
+     * @return \Siel\Acumulus\Shop\Config
+     */
+    public function getAcumulusConfig()
+    {
+        $this->init();
+        return $this->acumulusConfig;
     }
-    $type = \Siel\Acumulus\PrestaShop\Invoice\Source::CreditNote;
-    $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $newestOrderSlip);
-    $this->acumulusConfig->getManager()->sourceStatusChange($source);
-    return TRUE;
-  }
 
-  /**
-   * Creates the tables this module uses. Called during install() or update
-   * (install-4.0.2.php).
-   *
-   * Actual creation is done by the models. This method might get called via an
-   * install or update script: make it public and call init().
-   *
-   * @return bool
-   */
-  public function createTables() {
-    $this->init();
-    return $this->acumulusConfig->getAcumulusEntryModel()->install();
-  }
+    /**
+     * Install module.
+     *
+     * @return bool
+     */
+    public function install()
+    {
+        $this->init();
+        return $this->checkRequirements()
+        && parent::install()
+        && $this->createTables()
+        && $this->installTab()
+        && $this->registerHook('actionOrderHistoryAddAfter')
+        && $this->registerHook('actionOrderSlipAdd');
+    }
 
-  /**
-   * Drops the tables this module uses. Called during uninstall.
-   *
-   * Actual creation is done by the models.
-   *
-   * @return bool
-   */
-  protected function dropTables() {
-    return $this->acumulusConfig->getAcumulusEntryModel()->uninstall();
-  }
+    /**
+     * Uninstall module.
+     *
+     * @return bool
+     */
+    public function uninstall()
+    {
+        $this->init();
+        $this->confirmUninstall = $this->t('message_uninstall');
 
+        // Delete our config values
+        foreach ($this->acumulusConfig->getKeys() as $key) {
+            Configuration::deleteByName("ACUMULUS_$key");
+        }
+        $this->dropTables();
+        $this->uninstallTab();
+
+        return parent::uninstall();
+    }
+
+    /**
+     * Checks the requirements for this module (CURL, DOMXML, ...).
+     *
+     * @return bool
+     *   Success.
+     */
+    protected function checkRequirements()
+    {
+        $requirements = new \Siel\Acumulus\Helpers\Requirements();
+        $messages = $requirements->check();
+        foreach ($messages as $key => $message) {
+            $translatedMessage = $this->t($key);
+            if ($translatedMessage === $key) {
+                $translatedMessage = $message;
+            }
+            $this->displayError($translatedMessage);
+        }
+        return empty($this->messages);
+    }
+
+    /**
+     * Adds a menu-item: proudly copied from gamification.
+     */
+    protected function installTab()
+    {
+        $tab = new Tab();
+        $tab->active = 1;
+        $tab->class_name = 'AdminAcumulus';
+        $tab->name = array();
+        foreach (Language::getLanguages(true) as $lang) {
+            $tab->name[$lang['id_lang']] = 'Acumulus';
+        }
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
+        $tab->module = $this->name;
+        $tab->position = 1001;
+        return $tab->add();
+    }
+
+    protected function uninstallTab()
+    {
+        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulus');
+        if ($id_tab) {
+            $tab = new Tab($id_tab);
+            return $tab->delete();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Renders the configuration form.
+     *
+     * @return string
+     */
+    public function getContent()
+    {
+        $this->init();
+
+        // Add some styling in PS 1.5.
+        if (version_compare(_PS_VERSION_, 1.6, '<')) {
+            $this->context->controller->addCSS($this->_path . 'views/css/config-form.css');
+        }
+
+        $form = $this->acumulusConfig->getForm('config');
+        $output = '';
+        $output .= $this->processForm($form);
+        $output .= $this->renderForm($form);
+        return $output;
+    }
+
+    /**
+     * Processes the form (if it was submitted).
+     *
+     * @param \Siel\Acumulus\Helpers\Form $form
+     *
+     * @return string
+     *   Any output from the processing stage that has to be rendered: error or
+     *   success messages.
+     */
+    protected function processForm(Siel\Acumulus\Helpers\Form $form)
+    {
+        $output = '';
+        $form->process();
+        foreach ($form->getErrorMessages() as $message) {
+            $output .= $this->displayError($message);
+        }
+        foreach ($form->getSuccessMessages() as $message) {
+            $output .= $this->displayConfirmation($message);
+        }
+        return $output;
+    }
+
+    /**
+     * Renders the HTML for the form.
+     *
+     * @param \Siel\Acumulus\Helpers\Form $form
+     *
+     * @return string
+     *   The rendered form HTML.
+     */
+    protected function renderForm(Siel\Acumulus\Helpers\Form $form)
+    {
+        // Create and initialize form helper.
+        $helper = new HelperForm();
+
+        $adminTokenLite = Tools::getAdminTokenLite('AdminModules');
+        $currentIndex = AdminController::$currentIndex;
+
+        // Module, token and currentIndex.
+        $helper->module = $this;
+        $helper->name_controller = $this->name;
+        $helper->token = $adminTokenLite;
+        $helper->currentIndex = $currentIndex . '&configure=' . $this->name;
+
+        // Language.
+        $default_lang = (int) Configuration::get('PS_LANG_DEFAULT');
+        $helper->default_form_language = $default_lang;
+        $helper->allow_employee_form_lang = $default_lang;
+
+        // Title and toolbar.
+        $helper->title = $this->displayName;
+        $helper->show_toolbar = true; // false -> remove toolbar
+        $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
+        $helper->submit_action = 'submit' . $this->name;
+
+        $helper->toolbar_btn = array(
+            'save' => array(
+                'desc' => $this->t('button_save'),
+                'href' => $currentIndex . '&configure=' . $this->name . '&save' . $this->name . '&token=' . $adminTokenLite,
+            ),
+            'back' => array(
+                'href' => $currentIndex . '&token=' . $adminTokenLite,
+                'desc' => $this->t('button_back'),
+            ),
+        );
+
+        /** @noinspection PhpUndefinedFieldInspection */
+        $helper->multiple_fieldsets = true;
+        $formMapper = new \Siel\Acumulus\PrestaShop\Helpers\FormMapper();
+        $fields_form = $formMapper->map($form);
+        end($fields_form);
+        $lastFieldsetKey = key($fields_form);
+        $fields_form[$lastFieldsetKey]['form']['submit'] = array(
+            'title' => $this->t('button_save'),
+        );
+        $helper->show_cancel_button = true;
+        $helper->tpl_vars = array(
+            'fields_value' => $form->getFormValues(),
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id,
+        );
+        return $helper->generateForm($fields_form);
+    }
+
+    /**
+     * Hook actionOrderHistoryAddAfter.
+     *
+     * @param array $params
+     *   Array with the following entries:
+     *   - order_history: OrderHistory
+     *
+     * @return bool
+     */
+    public function hookactionOrderHistoryAddAfter(array $params)
+    {
+        $this->init();
+        $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
+        $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $params['order_history']->id_order);
+        $this->acumulusConfig->getManager()->sourceStatusChange($source);
+        return true;
+    }
+
+    /**
+     * Hook actionOrderSlipAdd.
+     *
+     * @param array $params
+     *   Array with the following entries:
+     *   - order: Order
+     *   - productList: array
+     *   - qtyList: array
+     *
+     * @return bool
+     */
+    public function hookactionOrderSlipAdd(array $params)
+    {
+        $this->init();
+        /** @var Order $order */
+        $order = $params['order'];
+        $orderSlips = $order->getOrderSlipsCollection();
+        /** @var OrderSLip $newestOrderSlip */
+        $newestOrderSlip = null;
+        foreach ($orderSlips as $orderSlip) {
+            /** @var OrderSlip $orderSlip */
+            if ($newestOrderSlip === null || $orderSlip->date_add > $newestOrderSlip->date_add) {
+                $newestOrderSlip = $orderSlip;
+            }
+        }
+        $type = \Siel\Acumulus\PrestaShop\Invoice\Source::CreditNote;
+        $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $newestOrderSlip);
+        $this->acumulusConfig->getManager()->sourceStatusChange($source);
+        return true;
+    }
+
+    /**
+     * Creates the tables this module uses. Called during install() or update
+     * (install-4.0.2.php).
+     *
+     * Actual creation is done by the models. This method might get called via an
+     * install or update script: make it public and call init().
+     *
+     * @return bool
+     */
+    public function createTables()
+    {
+        $this->init();
+        return $this->acumulusConfig->getAcumulusEntryModel()->install();
+    }
+
+    /**
+     * Drops the tables this module uses. Called during uninstall.
+     *
+     * Actual creation is done by the models.
+     *
+     * @return bool
+     */
+    protected function dropTables()
+    {
+        return $this->acumulusConfig->getAcumulusEntryModel()->uninstall();
+    }
 }
