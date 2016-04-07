@@ -28,7 +28,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.3.0';
+    public static $module_version = '4.4.0';
 
     /** @var array */
     protected $options = array();
@@ -46,7 +46,7 @@ class Acumulus extends Module
     {
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
-        $this->version = '4.3.0';
+        $this->version = self::$module_version;
         $this->author = 'Acumulus';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
