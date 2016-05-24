@@ -1,7 +1,7 @@
 <?php
 /**
  * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s this code, leading to E_WARNINGs...
- * 
+ *
  * @author    Buro RaDer / SIEL Acumulus
  * @copyright 2016 Buro RaDer
  * @license   see license.txt
@@ -28,7 +28,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.4.0';
+    public static $module_version = '4.5.0';
 
     /** @var array */
     protected $options = array();
