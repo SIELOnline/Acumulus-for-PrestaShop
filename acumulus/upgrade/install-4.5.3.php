@@ -13,7 +13,7 @@
  *
  * @return bool
  */
-function upgrade_module_4_5_0($object)
+function upgrade_module_4_5_3($object)
 {
-    return $object->getAcumulusConfig()->upgrade('4.4.9');
+    return $object->getAcumulusConfig()->upgrade('4.5.2');
 }

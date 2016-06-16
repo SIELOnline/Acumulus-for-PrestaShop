@@ -24,11 +24,11 @@ class Acumulus extends Module
      * - minor version: addition of minor features, backwards compatible
      * - major version: major or backwards incompatible changes
      *
-     * PrestaShop Note: maximum version length = 8.
+     * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
      *
      * @var string
      */
-    public static $module_version = '4.5.0';
+    public static $module_version = '4.5.3';
 
     /** @var array */
     protected $options = array();
