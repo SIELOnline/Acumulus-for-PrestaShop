@@ -28,7 +28,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.5.3';
+    public static $module_version = '4.6.0';
 
     /** @var array */
     protected $options = array();
@@ -79,7 +79,7 @@ class Acumulus extends Module
     {
         if ($this->acumulusConfig === null) {
             // Load autoloader
-            require_once(dirname(__FILE__) . '/libraries/Siel/psr4.php');
+            require_once(__DIR__ . '/libraries/Siel/psr4.php');
 
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
             $this->acumulusConfig = new \Siel\Acumulus\Shop\Config('PrestaShop', $languageCode);
@@ -110,7 +110,7 @@ class Acumulus extends Module
         return $this->checkRequirements()
         && parent::install()
         && $this->createTables()
-        && $this->installTab()
+        && $this->installTabs()
         && $this->registerHook('actionOrderHistoryAddAfter')
         && $this->registerHook('actionOrderSlipAdd');
     }
@@ -130,7 +130,7 @@ class Acumulus extends Module
             Configuration::deleteByName("ACUMULUS_$key");
         }
         $this->dropTables();
-        $this->uninstallTab();
+        $this->uninstallTabs();
 
         return parent::uninstall();
     }
@@ -156,13 +156,19 @@ class Acumulus extends Module
     }
 
     /**
-     * Adds a menu-item: proudly copied from gamification.
+     * Adds menu-items for the batch and advanced config forms.
+     *
+     * - Proudly copied from gamification.
+     * - Public so it can be called by update functions.
+     *
+     * @return bool
      */
-    protected function installTab()
+    public function installTabs()
     {
+        $this->init();
         $tab = new Tab();
         $tab->active = 1;
-        $tab->class_name = 'AdminAcumulus';
+        $tab->class_name = 'AdminAcumulusBatch';
         $tab->name = array();
         foreach (Language::getLanguages(true) as $lang) {
             $tab->name[$lang['id_lang']] = 'Acumulus';
@@ -170,18 +176,50 @@ class Acumulus extends Module
         $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
         $tab->module = $this->name;
         $tab->position = 1001;
-        return $tab->add();
+        $result1 = (bool) $tab->add();
+
+        $tab = new Tab();
+        $tab->active = 1;
+        $tab->class_name = 'AdminAcumulusAdvanced';
+        $tab->name = array();
+        foreach (Language::getLanguages(true) as $lang) {
+            $tab->name[$lang['id_lang']] = $this->t('advanced_page_title');
+        }
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
+        $tab->module = $this->name;
+        $tab->position = 1001;
+        $result2 = (bool) $tab->add();
+
+        return $result1 && $result2;
     }
 
-    protected function uninstallTab()
+    /**
+     * Removes menu-items for the batch and advanced config forms.
+     *
+     * - Proudly copied from gamification.
+     * - Public so it can be called by update functions.
+     *
+     * @return bool
+     */
+    public function uninstallTabs()
     {
-        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulus');
+        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusBatch');
         if ($id_tab) {
             $tab = new Tab($id_tab);
-            return $tab->delete();
+            $result1 = $tab->delete();
         } else {
-            return false;
+            $result1 = false;
         }
+
+        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusAdvanced');
+        if ($id_tab) {
+            $tab = new Tab($id_tab);
+            $result2 = $tab->delete();
+        } else {
+            $result2 = false;
+        }
+
+        return $result1 && $result2;
     }
 
     /**
@@ -260,6 +298,7 @@ class Acumulus extends Module
         $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
         $helper->submit_action = 'submit' . $this->name;
 
+        // This seems to be for PS 1.5 and lower only ... doesn't work in 1.6.
         $helper->toolbar_btn = array(
             'save' => array(
                 'desc' => $this->t('button_save'),
@@ -275,10 +314,14 @@ class Acumulus extends Module
         $helper->multiple_fieldsets = true;
         $formMapper = new \Siel\Acumulus\PrestaShop\Helpers\FormMapper();
         $fields_form = $formMapper->map($form);
-        end($fields_form);
-        $lastFieldsetKey = key($fields_form);
-        $fields_form[$lastFieldsetKey]['form']['submit'] = array(
-            'title' => $this->t('button_save'),
+        $fields_form['formSubmit']['form'] = array(
+            'legend' => array(
+                'title' => $this->t('button_save'),
+                'icon' => 'icon-save',
+            ),
+            'submit' => array(
+              'title' => $this->t('button_save'),
+            )
         );
         $helper->show_cancel_button = true;
         $helper->tpl_vars = array(

@@ -9,15 +9,38 @@
 
 use Siel\Acumulus\PrestaShop\Helpers\FormMapper;
 use Siel\Acumulus\Shop\BatchFormTranslations;
+use Siel\Acumulus\Shop\ConfigFormTranslations;
 
 /**
- * AdminAcumulusController provides the send batch form feature.
+ * BaseAdminAcumulusBatchController provides shared controller functionality.
+ *
  * Proudly copied from AdminPreferencesController.
  */
-class AdminAcumulusController extends AdminController
+class BaseAdminAcumulusController extends AdminController
 {
     /** @var Acumulus */
     protected $module = null;
+
+    /**
+     * The form type.
+     *
+     * @var string
+     */
+    protected $formType = '';
+
+    /**
+     * The form title.
+     *
+     * @var string
+     */
+    protected $title;
+
+    /**
+     * The form icon.
+     *
+     * @var string
+     */
+    protected $icon;
 
     public function __construct()
     {
@@ -27,9 +50,13 @@ class AdminAcumulusController extends AdminController
         $this->bootstrap = true;
 
         // Initialization.
-        require_once(dirname(__FILE__) . '/../../acumulus.php');
+        require_once(__DIR__ . '/../../acumulus.php');
         $this->module = new Acumulus();
-        $this->module->getAcumulusConfig()->getTranslator()->add(new BatchFormTranslations());
+        // Init order problem: getAcumulusConfig() initializes the autoloader,
+        // so we need to create that before creating the translations.
+        $acumulusConfig = $this->module->getAcumulusConfig();
+        $translations = $this->formType === 'batch' ? new BatchFormTranslations() : new ConfigFormTranslations();
+        $acumulusConfig->getTranslator()->add($translations);
 
         parent::__construct();
     }
@@ -55,7 +82,7 @@ class AdminAcumulusController extends AdminController
      */
     protected function getForm()
     {
-        return $this->module->getAcumulusConfig()->getForm('batch');
+        return $this->module->getAcumulusConfig()->getForm($this->formType);
     }
 
     public function initToolbarTitle()
@@ -64,7 +91,7 @@ class AdminAcumulusController extends AdminController
 
         switch ($this->display) {
             case 'add':
-                $this->toolbar_title[] = $this->t('batch_form_title');
+                $this->toolbar_title[] = $this->t("{$this->formType}_form_title");
                 break;
         }
     }
@@ -82,11 +109,18 @@ class AdminAcumulusController extends AdminController
         $form = $this->getForm();
         $formMapper = new FormMapper();
         $fields_form = $formMapper->map($form);
-        reset($fields_form);
-        $firstFieldsetKey = key($fields_form);
-        $fields_form[$firstFieldsetKey]['form']['submit'] = array(
-            'title' => $this->t('button_send'),
-            'icon' => 'process-icon-envelope',
+        if ($this->formType === 'batch') {
+            // On the batch form we place the send button before the extended
+            // help fieldset.
+            reset($fields_form);
+        } else {
+            // On other forms we place it in the last fieldset.
+            end($fields_form);
+        }
+        $key = key($fields_form);
+        $fields_form[$key]['form']['submit'] = array(
+            'title' => $this->title,
+            'icon' => $this->icon,
         );
         $this->fields_form = $fields_form;
 
