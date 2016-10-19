@@ -19,6 +19,6 @@ class AdminAcumulusBatchController extends BaseAdminAcumulusController
         $this->formType = 'batch';
         parent::__construct();
         $this->title = $this->t('button_send');
-        $this->icon = 'process-icon-envelope';
+        $this->icon = 'process-icon-partial_refund';
     }
 }

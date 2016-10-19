@@ -249,8 +249,7 @@ class Acumulus extends Module
      * @param \Siel\Acumulus\Helpers\Form $form
      *
      * @return string
-     *   Any output from the processing stage that has to be rendered: error or
-     *   success messages.
+     *   Any output from the processing stage that has to be rendered: messages.
      */
     protected function processForm(Siel\Acumulus\Helpers\Form $form)
     {
@@ -258,6 +257,9 @@ class Acumulus extends Module
         $form->process();
         foreach ($form->getErrorMessages() as $message) {
             $output .= $this->displayError($message);
+        }
+        foreach ($form->getWarningMessages() as $message) {
+            $output .= $this->displayWarning($message);
         }
         foreach ($form->getSuccessMessages() as $message) {
             $output .= $this->displayConfirmation($message);
