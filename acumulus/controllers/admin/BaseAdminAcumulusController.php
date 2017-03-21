@@ -78,7 +78,7 @@ class BaseAdminAcumulusController extends AdminController
 
 
     /**
-     * @return \Siel\Acumulus\Shop\BatchForm
+     * @return \Siel\Acumulus\Helpers\Form
      */
     protected function getForm()
     {
@@ -91,6 +91,7 @@ class BaseAdminAcumulusController extends AdminController
 
         switch ($this->display) {
             case 'add':
+                $this->meta_title = array($this->t("{$this->formType}_form_header"));
                 $this->toolbar_title[] = $this->t("{$this->formType}_form_title");
                 break;
         }
