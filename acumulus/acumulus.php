@@ -3,7 +3,7 @@
  * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s this code, leading to E_WARNINGs...
  *
  * @author    Buro RaDer / SIEL Acumulus
- * @copyright 2016 Buro RaDer
+ * @copyright 2017 Buro RaDer
  * @license   see license.txt
  */
 
@@ -28,7 +28,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.7.6';
+    public static $module_version = '4.7.8';
 
     /** @var array */
     protected $options = array();
@@ -100,9 +100,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Install module.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function install()
     {
@@ -116,9 +114,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Uninstall module.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     public function uninstall()
     {
@@ -133,6 +129,24 @@ class Acumulus extends Module
         $this->uninstallTabs();
 
         return parent::uninstall();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function enable($force_all = false)
+    {
+        $this->installTabs();
+        return parent::enable($force_all);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function disable($force_all = false)
+    {
+        $this->uninstallTabs();
+        return parent::disable($force_all);
     }
 
     /**
@@ -185,7 +199,11 @@ class Acumulus extends Module
         foreach (Language::getLanguages(true) as $lang) {
             $tab->name[$lang['id_lang']] = $this->t('advanced_page_title');
         }
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
+		// Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
+        if ($tab->id_parent === 0) {
+            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
+        }
         $tab->module = $this->name;
         $tab->position = 1001;
         $result2 = (bool) $tab->add();
