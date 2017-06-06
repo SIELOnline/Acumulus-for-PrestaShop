@@ -28,16 +28,13 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.7.8';
+    public static $module_version = '4.8.0';
 
     /** @var array */
     protected $options = array();
 
-    /** @var \Siel\Acumulus\Shop\Config */
-    protected $acumulusConfig = null;
-
-    /** @var \Siel\Acumulus\Shop\ConfigStoreInterface */
-    protected $configStore;
+    /** @var \Siel\Acumulus\Helpers\Container */
+    protected $container = null;
 
     /** @var string */
     protected $confirmUninstall;
@@ -69,7 +66,7 @@ class Acumulus extends Module
      */
     protected function t($key)
     {
-        return $this->acumulusConfig->getTranslator()->get($key);
+        return $this->container->getTranslator()->get($key);
     }
 
     /**
@@ -77,13 +74,13 @@ class Acumulus extends Module
      */
     protected function init()
     {
-        if ($this->acumulusConfig === null) {
+        if ($this->container === null) {
             // Load autoloader
             require_once(__DIR__ . '/libraries/Siel/psr4.php');
 
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-            $this->acumulusConfig = new \Siel\Acumulus\Shop\Config('PrestaShop', $languageCode);
-            $this->acumulusConfig->getTranslator()->add(new \Siel\Acumulus\Shop\ModuleTranslations());
+            $this->container = new \Siel\Acumulus\Helpers\Container('PrestaShop', $languageCode);
+            $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\ModuleTranslations());
 
             $this->displayName = $this->t('module_name');
             $this->description = $this->t('module_description');
@@ -91,12 +88,12 @@ class Acumulus extends Module
     }
 
     /**
-     * @return \Siel\Acumulus\Shop\Config
+     * @return \Siel\Acumulus\Helpers\ContainerInterface
      */
-    public function getAcumulusConfig()
+    public function getAcumulusContainer()
     {
         $this->init();
-        return $this->acumulusConfig;
+        return $this->container;
     }
 
     /**
@@ -122,7 +119,7 @@ class Acumulus extends Module
         $this->confirmUninstall = $this->t('message_uninstall');
 
         // Delete our config values
-        foreach ($this->acumulusConfig->getKeys() as $key) {
+        foreach ($this->getAcumulusContainer()->getConfig()->getKeys() as $key) {
             Configuration::deleteByName("ACUMULUS_$key");
         }
         $this->dropTables();
@@ -247,14 +244,13 @@ class Acumulus extends Module
      */
     public function getContent()
     {
-        $this->init();
-
+        // @todo: can we move all form handling to controllers, also for the config screen?
         // Add some styling in PS 1.5.
         if (version_compare(_PS_VERSION_, 1.6, '<')) {
             $this->context->controller->addCSS($this->_path . 'views/css/config-form.css');
         }
 
-        $form = $this->acumulusConfig->getForm('config');
+        $form = $this->getAcumulusContainer()->getForm('config');
         $output = '';
         $output .= $this->processForm($form);
         $output .= $this->renderForm($form);
@@ -332,7 +328,7 @@ class Acumulus extends Module
 
         /** @noinspection PhpUndefinedFieldInspection */
         $helper->multiple_fieldsets = true;
-        $formMapper = new \Siel\Acumulus\PrestaShop\Helpers\FormMapper();
+        $formMapper = $this->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
         $fields_form['formSubmit']['form'] = array(
             'legend' => array(
@@ -366,7 +362,7 @@ class Acumulus extends Module
         $this->init();
         $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
         $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $params['order_history']->id_order);
-        $this->acumulusConfig->getManager()->sourceStatusChange($source);
+        $this->getAcumulusContainer()->getManager()->sourceStatusChange($source);
         return true;
     }
 
@@ -397,7 +393,7 @@ class Acumulus extends Module
         }
         $type = \Siel\Acumulus\PrestaShop\Invoice\Source::CreditNote;
         $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $newestOrderSlip);
-        $this->acumulusConfig->getManager()->sourceStatusChange($source);
+        $this->getAcumulusContainer()->getManager()->sourceStatusChange($source);
         return true;
     }
 
@@ -413,7 +409,7 @@ class Acumulus extends Module
     public function createTables()
     {
         $this->init();
-        return $this->acumulusConfig->getAcumulusEntryModel()->install();
+        return $this->getAcumulusContainer()->getAcumulusEntryModel()->install();
     }
 
     /**
@@ -425,6 +421,6 @@ class Acumulus extends Module
      */
     protected function dropTables()
     {
-        return $this->acumulusConfig->getAcumulusEntryModel()->uninstall();
+        return $this->getAcumulusContainer()->getAcumulusEntryModel()->uninstall();
     }
 }

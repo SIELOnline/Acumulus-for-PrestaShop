@@ -15,5 +15,5 @@
  */
 function upgrade_module_4_5_3($object)
 {
-    return $object->getAcumulusConfig()->upgrade('4.5.2');
+    return $object->getAcumulusContainer()->getConfig()->upgrade('4.5.2');
 }

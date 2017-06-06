@@ -54,9 +54,9 @@ class BaseAdminAcumulusController extends AdminController
         $this->module = new Acumulus();
         // Init order problem: getAcumulusConfig() initializes the autoloader,
         // so we need to create that before creating the translations.
-        $acumulusConfig = $this->module->getAcumulusConfig();
+        $acumulusContainer = $this->module->getAcumulusContainer();
         $translations = $this->formType === 'batch' ? new BatchFormTranslations() : new ConfigFormTranslations();
-        $acumulusConfig->getTranslator()->add($translations);
+        $acumulusContainer->getTranslator()->add($translations);
 
         parent::__construct();
     }
@@ -73,7 +73,7 @@ class BaseAdminAcumulusController extends AdminController
      */
     protected function t($key)
     {
-        return $this->module->getAcumulusConfig()->getTranslator()->get($key);
+        return $this->module->getAcumulusContainer()->getTranslator()->get($key);
     }
 
 
@@ -82,7 +82,7 @@ class BaseAdminAcumulusController extends AdminController
      */
     protected function getForm()
     {
-        return $this->module->getAcumulusConfig()->getForm($this->formType);
+        return $this->module->getAcumulusContainer()->getForm($this->formType);
     }
 
     public function initToolbarTitle()
@@ -108,7 +108,7 @@ class BaseAdminAcumulusController extends AdminController
         $this->show_form_cancel_button = true;
         $this->multiple_fieldsets = true;
         $form = $this->getForm();
-        $formMapper = new FormMapper();
+        $formMapper = $this->module->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
         if ($this->formType === 'batch') {
             // On the batch form we place the send button before the extended

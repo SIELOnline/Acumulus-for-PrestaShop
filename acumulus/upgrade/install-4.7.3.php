@@ -4,7 +4,7 @@
  * ModuleCore::runUpgradeModule().
  *
  * @author    Buro RaDer / SIEL Acumulus
- * @copyright 2016 Buro RaDer
+ * @copyright 2017 Buro RaDer
  * @license   see license.txt
  */
 
@@ -13,7 +13,7 @@
  *
  * @return bool
  */
-function upgrade_module_4_5_0($object)
+function upgrade_module_4_7_3($object)
 {
-    return $object->getAcumulusContainer()->getConfig()->upgrade('4.4.9');
+    return $object->getAcumulusContainer()->getConfig()->upgrade('4.7.3');
 }

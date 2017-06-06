@@ -15,5 +15,5 @@
  */
 function upgrade_module_3_3_3($object)
 {
-    $object->createTables();
+    return $object->createTables();
 }
