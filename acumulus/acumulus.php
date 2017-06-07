@@ -28,7 +28,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.8.0';
+    public static $module_version = '4.8.0-a2';
 
     /** @var array */
     protected $options = array();
@@ -41,14 +41,23 @@ class Acumulus extends Module
 
     public function __construct()
     {
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->name = 'acumulus';
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->tab = 'billing_invoicing';
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->version = self::$module_version;
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->author = 'Acumulus';
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->need_instance = 0;
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->dependencies = array();
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->bootstrap = true;
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->module_key = '89693e3902e3d283a89fde3673dd3513';
 
         parent::__construct();
@@ -154,7 +163,7 @@ class Acumulus extends Module
      */
     protected function checkRequirements()
     {
-        $requirements = new \Siel\Acumulus\Helpers\Requirements();
+        $requirements = $this->container->getRequirements();
         $messages = $requirements->check();
         foreach ($messages as $key => $message) {
             $translatedMessage = $this->t($key);
@@ -294,6 +303,7 @@ class Acumulus extends Module
         // Create and initialize form helper.
         $helper = new HelperForm();
 
+        /** @noinspection PhpUndefinedClassInspection */
         $adminTokenLite = Tools::getAdminTokenLite('AdminModules');
         $currentIndex = AdminController::$currentIndex;
 
