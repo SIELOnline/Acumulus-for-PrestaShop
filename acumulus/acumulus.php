@@ -28,7 +28,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.8.0-a2';
+    public static $module_version = '4.8.1';
 
     /** @var array */
     protected $options = array();
@@ -253,7 +253,6 @@ class Acumulus extends Module
      */
     public function getContent()
     {
-        // @todo: can we move all form handling to controllers, also for the config screen?
         // Add some styling in PS 1.5.
         if (version_compare(_PS_VERSION_, 1.6, '<')) {
             $this->context->controller->addCSS($this->_path . 'views/css/config-form.css');

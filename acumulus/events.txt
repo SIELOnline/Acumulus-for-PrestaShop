@@ -7,7 +7,7 @@ These events are experimental. Depending on feedback from actual usage, details
 may change in future versions.
 
 Introduction
-------------
+============
 This file documents the events that the Acumulus module defines. Currently, the
 following events are defined:
 
@@ -16,22 +16,22 @@ following events are defined:
 - actionAcumulusInvoiceSent
 
 actionAcumulusInvoiceCreated
-----------------------------
+============================
 
 Description
 -----------
-The "actionAcumulusInvoiceCreated" event is used to change the invoice that will
-be sent to Acumulus. The Acumulus plugin has created the invoice and is about to
-complete and send it to Acumulus. But just before doing so, this event allows
-you to do your own completion beforechange details of the invoice as will be sent to Acumulus.
+The "actionAcumulusInvoiceCreated" event is used to change the invoice that
+will be sent to Acumulus. The Acumulus plugin has created the raw invoice and
+is about to complete and send it to Acumulus. But before doing so, this event
+allows you to do your own completion beforechange details of the invoice as
+will be sent to Acumulus.
 
 Usage
 -----
-When the "actionAcumulusInvoiceAdd" event is called, it is passed 2 parameters
-in the $params argument:
-- 'invoice'(by reference):
-  A keyed array containing the invoice that will be sent to Acumulus. The array
-  structure is similar to the XML structure as defined on
+When the "actionAcumulusInvoiceCreated" event is called, it is passed 3
+parameters in the $params argument:
+- 'invoice'(by reference): a keyed array containing the invoice that will be
+  sent to Acumulus. The array structure is similar to the XML structure as defined on
   https://apidoc.sielsystems.nl/content/invoice-add, though at this stage, only
   the customer key will be present at the highest level. The line tag is
   represented as a numeric array of lines, even if if there is only 1 line.
@@ -51,8 +51,10 @@ in the $params argument:
   'line' = 0. These null values will be replaced by the module by the most
   occurring vat rate before the actual sending takes place:
   - ['customer']['invoice']['line']['taxrate']
-- 'order':
-  The PrestaShop order object.
+- 'localResult' object of type \Siel\Acumulus\Invoice\Result
+  A Result object that at this stage can only contain local warnings and errors.
+- 'invoiceSource' object of type \Siel\Acumulus\PrestaShop\Invoice\Source
+  A wrapper object around the PrestaShop order or credit slip object.
 
 Typical usages for this event allow to implement business logic specific to
 your business, think of:
@@ -88,7 +90,55 @@ class Custom extends Module {
   }
 }
 
+
+actionAcumulusInvoiceCompleted
+==============================
+
+Description
+-----------
+The "actionAcumulusInvoiceCompleted" event is used to change the invoice that
+will be sent to Acumulus. The Acumulus plugin has created the raw invoice and
+has completed it into a state as will be sent to Acumulus. But before doing so,
+this event allows you to make your own changes to tthi invoice as will be sent
+to Acumulus.
+
+Usage
+-----
+When the "actionAcumulusInvoiceCompleted" event is called, it is passed 3
+parameters in the $params argument:
+- 'invoice' (by reference) a keyed array containing the invoice that will be
+  sent to Acumulus. See actionAcumulusInvoiceCreated for more details.
+- 'localResult' object of type \Siel\Acumulus\Invoice\Result
+  A Result object that at this stage can only contain local warnings and errors.
+- 'invoiceSource' object of type \Siel\Acumulus\PrestaShop\Invoice\Source
+  A wrapper object around the PrestaShop order or credit slip object.
+
+
+actionAcumulusInvoiceSent
+==============================
+
+Description
+-----------
+The "actionAcumulusInvoiceCompleted" event is used to change the invoice that
+will be sent to Acumulus. The Acumulus plugin has created the raw invoice and
+has completed it into a state as will be sent to Acumulus. But before doing so,
+this event allows you to make your own changes to tthi invoice as will be sent
+to Acumulus.
+
+Usage
+-----
+When the "actionAcumulusInvoiceCompleted" event is called, it is passed 3
+parameters in the $params argument:
+- 'invoice' a keyed array containing the invoice that will be
+  sent to Acumulus. See actionAcumulusInvoiceCreated for more details.
+- 'invoiceSource' object of type \Siel\Acumulus\PrestaShop\Invoice\Source
+  A wrapper object around the PrestaShop order or credit slip object.
+- 'result' object of type \Siel\Acumulus\Invoice\Result
+  A Result object containing the result (including any warnings and errors) of
+  sending the invoice to Acumulus.
+
+
 External Resources
-------------------
+==================
 - https://apidoc.sielsystems.nl/content/invoice-add.
 - https://apidoc.sielsystems.nl/content/warning-error-and-status-response-section-most-api-calls
