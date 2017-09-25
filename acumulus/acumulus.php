@@ -1,6 +1,7 @@
 <?php
 /**
- * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s this code, leading to E_WARNINGs...
+ * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s
+ * this code, leading to E_WARNINGs...
  *
  * @author    Buro RaDer / SIEL Acumulus
  * @copyright 2017 Buro RaDer
@@ -28,7 +29,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.8.1';
+    public static $module_version = '4.9.0';
 
     /** @var array */
     protected $options = array();
@@ -87,6 +88,7 @@ class Acumulus extends Module
             // Load autoloader
             require_once(__DIR__ . '/libraries/Siel/psr4.php');
 
+            /** @noinspection PhpUndefinedClassInspection */
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
             $this->container = new \Siel\Acumulus\Helpers\Container('PrestaShop', $languageCode);
             $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\ModuleTranslations());
@@ -152,7 +154,7 @@ class Acumulus extends Module
     public function disable($force_all = false)
     {
         $this->uninstallTabs();
-        return parent::disable($force_all);
+        parent::disable($force_all);
     }
 
     /**
