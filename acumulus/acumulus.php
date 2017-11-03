@@ -29,7 +29,7 @@ class Acumulus extends Module
      *
      * @var string
      */
-    public static $module_version = '4.9.0';
+    public static $module_version = '4.9.3';
 
     /** @var array */
     protected $options = array();
@@ -114,11 +114,8 @@ class Acumulus extends Module
     {
         $this->init();
         return $this->checkRequirements()
-        && parent::install()
-        && $this->createTables()
-        && $this->installTabs()
-        && $this->registerHook('actionOrderHistoryAddAfter')
-        && $this->registerHook('actionOrderSlipAdd');
+          && parent::install()
+          && $this->createTables();
     }
 
     /**
@@ -134,7 +131,6 @@ class Acumulus extends Module
             Configuration::deleteByName("ACUMULUS_$key");
         }
         $this->dropTables();
-        $this->uninstallTabs();
 
         return parent::uninstall();
     }
@@ -144,8 +140,11 @@ class Acumulus extends Module
      */
     public function enable($force_all = false)
     {
-        $this->installTabs();
-        return parent::enable($force_all);
+        return parent::enable($force_all)
+            && $this->installTabs()
+            && $this->registerHook('actionOrderHistoryAddAfter')
+            && $this->registerHook('actionOrderSlipAdd');
+
     }
 
     /**
@@ -153,8 +152,10 @@ class Acumulus extends Module
      */
     public function disable($force_all = false)
     {
-        $this->uninstallTabs();
-        parent::disable($force_all);
+	    return $this->unregisterHook('actionOrderHistoryAddAfter')
+            && $this->unregisterHook('actionOrderSlipAdd')
+            && $this->uninstallTabs()
+            && parent::disable($force_all);
     }
 
     /**
