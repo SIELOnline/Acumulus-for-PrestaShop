@@ -9,13 +9,11 @@ interdiff.txt
 .idea/*
 
 # Common library
-acumulus/libraries/Siel/*
+acumulus/lib/siel/*
 
-# Shared files
-changelog*.txt
+# License files
 license.txt
 licentie-nl.pdf
-leesmij.txt
 
 # Resulting installer files
 /*.zip
