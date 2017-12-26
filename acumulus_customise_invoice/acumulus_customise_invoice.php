@@ -1,13 +1,11 @@
 <?php
 /**
- * @author    Buro RaDer
- * @copyright 2017 SIEL
- * @license   see license.txt
+ * @author: Buro RaDer http://www.burorader.com/
+ * @copyright: SIEL BV https://www.siel.nl/acumulus/
+ * @license: GPLv3, see license.txt
  */
 
-use Siel\Acumulus\Invoice\Source;
-
-/**
+ /**
  * The AcumulusCustomiseInvoice module class contains plumbing and example code
  * to react to hooks triggered by the Acumulus module. These hooks allow you to:
  * - Prevent sending an invoice to Acumulus.
@@ -78,7 +76,7 @@ use Siel\Acumulus\Invoice\Source;
  * - https://apidoc.sielsystems.nl/content/warning-error-and-status-response-section-most-api-calls
  *
  */
-class AcumulusCustomiseInvoice extends Module
+class Acumulus_Customise_Invoice extends Module
 {
     /**
      * Increase this value on each change:
@@ -203,9 +201,9 @@ class AcumulusCustomiseInvoice extends Module
 
         // NOTE: the example below is now an option in the advanced settings:
         // Prevent sending 0-amount invoices (free products).
-//        if (empty($invoice) || $invoice['customer']['invoice'][\Siel\Acumulus\Meta::InvoiceAmountInc] == 0) {
+        if (empty($invoice) || $invoice['customer']['invoice'][\Siel\Acumulus\Meta::InvoiceAmountInc] == 0) {
             $invoice = null;
-//        }
+        }
     }
 
     /**
@@ -235,7 +233,7 @@ class AcumulusCustomiseInvoice extends Module
         $this->init();
         // Here you can make changes to the invoice based on your specific
         // situation, e.g. setting the payment status to its correct value:
-        //$invoice['customer']['invoice']['paymentstatus'] = $this->isOrderPaid($invoiceSource) ? Api::PaymentStatus_Paid : Api::PaymentStatus_Due;
+        $invoice['customer']['invoice']['testpaymentstatus'] = $this->isOrderPaid($invoiceSource) ? \Siel\Acumulus\Api::PaymentStatus_Paid : \Siel\Acumulus\Api::PaymentStatus_Due;
     }
 
     /**
@@ -317,7 +315,7 @@ class AcumulusCustomiseInvoice extends Module
      *   True if the order has been paid, false otherwise.
      *
      */
-    protected function isOrderPaid(Source $invoiceSource)
+    protected function isOrderPaid(\Siel\Acumulus\Invoice\Source $invoiceSource)
     {
         $this->container->getLog()->info('AcumulusCustomiseInvoice::isOrderPaid(): invoiceSource = ' . var_export($invoiceSource->getSource(), true));
         return true;
