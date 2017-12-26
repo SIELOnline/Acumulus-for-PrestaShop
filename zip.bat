@@ -5,10 +5,9 @@ echo Usage: %~n0 version
 exit /B 1;
 )
 set version=%1
+set archive=PrestaShop-1.7.x-Acumulus-%version%.zip
 
-del PrestaShop-1.7.x-Acumulus-%version%.zip 2> nul
-
-rem zip package.
-"C:\Program Files\7-Zip\7z.exe" a -tzip PrestaShop-1.7.x-Acumulus-%version%.zip acumulus | findstr /i "Failed Error"
-"C:\Program Files\7-Zip\7z.exe" d PrestaShop-1.7.x-Acumulus-%version%.zip config_nl.xml -r | findstr /i "Failed Error"
-"C:\Program Files\7-Zip\7z.exe" t PrestaShop-1.7.x-Acumulus-%version%.zip | findstr /i "Processing Everything Failed Error"
+rem delete, recreate and check zip package.
+del %archive% 2> nul
+"C:\Program Files\7-Zip\7z.exe" a -xr!.git -xr!config_nl.xml -tzip %archive% acumulus | findstr /i "Failed Error"
+"C:\Program Files\7-Zip\7z.exe" t %archive% | findstr /i "Processing Everything Failed Error"
