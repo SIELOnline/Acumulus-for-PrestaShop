@@ -93,8 +93,12 @@ class Acumulus_Customise_Invoice extends Module
     /** @var array */
     protected $options = array();
 
-    /** @var \Siel\Acumulus\Helpers\Container */
-    protected $container = null;
+    /**
+     * Do not call directly, use getAcumulusContainer().
+     *
+     * @var \Siel\Acumulus\Helpers\ContainerInterface
+     */
+    private $container = null;
 
     public function __construct()
     {
@@ -126,7 +130,11 @@ class Acumulus_Customise_Invoice extends Module
     }
 
     /**
-     * Initializes access to the Acumulus classes and configuration.
+     * Loads the Acumulus library and creates a configuration object so this
+     * custom plugin has access to the Acumulus classes, configuration and
+     * constants.
+     *
+     * Do not call directly, use getAcumulusContainer().
      */
     private function init()
     {
@@ -315,9 +323,11 @@ class Acumulus_Customise_Invoice extends Module
      *   True if the order has been paid, false otherwise.
      *
      */
-    protected function isOrderPaid(\Siel\Acumulus\Invoice\Source $invoiceSource)
+    private function isOrderPaid(\Siel\Acumulus\Invoice\Source $invoiceSource)
     {
-        $this->container->getLog()->info('AcumulusCustomiseInvoice::isOrderPaid(): invoiceSource = ' . var_export($invoiceSource->getSource(), true));
+        /** @var \Order|\OrderSlip */
+        $order = $invoiceSource->getSource();
+        //$this->getAcumulusContainer()->getLog()->info('AcumulusCustomiseInvoice::isOrderPaid(): invoiceSource = ' . var_export($invoiceSource->getSource(), true));
         return true;
     }
 }
