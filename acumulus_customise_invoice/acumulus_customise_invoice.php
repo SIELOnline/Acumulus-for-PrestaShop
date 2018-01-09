@@ -94,7 +94,7 @@ class Acumulus_Customise_Invoice extends Module
     protected $options = array();
 
     /**
-     * Do not call directly, use getAcumulusContainer().
+     * Do not call directly, use the getter getAcumulusContainer().
      *
      * @var \Siel\Acumulus\Helpers\ContainerInterface
      */
