@@ -1,8 +1,8 @@
 <?php
 /**
- * @author: Buro RaDer http://www.burorader.com/
- * @copyright: SIEL BV https://www.siel.nl/acumulus/
- * @license: GPLv3, see license.txt
+ * @author    Buro RaDer, http://www.burorader.com/
+ * @copyright SIEL BV, https://www.siel.nl/acumulus/
+ * @license   GPL v3, see license.txt
  */
 
  /**
@@ -88,7 +88,7 @@ class Acumulus_Customise_Invoice extends Module
      *
      * @var string
      */
-    public static $module_version = '5.0.0';
+    public static $module_version = '5.0.1';
 
     /** @var array */
     protected $options = array();

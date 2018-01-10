@@ -3,9 +3,9 @@
  * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s
  * this code, leading to E_WARNINGs...
  *
- * @author    Buro RaDer / SIEL Acumulus
- * @copyright 2017 Buro RaDer
- * @license   see license.txt
+ * @author    Buro RaDer, http://www.burorader.com/
+ * @copyright SIEL BV, https://www.siel.nl/acumulus/
+ * @license   GPL v3, see license.txt
  */
 
 /**
