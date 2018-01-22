@@ -40,7 +40,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '5.0.3';
+        $this->version = '5.0.4';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -49,7 +49,6 @@ class Acumulus extends Module
         $this->dependencies = array();
         $this->bootstrap = true;
         $this->module_key = '2fd7abd2f9cca4a9ee04d7fb58e0e46a';
-        //$this->module_key = '89693e3902e3d283a89fde3673dd3513';
 
         parent::__construct();
     }
