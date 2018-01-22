@@ -2,9 +2,9 @@
 /**
  * Validator says: Missing short description in file comment.
  *
- * @author    Buro RaDer / SIEL Acumulus
- * @copyright 2016 Buro RaDer
- * @license   see license.txt
+ * @author    Buro RaDer, http://www.burorader.com/
+ * @copyright SIEL BV, https://www.siel.nl/acumulus/
+ * @license   GPL v3, see license.txt
  */
 
 use Siel\Acumulus\PrestaShop\Helpers\FormMapper;
@@ -50,7 +50,7 @@ class BaseAdminAcumulusController extends AdminController
         $this->bootstrap = true;
 
         // Initialization.
-        require_once(__DIR__ . '/../../acumulus.php');
+        require_once(dirname(__FILE__) . '/../../acumulus.php');
         $this->module = new Acumulus();
         // Init order problem: getAcumulusConfig() initializes the autoloader,
         // so we need to create that before creating the translations.

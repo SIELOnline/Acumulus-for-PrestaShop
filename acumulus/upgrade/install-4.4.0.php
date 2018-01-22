@@ -1,24 +1,24 @@
 <?php
 /**
- * See http://doc.prestashop.com/display/PS15/Auto-updating+modules and
- * ModuleCore::runUpgradeModule().
+ * See http://doc.prestashop.com/display/PS15/Auto-updating+modules
+ * and ModuleCore::runUpgradeModule().
  *
- * @author    Buro RaDer / SIEL Acumulus
- * @copyright 2016 Buro RaDer
- * @license   see license.txt
+ * @author    Buro RaDer, http://www.burorader.com/
+ * @copyright SIEL BV, https://www.siel.nl/acumulus/
+ * @license   GPL v3, see license.txt
  */
 
 /**
- * @param Acumulus $object
+ * param Acumulus $object
  *
  * @return bool
  */
-function upgrade_module_4_4_0(/** @noinspection PhpUnusedParameterInspection */ $object)
+function upgrade_module_4_4_0()
 {
-  $tableName = _DB_PREFIX_ . 'acumulus_entry';
-  return Db::getInstance()->execute(
-    "ALTER TABLE `$tableName`
-     CHANGE COLUMN `id_entry` `id_entry` INT(11) NULL DEFAULT NULL,
-     CHANGE COLUMN `token` `token` CHAR(32) NULL DEFAULT NULL"
-  );
+    $tableName = _DB_PREFIX_ . 'acumulus_entry';
+    return Db::getInstance()->execute(
+        "ALTER TABLE `$tableName`
+        CHANGE COLUMN `id_entry` `id_entry` INT(11) NULL DEFAULT NULL,
+        CHANGE COLUMN `token` `token` CHAR(32) NULL DEFAULT NULL"
+    );
 }

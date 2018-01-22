@@ -1,11 +1,11 @@
 <?php
 /**
- * See http://doc.prestashop.com/display/PS15/Auto-updating+modules and
- * ModuleCore::runUpgradeModule().
+ * See http://doc.prestashop.com/display/PS15/Auto-updating+modules
+ * and ModuleCore::runUpgradeModule().
  *
- * @author    Buro RaDer / SIEL Acumulus
- * @copyright 2017 Buro RaDer
- * @license   see license.txt
+ * @author    Buro RaDer, http://www.burorader.com/
+ * @copyright SIEL BV, https://www.siel.nl/acumulus/
+ * @license   GPL v3, see license.txt
  */
 
 /**

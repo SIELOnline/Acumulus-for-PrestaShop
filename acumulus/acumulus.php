@@ -19,18 +19,6 @@
  */
 class Acumulus extends Module
 {
-    /**
-     * Increase this value on each change:
-     * - point release: bug fixes
-     * - minor version: addition of minor features, backwards compatible
-     * - major version: major or backwards incompatible changes
-     *
-     * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
-     *
-     * @var string
-     */
-    public static $module_version = '5.0.1';
-
     /** @var array */
     protected $options = array();
 
@@ -42,24 +30,26 @@ class Acumulus extends Module
 
     public function __construct()
     {
-        /** @noinspection PhpUndefinedFieldInspection */
+        /**
+         * Increase this value on each change:
+         * - point release: bug fixes
+         * - minor version: addition of minor features, backwards compatible
+         * - major version: major or backwards incompatible changes
+         *
+         * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
+         *
+         * @var string
+         */
+        $this->version = '5.0.3';
         $this->name = 'acumulus';
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->tab = 'billing_invoicing';
-        /** @noinspection PhpUndefinedFieldInspection */
-        $this->version = self::$module_version;
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->author = 'Acumulus';
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->need_instance = 0;
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->dependencies = array();
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->bootstrap = true;
-        /** @noinspection PhpUndefinedFieldInspection */
-        $this->module_key = '89693e3902e3d283a89fde3673dd3513';
+        $this->module_key = '2fd7abd2f9cca4a9ee04d7fb58e0e46a';
+        //$this->module_key = '89693e3902e3d283a89fde3673dd3513';
 
         parent::__construct();
     }
@@ -86,7 +76,7 @@ class Acumulus extends Module
     {
         if ($this->container === null) {
             // Load autoloader
-            require_once(__DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
+            require_once(dirname(__FILE__) . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
             SielAcumulusAutoloader::register();
 
             /** @noinspection PhpUndefinedClassInspection */
@@ -145,7 +135,6 @@ class Acumulus extends Module
             && $this->installTabs()
             && $this->registerHook('actionOrderHistoryAddAfter')
             && $this->registerHook('actionOrderSlipAdd');
-
     }
 
     /**
@@ -153,10 +142,10 @@ class Acumulus extends Module
      */
     public function disable($force_all = false)
     {
-	    return $this->unregisterHook('actionOrderHistoryAddAfter')
+        parent::disable($force_all);
+        return $this->unregisterHook('actionOrderHistoryAddAfter')
             && $this->unregisterHook('actionOrderSlipAdd')
-            && $this->uninstallTabs()
-            && parent::disable($force_all);
+            && $this->uninstallTabs();
     }
 
     /**
@@ -209,7 +198,7 @@ class Acumulus extends Module
         foreach (Language::getLanguages(true) as $lang) {
             $tab->name[$lang['id_lang']] = $this->t('advanced_page_title');
         }
-		// Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
+        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
         $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
         if ($tab->id_parent === 0) {
             $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
@@ -331,7 +320,7 @@ class Acumulus extends Module
         $helper->toolbar_btn = array(
             'save' => array(
                 'desc' => $this->t('button_save'),
-                'href' => $currentIndex . '&configure=' . $this->name . '&save' . $this->name . '&token=' . $adminTokenLite,
+                'href' => $helper->currentIndex . '&save' . $this->name . '&token=' . $adminTokenLite,
             ),
             'back' => array(
                 'href' => $currentIndex . '&token=' . $adminTokenLite,
@@ -396,7 +385,7 @@ class Acumulus extends Module
         /** @var Order $order */
         $order = $params['order'];
         $orderSlips = $order->getOrderSlipsCollection();
-        /** @var OrderSLip $newestOrderSlip */
+        /** @var OrderSlip $newestOrderSlip */
         $newestOrderSlip = null;
         foreach ($orderSlips as $orderSlip) {
             /** @var OrderSlip $orderSlip */

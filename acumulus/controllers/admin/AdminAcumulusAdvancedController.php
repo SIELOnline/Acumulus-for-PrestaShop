@@ -2,9 +2,9 @@
 /**
  * Validator says: Missing short description in file comment.
  *
- * @author    Buro RaDer / SIEL Acumulus
- * @copyright 2016 Buro RaDer
- * @license   see license.txt
+ * @author    Buro RaDer, http://www.burorader.com/
+ * @copyright SIEL BV, https://www.siel.nl/acumulus/
+ * @license   GPL v3, see license.txt
  */
 
 include_once('BaseAdminAcumulusController.php');
