@@ -8,17 +8,9 @@ interdiff.txt
 # PHPStorm
 .idea/*
 
-# Common library
-acumulus/lib/siel/*
-
-# License files
-license.txt
-licentie-nl.pdf
-
 # Resulting installer files
 /*.zip
 
 #Generated files
-acumulus/config.xml
-acumulus/config_nl.xml
-acumulus_validation*.pdf
+config.xml
+config_nl.xml
