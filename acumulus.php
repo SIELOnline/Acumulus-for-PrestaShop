@@ -40,13 +40,14 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '5.2.0';
+        $this->version = '5.2.1';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
         $this->dependencies = array();
+        /** @noinspection PhpUndefinedFieldInspection */
         $this->bootstrap = true;
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
 
@@ -177,7 +178,9 @@ class Acumulus extends Module
      */
     public function installTabs()
     {
+
         $this->init();
+        /** @noinspection PhpUnhandledExceptionInspection */
         $tab = new Tab();
         $tab->active = 1;
         $tab->class_name = 'AdminAcumulusBatch';
@@ -185,11 +188,16 @@ class Acumulus extends Module
         foreach (Language::getLanguages(true) as $lang) {
             $tab->name[$lang['id_lang']] = 'Acumulus';
         }
+
+//      /** @var \PrestaShopBundle\Entity\Repository\TabRepository $tabRepository */
+//      $tabRepository = this->context->controller->get('prestashop.core.admin.tab.repository');
+//      $tab->id_parent = $tabRepository->findOneIdByClassName('AdminParentOrders');
         $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
         $tab->module = $this->name;
         $tab->position = 1001;
         $result1 = (bool) $tab->add();
 
+        /** @noinspection PhpUnhandledExceptionInspection */
         $tab = new Tab();
         $tab->active = 1;
         $tab->class_name = 'AdminAcumulusAdvanced';
@@ -221,7 +229,9 @@ class Acumulus extends Module
     {
         $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusBatch');
         if ($id_tab) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $tab = new Tab($id_tab);
+            /** @noinspection PhpUnhandledExceptionInspection */
             $result1 = $tab->delete();
         } else {
             $result1 = false;
@@ -229,7 +239,9 @@ class Acumulus extends Module
 
         $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusAdvanced');
         if ($id_tab) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $tab = new Tab($id_tab);
+            /** @noinspection PhpUnhandledExceptionInspection */
             $result2 = $tab->delete();
         } else {
             $result2 = false;
@@ -410,7 +422,7 @@ class Acumulus extends Module
     public function createTables()
     {
         $this->init();
-        return $this->getAcumulusContainer()->getAcumulusEntryModel()->install();
+        return $this->getAcumulusContainer()->getAcumulusEntryManager()->install();
     }
 
     /**
@@ -422,6 +434,6 @@ class Acumulus extends Module
      */
     protected function dropTables()
     {
-        return $this->getAcumulusContainer()->getAcumulusEntryModel()->uninstall();
+        return $this->getAcumulusContainer()->getAcumulusEntryManager()->uninstall();
     }
 }
