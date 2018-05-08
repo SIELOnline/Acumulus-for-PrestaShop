@@ -40,7 +40,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '5.2.1';
+        $this->version = '5.4.1';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -52,6 +52,10 @@ class Acumulus extends Module
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
 
         parent::__construct();
+
+        $this->displayName = $this->l('Acumulus');
+        $this->description = $this->l('Module that sends invoice data for your orders and refunds to your online Acumulus administration.');
+        $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
     }
 
     /**
@@ -90,7 +94,7 @@ class Acumulus extends Module
     }
 
     /**
-     * @return \Siel\Acumulus\Helpers\ContainerInterface
+     * @return \Siel\Acumulus\Helpers\Container
      */
     public function getAcumulusContainer()
     {
@@ -168,6 +172,7 @@ class Acumulus extends Module
         return empty($this->messages);
     }
 
+    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * Adds menu-items for the batch and advanced config forms.
      *
@@ -217,6 +222,7 @@ class Acumulus extends Module
         return $result1 && $result2;
     }
 
+    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * Removes menu-items for the batch and advanced config forms.
      *
@@ -281,6 +287,9 @@ class Acumulus extends Module
     {
         $output = '';
         $form->process();
+        // Force the creation of the fields to get connection error messages
+        // shown.
+        $form->getFields();
         foreach ($form->getErrorMessages() as $message) {
             $output .= $this->displayError($message);
         }
@@ -375,7 +384,7 @@ class Acumulus extends Module
         $this->init();
         $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
         $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $params['order_history']->id_order);
-        $this->getAcumulusContainer()->getManager()->sourceStatusChange($source);
+        $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
         return true;
     }
 
@@ -406,7 +415,7 @@ class Acumulus extends Module
         }
         $type = \Siel\Acumulus\PrestaShop\Invoice\Source::CreditNote;
         $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $newestOrderSlip);
-        $this->getAcumulusContainer()->getManager()->sourceStatusChange($source);
+        $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
         return true;
     }
 

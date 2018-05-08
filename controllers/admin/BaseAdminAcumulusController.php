@@ -135,6 +135,9 @@ class BaseAdminAcumulusController extends AdminController
     {
         $form = $this->getForm();
         $form->process();
+        // Force the creation of the fields to get connection error messages
+        // shown.
+        $form->getFields();
         foreach ($form->getErrorMessages() as $message) {
             $this->displayWarning($message);
         }
