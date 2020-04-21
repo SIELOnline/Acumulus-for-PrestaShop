@@ -40,7 +40,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '5.8.0';
+        $this->version = '5.9.0';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -83,10 +83,8 @@ class Acumulus extends Module
             require_once(dirname(__FILE__) . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
             SielAcumulusAutoloader::register();
 
-            /** @noinspection PhpUndefinedClassInspection */
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
             $this->container = new \Siel\Acumulus\Helpers\Container('PrestaShop', $languageCode);
-            $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\ModuleTranslations());
 
             $this->displayName = $this->t('module_name');
             $this->description = $this->t('module_description');
@@ -172,7 +170,6 @@ class Acumulus extends Module
         return empty($this->messages);
     }
 
-    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * Adds menu-items for the batch and advanced config forms.
      *
@@ -185,7 +182,6 @@ class Acumulus extends Module
     {
 
         $this->init();
-        /** @noinspection PhpUnhandledExceptionInspection */
         $tab = new Tab();
         $tab->active = 1;
         $tab->class_name = 'AdminAcumulusBatch';
@@ -202,7 +198,6 @@ class Acumulus extends Module
         $tab->position = 1001;
         $result1 = (bool) $tab->add();
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         $tab = new Tab();
         $tab->active = 1;
         $tab->class_name = 'AdminAcumulusAdvanced';
@@ -315,7 +310,6 @@ class Acumulus extends Module
         // Create and initialize form helper.
         $helper = new HelperForm();
 
-        /** @noinspection PhpUndefinedClassInspection */
         $adminTokenLite = Tools::getAdminTokenLite('AdminModules');
         $currentIndex = AdminController::$currentIndex;
 
