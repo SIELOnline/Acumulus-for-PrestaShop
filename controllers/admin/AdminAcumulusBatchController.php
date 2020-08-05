@@ -1,5 +1,7 @@
 <?php
 /**
+ * @noinspection PhpUnused
+ *
  * Validator says: Missing short description in file comment.
  *
  * @author    Buro RaDer, https://burorader.com/

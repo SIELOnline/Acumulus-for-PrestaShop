@@ -1,5 +1,7 @@
 <?php
 /**
+ * @noinspection PhpFullyQualifiedNameUsageInspection
+ *
  * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s
  * this code, leading to E_WARNINGs...
  *
@@ -7,6 +9,9 @@
  * @copyright SIEL BV, https://www.siel.nl/acumulus/
  * @license   GPL v3, see license.txt
  */
+
+use Siel\Acumulus\Helpers\Message;
+use Siel\Acumulus\Helpers\Severity;
 
 /**
  * Acumulus defines a PrestaShop module that can interact with the Acumulus
@@ -40,7 +45,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '5.9.0';
+        $this->version = '6.0.0';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -285,14 +290,25 @@ class Acumulus extends Module
         // Force the creation of the fields to get connection error messages
         // shown.
         $form->getFields();
-        foreach ($form->getErrorMessages() as $message) {
-            $output .= $this->displayError($message);
-        }
-        foreach ($form->getWarningMessages() as $message) {
-            $output .= $this->displayWarning($message);
-        }
-        foreach ($form->getSuccessMessages() as $message) {
-            $output .= $this->displayConfirmation($message);
+        foreach ($form->getMessages(Severity::RealMessages) as $message) {
+            switch ($message->getSeverity()) {
+                case Severity::Success:
+                    $output .= $this->displayConfirmation($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                case Severity::Info:
+                case Severity::Notice:
+                    $output .= $this->displayInformation($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                case Severity::Warning:
+                    $output .= $this->displayWarning($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                case Severity::Error:
+                case Severity::Exception:
+                    $output .= $this->displayError($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                default:
+                    break;
+            }
         }
         return $output;
     }
@@ -372,6 +388,8 @@ class Acumulus extends Module
      *   - order_history: OrderHistory
      *
      * @return bool
+     *
+     * @noinspection PhpUnused
      */
     public function hookactionOrderHistoryAddAfter(array $params)
     {
@@ -392,6 +410,8 @@ class Acumulus extends Module
      *   - qtyList: array
      *
      * @return bool
+     *
+     * @noinspection PhpUnused
      */
     public function hookactionOrderSlipAdd(array $params)
     {

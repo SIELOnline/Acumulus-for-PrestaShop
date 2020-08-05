@@ -7,7 +7,8 @@
  * @license   GPL v3, see license.txt
  */
 
-use Siel\Acumulus\PrestaShop\Helpers\FormMapper;
+use Siel\Acumulus\Helpers\Severity;
+use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
 
@@ -102,6 +103,7 @@ class BaseAdminAcumulusController extends AdminController
      *
      * @return string
      *   The rendered form.
+     * @throws \SmartyException
      */
     public function renderForm()
     {
@@ -138,11 +140,12 @@ class BaseAdminAcumulusController extends AdminController
         // Force the creation of the fields to get connection error messages
         // shown.
         $form->getFields();
-        foreach ($form->getErrorMessages() as $message) {
-            $this->displayWarning($message);
-        }
-        foreach ($form->getSuccessMessages() as $message) {
-            $this->displayInformation($message);
+        foreach ($form->getMessages() as $message) {
+            if (($message->getSeverity() & Severity::WarningOrWorse) !== 0) {
+                $this->displayWarning($message->format(Message::Format_PlainWithSeverity));
+            } else {
+                $this->displayInformation($message->format(Message::Format_PlainWithSeverity));
+            }
         }
         $this->display = 'add';
     }
