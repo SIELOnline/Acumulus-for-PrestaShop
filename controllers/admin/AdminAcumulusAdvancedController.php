@@ -19,8 +19,7 @@ class AdminAcumulusAdvancedController extends BaseAdminAcumulusController
     public function __construct()
     {
         $this->formType = 'advanced';
-        parent::__construct();
-        $this->title = $this->t('button_save');
         $this->icon = 'process-icon-save';
+        parent::__construct();
     }
 }

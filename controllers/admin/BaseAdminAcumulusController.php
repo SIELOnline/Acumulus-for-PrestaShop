@@ -9,8 +9,6 @@
 
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Helpers\Message;
-use Siel\Acumulus\Shop\BatchFormTranslations;
-use Siel\Acumulus\Shop\ConfigFormTranslations;
 
 /**
  * BaseAdminAcumulusBatchController provides shared controller functionality.
@@ -30,13 +28,6 @@ class BaseAdminAcumulusController extends AdminController
     protected $formType = '';
 
     /**
-     * The form title.
-     *
-     * @var string
-     */
-    protected $title;
-
-    /**
      * The form icon.
      *
      * @var string
@@ -53,11 +44,8 @@ class BaseAdminAcumulusController extends AdminController
         // Initialization.
         require_once(dirname(__FILE__) . '/../../acumulus.php');
         $this->module = new Acumulus();
-        // Init order problem: getAcumulusConfig() initializes the autoloader,
-        // so we need to create that before creating the translations.
-        $acumulusContainer = $this->module->getAcumulusContainer();
-        $translations = $this->formType === 'batch' ? new BatchFormTranslations() : new ConfigFormTranslations();
-        $acumulusContainer->getTranslator()->add($translations);
+        // Initializes the translations.
+        $this->getForm();
 
         parent::__construct();
     }
@@ -92,8 +80,8 @@ class BaseAdminAcumulusController extends AdminController
 
         switch ($this->display) {
             case 'add':
-                $this->meta_title = array($this->t("{$this->formType}_form_header"));
-                $this->toolbar_title[] = $this->t("{$this->formType}_form_title");
+                $this->meta_title = array($this->t("{$this->formType}_form_title"));
+                $this->toolbar_title[] = $this->t("{$this->formType}_form_header");
                 break;
         }
     }
@@ -107,6 +95,9 @@ class BaseAdminAcumulusController extends AdminController
      */
     public function renderForm()
     {
+        if ($this->formType === 'register') {
+            Context::getContext()->controller->addCSS( __PS_BASE_URI__ . 'modules/acumulus/views/css/register-form.css');
+        }
         $this->show_form_cancel_button = true;
         $this->multiple_fieldsets = true;
         $form = $this->getForm();
@@ -122,7 +113,7 @@ class BaseAdminAcumulusController extends AdminController
         }
         $key = key($fields_form);
         $fields_form[$key]['form']['submit'] = array(
-            'title' => $this->title,
+            'title' => $this->t("button_submit_{$this->formType}"),
             'icon' => $this->icon,
         );
         $this->fields_form = $fields_form;

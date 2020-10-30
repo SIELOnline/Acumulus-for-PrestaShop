@@ -45,7 +45,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '6.0.0';
+        $this->version = '6.0.4';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -176,7 +176,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Adds menu-items for the batch and advanced config forms.
+     * Adds menu-items.
      *
      * - Proudly copied from gamification.
      * - Public so it can be called by update functions.
@@ -187,28 +187,29 @@ class Acumulus extends Module
     {
 
         $this->init();
+
+        // Add the batch form.
+        $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\BatchFormTranslations());
         $tab = new Tab();
         $tab->active = 1;
         $tab->class_name = 'AdminAcumulusBatch';
         $tab->name = array();
         foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = 'Acumulus';
+            $tab->name[$lang['id_lang']] = $this->t('batch_form_header');
         }
-
-//      /** @var \PrestaShopBundle\Entity\Repository\TabRepository $tabRepository */
-//      $tabRepository = this->context->controller->get('prestashop.core.admin.tab.repository');
-//      $tab->id_parent = $tabRepository->findOneIdByClassName('AdminParentOrders');
         $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
         $tab->module = $this->name;
         $tab->position = 1001;
         $result1 = (bool) $tab->add();
 
+        // Add the advanced config form.
+        $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\ConfigFormTranslations());
         $tab = new Tab();
         $tab->active = 1;
         $tab->class_name = 'AdminAcumulusAdvanced';
         $tab->name = array();
         foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = $this->t('advanced_page_title');
+            $tab->name[$lang['id_lang']] = $this->t('advanced_form_header');
         }
         // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
         $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
@@ -219,12 +220,31 @@ class Acumulus extends Module
         $tab->position = 1001;
         $result2 = (bool) $tab->add();
 
-        return $result1 && $result2;
+        // Add the register form.
+        $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\RegisterFormTranslations());
+        $tab = new Tab();
+        $tab->active = 1;
+        $tab->class_name = 'AdminAcumulusRegister';
+        $tab->name = array();
+        foreach (Language::getLanguages(true) as $lang) {
+            $tab->name[$lang['id_lang']] = $this->t('register_form_header');
+        }
+        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
+        if ($tab->id_parent === 0) {
+            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
+        }
+        $tab->module = $this->name;
+        $tab->position = 1002;
+        $tab->visible = false;
+        $result3 = (bool) $tab->add();
+
+        return $result1 && $result2 && $result3;
     }
 
     /** @noinspection PhpDocMissingThrowsInspection */
     /**
-     * Removes menu-items for the batch and advanced config forms.
+     * Removes menu-items.
      *
      * - Proudly copied from gamification.
      * - Public so it can be called by update functions.
@@ -238,9 +258,7 @@ class Acumulus extends Module
             /** @noinspection PhpUnhandledExceptionInspection */
             $tab = new Tab($id_tab);
             /** @noinspection PhpUnhandledExceptionInspection */
-            $result1 = $tab->delete();
-        } else {
-            $result1 = false;
+            $tab->delete();
         }
 
         $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusAdvanced');
@@ -248,12 +266,18 @@ class Acumulus extends Module
             /** @noinspection PhpUnhandledExceptionInspection */
             $tab = new Tab($id_tab);
             /** @noinspection PhpUnhandledExceptionInspection */
-            $result2 = $tab->delete();
-        } else {
-            $result2 = false;
+            $tab->delete();
         }
 
-        return $result1 && $result2;
+        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusRegister');
+        if ($id_tab) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $tab = new Tab($id_tab);
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $tab->delete();
+        }
+
+        return true;
     }
 
     /**
@@ -346,29 +370,17 @@ class Acumulus extends Module
         $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
         $helper->submit_action = 'submit' . $this->name;
 
-        // This seems to be for PS 1.5 and lower only ... doesn't work in 1.6.
-        $helper->toolbar_btn = array(
-            'save' => array(
-                'desc' => $this->t('button_save'),
-                'href' => $helper->currentIndex . '&save' . $this->name . '&token=' . $adminTokenLite,
-            ),
-            'back' => array(
-                'href' => $currentIndex . '&token=' . $adminTokenLite,
-                'desc' => $this->t('button_back'),
-            ),
-        );
-
         /** @noinspection PhpUndefinedFieldInspection */
         $helper->multiple_fieldsets = true;
         $formMapper = $this->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
         $fields_form['formSubmit']['form'] = array(
             'legend' => array(
-                'title' => $this->t('button_save'),
+                'title' => $this->t("button_submit_{$form->getType()}"),
                 'icon' => 'icon-save',
             ),
             'submit' => array(
-              'title' => $this->t('button_save'),
+              'title' => $this->t("button_submit_{$form->getType()}"),
             )
         );
         $helper->show_cancel_button = true;

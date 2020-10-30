@@ -12,14 +12,14 @@
 include_once('BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusBatchController provides the send batch form feature.
+ * AdminAcumulusRegisterController provides the register form feature.
  */
-class AdminAcumulusBatchController extends BaseAdminAcumulusController
+class AdminAcumulusRegisterController extends BaseAdminAcumulusController
 {
     public function __construct()
     {
-        $this->formType = 'batch';
-        $this->icon = 'process-icon-partial_refund';
+        $this->formType = 'register';
+        $this->icon = 'process-icon- icon-user-plus';
         parent::__construct();
     }
 }
