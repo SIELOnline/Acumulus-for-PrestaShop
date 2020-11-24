@@ -191,7 +191,7 @@ class Acumulus extends Module
         // Add the batch form.
         $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\BatchFormTranslations());
         $tab = new Tab();
-        $tab->active = 1;
+        $tab->active = true;
         $tab->class_name = 'AdminAcumulusBatch';
         $tab->name = array();
         foreach (Language::getLanguages(true) as $lang) {
@@ -205,7 +205,7 @@ class Acumulus extends Module
         // Add the advanced config form.
         $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\ConfigFormTranslations());
         $tab = new Tab();
-        $tab->active = 1;
+        $tab->active = true;
         $tab->class_name = 'AdminAcumulusAdvanced';
         $tab->name = array();
         foreach (Language::getLanguages(true) as $lang) {
@@ -223,7 +223,7 @@ class Acumulus extends Module
         // Add the register form.
         $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\RegisterFormTranslations());
         $tab = new Tab();
-        $tab->active = 1;
+        $tab->active = false;
         $tab->class_name = 'AdminAcumulusRegister';
         $tab->name = array();
         foreach (Language::getLanguages(true) as $lang) {
@@ -236,7 +236,6 @@ class Acumulus extends Module
         }
         $tab->module = $this->name;
         $tab->position = 1002;
-        $tab->visible = false;
         $result3 = (bool) $tab->add();
 
         return $result1 && $result2 && $result3;
