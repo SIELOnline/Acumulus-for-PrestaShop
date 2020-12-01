@@ -1,17 +1,25 @@
 <?php
+/** @noinspection PhpUndefinedClassInspection */
+/** @noinspection PhpMissingParamTypeInspection */
+/** @noinspection PhpMissingReturnTypeInspection */
+
 /**
  * @noinspection PhpFullyQualifiedNameUsageInspection
- *
- * DO NOT USE the keywords namespace and use here! PrestaShop loads and eval()'s
- * this code, leading to E_WARNINGs...
  *
  * @author    Buro RaDer, https://burorader.com/
  * @copyright SIEL BV, https://www.siel.nl/acumulus/
  * @license   GPL v3, see license.txt
  */
 
+use Siel\Acumulus\Helpers\Container;
+use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Helpers\Severity;
+use Siel\Acumulus\Invoice\Source;
+use Siel\Acumulus\Shop\BatchFormTranslations;
+use Siel\Acumulus\Shop\ConfigFormTranslations;
+use Siel\Acumulus\Shop\RegisterFormTranslations;
+use Siel\Acumulus\Shop\InvoiceStatusFormTranslations;
 
 /**
  * Acumulus defines a PrestaShop module that can interact with the Acumulus
@@ -89,7 +97,7 @@ class Acumulus extends Module
             SielAcumulusAutoloader::register();
 
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-            $this->container = new \Siel\Acumulus\Helpers\Container('PrestaShop', $languageCode);
+            $this->container = new Container('PrestaShop', $languageCode);
 
             $this->displayName = $this->t('module_name');
             $this->description = $this->t('module_description');
@@ -112,8 +120,8 @@ class Acumulus extends Module
     {
         $this->init();
         return $this->checkRequirements()
-          && parent::install()
-          && $this->createTables();
+          and parent::install()
+          and $this->createTables();
     }
 
     /**
@@ -139,9 +147,8 @@ class Acumulus extends Module
     public function enable($force_all = false)
     {
         return parent::enable($force_all)
-            && $this->installTabs()
-            && $this->registerHook('actionOrderHistoryAddAfter')
-            && $this->registerHook('actionOrderSlipAdd');
+            and $this->installTabs()
+            and $this->registerHooks();
     }
 
     /**
@@ -149,10 +156,9 @@ class Acumulus extends Module
      */
     public function disable($force_all = false)
     {
-        parent::disable($force_all);
-        return $this->unregisterHook('actionOrderHistoryAddAfter')
-            && $this->unregisterHook('actionOrderSlipAdd')
-            && $this->uninstallTabs();
+        return parent::disable($force_all)
+               and $this->unregisterHooks()
+               and $this->uninstallTabs();
     }
 
     /**
@@ -176,6 +182,30 @@ class Acumulus extends Module
     }
 
     /**
+     * Enables the hooks that this module wants to respond to.
+     *
+     * @return bool
+     */
+    public function registerHooks()
+    {
+        return $this->registerHook('actionOrderHistoryAddAfter')
+               and $this->registerHook('actionOrderSlipAdd')
+               and $this->registerHook('displayAdminOrderLeft');
+    }
+
+    /**
+     * Disables the hooks that this module wants to respond to.
+     *
+     * @return bool
+     */
+    public function unregisterHooks()
+    {
+        return $this->registerHook('actionOrderHistoryAddAfter')
+               and $this->registerHook('actionOrderSlipAdd')
+               and $this->registerHook('displayAdminOrderLeft');
+    }
+
+    /**
      * Adds menu-items.
      *
      * - Proudly copied from gamification.
@@ -189,7 +219,7 @@ class Acumulus extends Module
         $this->init();
 
         // Add the batch form.
-        $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\BatchFormTranslations());
+        $this->container->getTranslator()->add(new BatchFormTranslations());
         $tab = new Tab();
         $tab->active = true;
         $tab->class_name = 'AdminAcumulusBatch';
@@ -203,7 +233,7 @@ class Acumulus extends Module
         $result1 = (bool) $tab->add();
 
         // Add the advanced config form.
-        $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\ConfigFormTranslations());
+        $this->container->getTranslator()->add(new ConfigFormTranslations());
         $tab = new Tab();
         $tab->active = true;
         $tab->class_name = 'AdminAcumulusAdvanced';
@@ -221,7 +251,7 @@ class Acumulus extends Module
         $result2 = (bool) $tab->add();
 
         // Add the register form.
-        $this->container->getTranslator()->add(new \Siel\Acumulus\Shop\RegisterFormTranslations());
+        $this->container->getTranslator()->add(new RegisterFormTranslations());
         $tab = new Tab();
         $tab->active = false;
         $tab->class_name = 'AdminAcumulusRegister';
@@ -238,7 +268,25 @@ class Acumulus extends Module
         $tab->position = 1002;
         $result3 = (bool) $tab->add();
 
-        return $result1 && $result2 && $result3;
+        // Add the invoice form.
+        $this->container->getTranslator()->add(new InvoiceStatusFormTranslations());
+        $tab = new Tab();
+        $tab->active = false;
+        $tab->class_name = 'AdminAcumulusInvoice';
+        $tab->name = array();
+        foreach (Language::getLanguages(true) as $lang) {
+            $tab->name[$lang['id_lang']] = $this->t('invoice_form_header');
+        }
+        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
+        if ($tab->id_parent === 0) {
+            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
+        }
+        $tab->module = $this->name;
+        $tab->position = 1003;
+        $result4 = (bool) $tab->add();
+
+        return $result1 && $result2 && $result3 && $result4;
     }
 
     /** @noinspection PhpDocMissingThrowsInspection */
@@ -247,6 +295,8 @@ class Acumulus extends Module
      *
      * - Proudly copied from gamification.
      * - Public so it can be called by update functions.
+     * - Returns true as to not worry users about messages that PS could not
+     *   deactivate this module.
      *
      * @return bool
      */
@@ -276,6 +326,14 @@ class Acumulus extends Module
             $tab->delete();
         }
 
+        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusInvoice');
+        if ($id_tab) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $tab = new Tab($id_tab);
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $tab->delete();
+        }
+
         return true;
     }
 
@@ -286,11 +344,6 @@ class Acumulus extends Module
      */
     public function getContent()
     {
-        // Add some styling in PS 1.5.
-        if (version_compare(_PS_VERSION_, 1.6, '<')) {
-            $this->context->controller->addCSS($this->_path . 'views/css/config-form.css');
-        }
-
         $form = $this->getAcumulusContainer()->getForm('config');
         $output = '';
         $output .= $this->processForm($form);
@@ -306,7 +359,7 @@ class Acumulus extends Module
      * @return string
      *   Any output from the processing stage that has to be rendered: messages.
      */
-    protected function processForm(Siel\Acumulus\Helpers\Form $form)
+    protected function processForm(Form $form)
     {
         $output = '';
         $form->process();
@@ -344,8 +397,10 @@ class Acumulus extends Module
      * @return string
      *   The rendered form HTML.
      */
-    protected function renderForm(Siel\Acumulus\Helpers\Form $form)
+    protected function renderForm(Form $form)
     {
+        $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
+
         // Create and initialize form helper.
         $helper = new HelperForm();
 
@@ -363,26 +418,33 @@ class Acumulus extends Module
         $helper->default_form_language = $default_lang;
         $helper->allow_employee_form_lang = $default_lang;
 
-        // Title and toolbar.
         $helper->title = $this->displayName;
-        $helper->show_toolbar = true; // false -> remove toolbar
-        $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
-        $helper->submit_action = 'submit' . $this->name;
-
         /** @noinspection PhpUndefinedFieldInspection */
         $helper->multiple_fieldsets = true;
         $formMapper = $this->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
-        $fields_form['formSubmit']['form'] = array(
-            'legend' => array(
-                'title' => $this->t("button_submit_{$form->getType()}"),
-                'icon' => 'icon-save',
-            ),
-            'submit' => array(
-              'title' => $this->t("button_submit_{$form->getType()}"),
-            )
-        );
-        $helper->show_cancel_button = true;
+
+        if ($form->needsFormAndSubmitButton()) {
+            // Title and toolbar.
+            $helper->show_toolbar = true; // false -> remove toolbar
+            $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
+            $helper->submit_action = 'submit' . $this->name;
+
+            $fields_form['formSubmit']['form'] = array(
+                'legend' => array(
+                    'title' => $this->t("button_submit_{$form->getType()}"),
+                    'icon' => 'icon-save',
+                ),
+                'submit' => array(
+                    'title' => $this->t("button_submit_{$form->getType()}"),
+                )
+            );
+            $helper->show_cancel_button = true;
+        } else {
+            $helper->show_toolbar = false; // false -> remove toolbar
+            $helper->show_cancel_button = false;
+            $helper->multiple_fieldsets = true;
+        }
         $helper->tpl_vars = array(
             'fields_value' => $form->getFormValues(),
             'languages' => $this->context->controller->getLanguages(),
@@ -405,8 +467,7 @@ class Acumulus extends Module
     public function hookactionOrderHistoryAddAfter(array $params)
     {
         $this->init();
-        $type = \Siel\Acumulus\PrestaShop\Invoice\Source::Order;
-        $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $params['order_history']->id_order);
+        $source = $this->container->getSource(Source::Order, $params['order_history']->id_order);
         $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
         return true;
     }
@@ -438,10 +499,45 @@ class Acumulus extends Module
                 $newestOrderSlip = $orderSlip;
             }
         }
-        $type = \Siel\Acumulus\PrestaShop\Invoice\Source::CreditNote;
-        $source = new \Siel\Acumulus\PrestaShop\Invoice\Source($type, $newestOrderSlip);
+        $source = $this->container->getSource(Source::CreditNote, $newestOrderSlip);
         $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
         return true;
+    }
+
+    /**
+     * Hook displayAdminOrderLeft.
+     *
+     * @param array $params
+     *   Array with the following entries:
+     *   - id_order: Order id
+     *
+     * @return string
+     *   The html we want to be output on the order details screen.
+     *
+     * @noinspection PhpUnused
+     */
+    public function hookDisplayAdminOrderLeft(array $params)
+    {
+        $this->init();
+        $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
+        $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
+        $orderId = $params['id_order'];
+        // Create form to already load form translations and to set the Source.
+        /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
+        $form = $this->getAcumulusContainer()->getForm('invoice');
+        $source = $this->container->getSource(Source::Order, $orderId);
+        $form->setSource($source);
+        $formRenderer = $this->getAcumulusContainer()->getFormRenderer();
+
+        $id = 'acumulus-' . $form->getType();
+        $wait = $this->t('wait');
+        $url = $this->getAcumulusContainer()->getShopCapabilities()->getLink('invoice');
+        $output = '';
+        $output .= "<form method='POST' action='$url' id='$id' class='form-horizontal acumulus-area' data-acumulus-wait='$wait'>";
+        $output .= $formRenderer->render($form);
+        $output .= '</form>';
+
+        return $output;
     }
 
     /**

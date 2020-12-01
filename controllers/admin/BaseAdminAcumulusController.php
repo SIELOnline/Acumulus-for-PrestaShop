@@ -14,11 +14,12 @@ use Siel\Acumulus\Helpers\Message;
  * BaseAdminAcumulusBatchController provides shared controller functionality.
  *
  * Proudly copied from AdminPreferencesController.
+ *
+ * Specify more specific type for property $module:
+ * @property Acumulus $module
  */
-class BaseAdminAcumulusController extends AdminController
+class BaseAdminAcumulusController extends ModuleAdminController
 {
-    /** @var Acumulus */
-    protected $module = null;
 
     /**
      * The form type.
@@ -41,13 +42,10 @@ class BaseAdminAcumulusController extends AdminController
         $this->display = 'add';
         $this->bootstrap = true;
 
-        // Initialization.
-        require_once(dirname(__FILE__) . '/../../acumulus.php');
-        $this->module = new Acumulus();
+        parent::__construct();
+
         // Initializes the translations.
         $this->getForm();
-
-        parent::__construct();
     }
 
     /**
@@ -95,34 +93,36 @@ class BaseAdminAcumulusController extends AdminController
      */
     public function renderForm()
     {
-        if ($this->formType === 'register') {
-            Context::getContext()->controller->addCSS( __PS_BASE_URI__ . 'modules/acumulus/views/css/register-form.css');
-        }
         $this->show_form_cancel_button = true;
         $this->multiple_fieldsets = true;
         $form = $this->getForm();
+        if (!$this->ajax) {
+            Context::getContext()->controller->addCSS(__PS_BASE_URI__ . 'modules/acumulus/views/css/acumulus.css');
+        }
         $formMapper = $this->module->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
-        if ($this->formType === 'batch') {
-            // On the batch form we place the send button before the extended
-            // help fieldset.
-            reset($fields_form);
-        } else {
-            // On other forms we place it in the last fieldset.
-            end($fields_form);
+        if ($form->needsFormAndSubmitButton()) {
+            if ($this->formType === 'batch') {
+                // On the batch form we place the send button before the extended
+                // help fieldset.
+                reset($fields_form);
+            } else {
+                // On other forms we place it in the last fieldset.
+                end($fields_form);
+            }
+            $key = key($fields_form);
+            $fields_form[$key]['form']['submit'] = array(
+                'title' => $this->t("button_submit_{$this->formType}"),
+                'icon' => $this->icon,
+            );
         }
-        $key = key($fields_form);
-        $fields_form[$key]['form']['submit'] = array(
-            'title' => $this->t("button_submit_{$this->formType}"),
-            'icon' => $this->icon,
-        );
         $this->fields_form = $fields_form;
 
         return parent::renderForm();
     }
 
     /**
-     * Processes the form (if it was submitted).
+     * Processes the form (it was submitted).
      */
     public function processSave()
     {
