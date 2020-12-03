@@ -19,6 +19,7 @@ use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
 use Siel\Acumulus\Shop\RegisterFormTranslations;
+use Siel\Acumulus\Shop\InvoiceStatusForm;
 use Siel\Acumulus\Shop\InvoiceStatusFormTranslations;
 
 /**
@@ -424,7 +425,7 @@ class Acumulus extends Module
         $formMapper = $this->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
 
-        if ($form->needsFormAndSubmitButton()) {
+        if ($form->isFullPage()) {
             // Title and toolbar.
             $helper->show_toolbar = true; // false -> remove toolbar
             $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
@@ -521,22 +522,38 @@ class Acumulus extends Module
         $this->init();
         $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
         $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
-        $orderId = $params['id_order'];
+
         // Create form to already load form translations and to set the Source.
         /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
         $form = $this->getAcumulusContainer()->getForm('invoice');
+        $orderId = $params['id_order'];
         $source = $this->container->getSource(Source::Order, $orderId);
         $form->setSource($source);
-        $formRenderer = $this->getAcumulusContainer()->getFormRenderer();
 
+        return $this->renderFormInvoice($form);
+    }
+
+    /**
+     * Renders the form.
+     *
+     * This method is called by eithe hookDisplayAdminOrderLeft() or by the
+     * AdminAcumulusInvoiceController and should return the rendered form.
+     *
+     * @param \Siel\Acumulus\Shop\InvoiceStatusForm $form
+     *
+     * @return string
+     *   The rendered form.
+     */
+    public function renderFormInvoice(InvoiceStatusForm $form)
+    {
         $id = 'acumulus-' . $form->getType();
-        $wait = $this->t('wait');
         $url = $this->getAcumulusContainer()->getShopCapabilities()->getLink('invoice');
+        $wait = $this->t('wait');
+        $formRenderer = $this->getAcumulusContainer()->getFormRenderer();
         $output = '';
         $output .= "<form method='POST' action='$url' id='$id' class='form-horizontal acumulus-area' data-acumulus-wait='$wait'>";
         $output .= $formRenderer->render($form);
         $output .= '</form>';
-
         return $output;
     }
 

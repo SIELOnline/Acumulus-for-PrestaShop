@@ -101,7 +101,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
         }
         $formMapper = $this->module->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
-        if ($form->needsFormAndSubmitButton()) {
+        if ($form->isFullPage()) {
             if ($this->formType === 'batch') {
                 // On the batch form we place the send button before the extended
                 // help fieldset.

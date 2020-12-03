@@ -47,7 +47,8 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
         } else {
             $this->jsonError('Error: No area parameter in ajax request for Acumulus.');
         }
-        $this->json = true;
+        // We do not use the json feature of PS as it gives numerous warnings.
+//        $this->json = true;
         header('Content-Type: application/json;charset=utf-8');
         return true;
     }
@@ -65,15 +66,8 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
      */
     public function renderForm()
     {
-        $id = 'acumulus-' . $this->getForm()->getType();
-        $url = $this->module->getAcumulusContainer()->getShopCapabilities()->getLink('invoice');
-        $wait = $this->t('wait');
-        $formRenderer = $this->module->getAcumulusContainer()->getFormRenderer();
-        $output = '';
-        $output .= "<form method='POST' action='$url' id='$id' class='form-horizontal acumulus-area' data-acumulus-wait='$wait'>";
-        $output .= $formRenderer->render($this->getForm());
-        $output .= '</form>';
-        return $output;
+        /** @noinspection PhpParamsInspection */
+        return $this->module->renderFormInvoice($this->getForm());
     }
 
     /**
@@ -94,7 +88,13 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
             }
             $this->context->smarty->assign($type, array_unique($this->$type));
         }
-        parent::smartyOutputContent($templates);
+
+        // Below is a simplified version of parent::smartyOutputContent();
+        // The json_encode() was added.
+        $html = '';
+        $html .= $this->context->smarty->fetch($templates, null, $this->getLayout());
+        $html = json_encode(['content' => $html]);
+        echo trim($html);
     }
 
 
