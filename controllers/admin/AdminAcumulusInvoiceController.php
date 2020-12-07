@@ -47,7 +47,7 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
         } else {
             $this->jsonError('Error: No area parameter in ajax request for Acumulus.');
         }
-        // We do not use the json feature of PS as it gives numerous warnings.
+        // We do not use the json feature of PS as it gives several warnings.
 //        $this->json = true;
         header('Content-Type: application/json;charset=utf-8');
         return true;

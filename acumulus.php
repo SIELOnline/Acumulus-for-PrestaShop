@@ -40,7 +40,7 @@ class Acumulus extends Module
     protected $container = null;
 
     /** @var string */
-    protected $confirmUninstall;
+    protected $confirmUninstallMsg;
 
     public function __construct()
     {
@@ -69,7 +69,7 @@ class Acumulus extends Module
 
         $this->displayName = $this->l('Acumulus');
         $this->description = $this->l('Module that sends invoice data for your orders and refunds to your online Acumulus administration.');
-        $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
+        $this->confirmUninstallMsg = $this->l('Are you sure you want to uninstall?');
     }
 
     /**
@@ -131,7 +131,7 @@ class Acumulus extends Module
     public function uninstall()
     {
         $this->init();
-        $this->confirmUninstall = $this->t('message_uninstall');
+        $this->confirmUninstallMsg = $this->t('message_uninstall');
 
         // Delete our config values
         foreach ($this->getAcumulusContainer()->getConfig()->getKeys() as $key) {
