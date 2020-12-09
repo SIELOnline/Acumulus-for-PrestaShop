@@ -401,6 +401,7 @@ class Acumulus extends Module
     protected function renderForm(Form $form)
     {
         $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
+        $this->context->controller->addJS($this->_path . 'views/js/acumulus.js');
 
         // Create and initialize form helper.
         $helper = new HelperForm();
@@ -520,17 +521,20 @@ class Acumulus extends Module
     public function hookDisplayAdminOrderLeft(array $params)
     {
         $this->init();
-        $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
-        $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
+        if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
+            $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
+            $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
 
-        // Create form to already load form translations and to set the Source.
-        /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
-        $form = $this->getAcumulusContainer()->getForm('invoice');
-        $orderId = $params['id_order'];
-        $source = $this->container->getSource(Source::Order, $orderId);
-        $form->setSource($source);
+            // Create form to already load form translations and to set the Source.
+            /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
+            $form = $this->getAcumulusContainer()->getForm('invoice');
+            $orderId = $params['id_order'];
+            $source = $this->container->getSource(Source::Order, $orderId);
+            $form->setSource($source);
 
-        return $this->renderFormInvoice($form);
+            return $this->renderFormInvoice($form);
+        }
+        return '';
     }
 
     /**

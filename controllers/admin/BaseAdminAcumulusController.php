@@ -98,6 +98,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
         $form = $this->getForm();
         if (!$this->ajax) {
             Context::getContext()->controller->addCSS(__PS_BASE_URI__ . 'modules/acumulus/views/css/acumulus.css');
+            $this->context->controller->addJS(__PS_BASE_URI__ . 'modules/acumulus/views/js/acumulus.js');
         }
         $formMapper = $this->module->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);

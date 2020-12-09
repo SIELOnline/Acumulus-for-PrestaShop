@@ -3,6 +3,12 @@
  * @copyright SIEL BV, https://www.siel.nl/acumulus/
  * @license   GPL v3, see license.txt
  */
+.panel-heading span {
+  display: inline-block;
+  font-size: smaller;
+  text-transform: none;
+  padding-left: 1em;
+}
 
 .acumulus-version-info {
   font-size: larger;
