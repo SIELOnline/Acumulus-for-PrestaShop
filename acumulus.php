@@ -1,10 +1,8 @@
 <?php
-/** @noinspection PhpUndefinedClassInspection */
-/** @noinspection PhpMissingParamTypeInspection */
-/** @noinspection PhpMissingReturnTypeInspection */
-
 /**
- * @noinspection PhpFullyQualifiedNameUsageInspection
+ * @noinspection PhpUndefinedClassInspection
+ * @noinspection PhpMissingParamTypeInspection
+ * @noinspection PhpMissingReturnTypeInspection
  *
  * @author    Buro RaDer, https://burorader.com/
  * @copyright SIEL BV, https://www.siel.nl/acumulus/
@@ -54,14 +52,13 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '6.0.4';
+        $this->version = '6.1.0';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
         $this->dependencies = array();
-        /** @noinspection PhpUndefinedFieldInspection */
         $this->bootstrap = true;
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
 
