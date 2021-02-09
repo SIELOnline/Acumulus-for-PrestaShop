@@ -52,12 +52,12 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '6.1.2';
+        $this->version = '6.2.0';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.9');
+        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.9');
         $this->dependencies = array();
         $this->bootstrap = true;
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
@@ -210,10 +210,12 @@ class Acumulus extends Module
      * - Public so it can be called by update functions.
      *
      * @return bool
+     *
+     * @noinspection PhpDeprecationInspection Tab::getIdFromClassName() is
+     *   deprecated.
      */
     public function installTabs()
     {
-
         $this->init();
 
         // Add the batch form.
@@ -228,7 +230,25 @@ class Acumulus extends Module
         $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
         $tab->module = $this->name;
         $tab->position = 1001;
-        $result1 = (bool) $tab->add();
+        $result1 = $tab->add();
+
+        // Add the config form.
+        $this->container->getTranslator()->add(new ConfigFormTranslations());
+        $tab = new Tab();
+        $tab->active = true;
+        $tab->class_name = 'AdminAcumulusConfig';
+        $tab->name = array();
+        foreach (Language::getLanguages(true) as $lang) {
+            $tab->name[$lang['id_lang']] = $this->t('config_form_header');
+        }
+        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
+        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
+        if ($tab->id_parent === 0) {
+            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
+        }
+        $tab->module = $this->name;
+        $tab->position = 1001;
+        $result2 = $tab->add();
 
         // Add the advanced config form.
         $this->container->getTranslator()->add(new ConfigFormTranslations());
@@ -245,8 +265,8 @@ class Acumulus extends Module
             $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
         }
         $tab->module = $this->name;
-        $tab->position = 1001;
-        $result2 = (bool) $tab->add();
+        $tab->position = 1002;
+        $result3 = $tab->add();
 
         // Add the register form.
         $this->container->getTranslator()->add(new RegisterFormTranslations());
@@ -263,8 +283,8 @@ class Acumulus extends Module
             $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
         }
         $tab->module = $this->name;
-        $tab->position = 1002;
-        $result3 = (bool) $tab->add();
+        $tab->position = 1003;
+        $result4 = $tab->add();
 
         // Add the invoice form.
         $this->container->getTranslator()->add(new InvoiceStatusFormTranslations());
@@ -281,13 +301,12 @@ class Acumulus extends Module
             $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
         }
         $tab->module = $this->name;
-        $tab->position = 1003;
-        $result4 = (bool) $tab->add();
+        $tab->position = 1004;
+        $result5 = $tab->add();
 
-        return $result1 && $result2 && $result3 && $result4;
+        return $result1 && $result2 && $result3 && $result4 && $result5;
     }
 
-    /** @noinspection PhpDocMissingThrowsInspection */
     /**
      * Removes menu-items.
      *
@@ -297,10 +316,20 @@ class Acumulus extends Module
      *   deactivate this module.
      *
      * @return bool
+     *
+     * @noinspection PhpDeprecationInspection Tab::getIdFromClassName() is deprecated.
      */
     public function uninstallTabs()
     {
         $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusBatch');
+        if ($id_tab) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $tab = new Tab($id_tab);
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $tab->delete();
+        }
+
+        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusConfig');
         if ($id_tab) {
             /** @noinspection PhpUnhandledExceptionInspection */
             $tab = new Tab($id_tab);
