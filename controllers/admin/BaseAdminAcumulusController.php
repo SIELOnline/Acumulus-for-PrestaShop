@@ -89,7 +89,8 @@ class BaseAdminAcumulusController extends ModuleAdminController
      *
      * @return string
      *   The rendered form.
-     * @throws \SmartyException
+     *
+     * @throws \Exception
      */
     public function renderForm()
     {
