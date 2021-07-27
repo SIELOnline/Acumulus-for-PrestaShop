@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection AutoloadingIssuesInspection */
+
 /**
  * @noinspection PhpUndefinedClassInspection
  * @noinspection PhpMissingParamTypeInspection
@@ -35,7 +36,7 @@ class Acumulus extends Module
     protected $options = array();
 
     /** @var \Siel\Acumulus\Helpers\Container */
-    protected $container = null;
+    protected $container;
 
     /** @var string */
     protected $confirmUninstallMsg;
@@ -52,7 +53,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '6.3.0';
+        $this->version = '6.3.1';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -91,7 +92,7 @@ class Acumulus extends Module
     {
         if ($this->container === null) {
             // Load autoloader
-            require_once(dirname(__FILE__) . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
+            require_once(__DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
             SielAcumulusAutoloader::register();
 
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
@@ -318,6 +319,7 @@ class Acumulus extends Module
      * @return bool
      *
      * @noinspection PhpDeprecationInspection Tab::getIdFromClassName() is deprecated.
+     * @noinspection PhpDocMissingThrowsInspection
      */
     public function uninstallTabs()
     {
