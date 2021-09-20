@@ -53,7 +53,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '6.3.1';
+        $this->version = '6.3.2';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -187,9 +187,26 @@ class Acumulus extends Module
      */
     public function registerHooks()
     {
-        return $this->registerHook('actionOrderHistoryAddAfter')
-               and $this->registerHook('actionOrderSlipAdd')
-               and $this->registerHook('displayAdminOrderLeft');
+        $hooks = [
+            'actionOrderHistoryAddAfter',
+            'actionOrderSlipAdd',
+            'actionAdminControllerSetMedia',
+        ];
+        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+            $hooks = array_merge($hooks, [
+                'displayAdminOrderTabLink',
+                'displayAdminOrderTabContent',
+            ]);
+        } else {
+            $hooks = array_merge($hooks, [
+                'displayAdminOrderLeft',
+            ]);
+        }
+        $result = true;
+        foreach ($hooks as $hook) {
+            $result = $this->registerHook($hook) and $result;
+        }
+        return $result;
     }
 
     /**
@@ -199,9 +216,18 @@ class Acumulus extends Module
      */
     public function unregisterHooks()
     {
-        return $this->registerHook('actionOrderHistoryAddAfter')
-               and $this->registerHook('actionOrderSlipAdd')
-               and $this->registerHook('displayAdminOrderLeft');
+        $hooks = [
+            'actionOrderHistoryAddAfter',
+            'actionOrderSlipAdd',
+            'actionAdminControllerSetMedia',
+            'displayAdminOrderTabLink',
+            'displayAdminOrderTabContent',
+            'displayAdminOrderLeft',
+        ];
+        foreach ($hooks as $hook) {
+            $this->unregisterHook($hook);
+        }
+        return true;
     }
 
     /**
@@ -535,7 +561,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Hook displayAdminOrderLeft.
+     * Hook displayAdminOrderLeft. Deprecated in 1.7.7.0
      *
      * @param array $params
      *   Array with the following entries:
@@ -548,10 +574,75 @@ class Acumulus extends Module
      */
     public function hookDisplayAdminOrderLeft(array $params)
     {
+        return $this->hookDisplayAdminOrderTabContent($params);
+    }
+
+    /**
+     * Hook actionAdminControllerSetMedia
+     *
+     * This hook gets called on the order overview and order detail page when we
+     * can till add css and js. However, using the context, values or set of
+     * parameters, it is not possible to distinguish which type of page is
+     * actually rendered.
+     *
+     * We only want to add css and js to the order detail page, but the order
+     * overview page also gets our css and js loaded. It is as it is.
+     */
+    public function hookActionAdminControllerSetMedia()
+    {
+        $controller = Tools::getValue('controller');
+        if ($controller === 'AdminOrders') {
+            if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+                $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
+            } else {
+                $this->context->controller->addCSS($this->_path . 'views/css/acumulus-176-.css');
+            }
+            $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
+        }
+    }
+
+    /**
+     * Hook displayAdminOrderTabContent. Since 1.7.7.0
+     *
+     * {@see https://devdocs.prestashop.com/1.7/modules/core-updates/img/order-view-page-hooks.jpg}
+     *
+     * @param array $params
+     *   Array with the following entries:
+     *   - id_order: Order id
+     *
+     * @return string
+     *   The html we want to be output on the order details screen.
+     *
+     * @noinspection PhpUnused
+     */
+    public function hookDisplayAdminOrderTabLink(array $params)
+    {
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
-            $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
-            $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
+            return '<li class="nav-item"><a class="nav-link" id="orderAcumulusTab" data-toggle="tab" href="#orderAcumulusTabContent" role="tab" aria-controls="orderAcumulusTabContent" aria-expanded="true" aria-selected="false">
+                    <i class="icon-acumulus"></i>Acumulus</a></li>';
+        }
+        return '';
+    }
+
+    /**
+     * Hook displayAdminOrderTabContent. Since 1.7.7.0
+     *
+     * {@see https://devdocs.prestashop.com/1.7/modules/core-updates/img/order-view-page-hooks.jpg}
+     *
+     * @param array $params
+     *   Array with the following entries:
+     *   - id_order: Order id
+     *
+     * @return string
+     *   The html we want to be output on the order details screen.
+     *
+     * @noinspection PhpUnused
+     */
+    public function hookDisplayAdminOrderTabContent(array $params)
+    {
+        $this->init();
+        if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
 
             // Create form to already load form translations and to set the Source.
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
@@ -568,7 +659,7 @@ class Acumulus extends Module
     /**
      * Renders the form.
      *
-     * This method is called by eithe hookDisplayAdminOrderLeft() or by the
+     * This method is called by either hookDisplayAdminOrderLeft() or by the
      * AdminAcumulusInvoiceController and should return the rendered form.
      *
      * @param \Siel\Acumulus\Shop\InvoiceStatusForm $form

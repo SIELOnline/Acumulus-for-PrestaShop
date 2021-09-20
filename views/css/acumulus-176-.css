@@ -25,30 +25,18 @@
 /*
  * Invoice status overview.
  */
-#orderAcumulusTab {
-  padding-left: 50px;
+#acumulus-invoice .panel .panel-heading {
+  padding-left: 32px;
 }
 
 .icon-acumulus {
   position: absolute;
-  top: 14px;
-  left: 18px;
+  left: 0;
   background-image: url("../img/siel-logo.svg");
   background-size: 100%;
+  display: block;
   width: 32px;
   height: 32px;
-}
-
-#acumulus-invoice {
-  margin-left: -15px;
-}
-
-#acumulus-invoice .form-group {
-  display: flex;
-}
-
-#acumulus-invoice .form-group label {
-  flex: 0 0 15%;
 }
 
 #acumulus-invoice .notice-info {

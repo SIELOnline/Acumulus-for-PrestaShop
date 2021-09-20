@@ -1,9 +1,9 @@
 "use strict";
 (function($) {
-  function addAcumulusAjaxHandling() {
+  function addAcumulusAjaxHandling(elt) {
     const buttonSelector = "button, input[type=button], input[type=submit]";
     $(buttonSelector, ".acumulus-area").addClass("btn btn-primary"); // jQuery
-    $(".acumulus-ajax").click(function() { // jQuery
+    $(".acumulus-ajax", elt).click(function() { // jQuery
       // Area is the element that is going to be replaced and serves as the
       // parent in which we will search for form elements.
       const clickedElt = this;
@@ -39,14 +39,15 @@
       // Send the ajax request.
       $.post(ajaxUrl, data, function(response) { // jQuery
         area.insertAdjacentHTML('beforebegin', response.content);
+        const newArea = area.previousElementSibling;
         area.parentNode.removeChild(area);
-        addAcumulusAjaxHandling();
+        addAcumulusAjaxHandling(newArea);
       });
     });
   }
 
   $(document).ready(function() { // jQuery
-    addAcumulusAjaxHandling();
+    addAcumulusAjaxHandling(document);
     $(".acumulus-auto-click").click(); // jQuery
   });
 }(jQuery));
