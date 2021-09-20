@@ -15,12 +15,12 @@
  */
 function upgrade_module_6_1_0($object)
 {
-    // Update tabs, ignore errors on uninstallTAbs() as that removes not yet
+    // Update tabs, ignore errors on uninstallTabs() as that removes not yet
     // registered tabs.
     $result1 = $object->uninstallTabs();
     $result2 = $object->installTabs();
-    // Update hooks, ignore errors on unregisterHooks() as that removes not yet
-    // registered hooks.
+    // Update hooks, ignore errors on unregisterHooks() as that removes
+    // non-registered hooks.
     $result3 = $object->unregisterHooks();
     $result4 = $object->registerHooks();
     return $result2 && $result4;
