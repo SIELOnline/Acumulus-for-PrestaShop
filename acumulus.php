@@ -53,7 +53,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '6.3.2';
+        $this->version = '6.3.7';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
