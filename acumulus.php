@@ -1,15 +1,18 @@
-<?php /** @noinspection AutoloadingIssuesInspection */
-
+<?php
 /**
  * @noinspection PhpUndefinedClassInspection
  * @noinspection PhpMissingParamTypeInspection
  * @noinspection PhpMissingReturnTypeInspection
+ * @noinspection PhpConcatenationWithEmptyStringCanBeInlinedInspection
+ * @noinspection AutoloadingIssuesInspection
  *
  * @author    Buro RaDer, https://burorader.com/
  * @copyright SIEL BV, https://www.siel.nl/acumulus/
  * @license   GPL v3, see license.txt
  */
 
+use Doctrine\ORM\EntityManagerInterface;
+use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
@@ -20,6 +23,8 @@ use Siel\Acumulus\Shop\ConfigFormTranslations;
 use Siel\Acumulus\Shop\RegisterFormTranslations;
 use Siel\Acumulus\Shop\InvoiceStatusForm;
 use Siel\Acumulus\Shop\InvoiceStatusFormTranslations;
+
+use const Siel\Acumulus\Version;
 
 /**
  * Acumulus defines a PrestaShop module that can interact with the Acumulus
@@ -36,7 +41,7 @@ class Acumulus extends Module
     protected $options = array();
 
     /** @var \Siel\Acumulus\Helpers\Container */
-    protected $container;
+    protected $acumulusContainer;
 
     /** @var string */
     protected $confirmUninstallMsg;
@@ -82,7 +87,7 @@ class Acumulus extends Module
      */
     protected function t($key)
     {
-        return $this->container->getTranslator()->get($key);
+        return $this->getAcumulusContainer()->getTranslator()->get($key);
     }
 
     /**
@@ -90,13 +95,13 @@ class Acumulus extends Module
      */
     protected function init()
     {
-        if ($this->container === null) {
+        if ($this->acumulusContainer === null) {
             // Load autoloader
             require_once(__DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
             SielAcumulusAutoloader::register();
 
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-            $this->container = new Container('PrestaShop', $languageCode);
+            $this->acumulusContainer = new Container('PrestaShop', $languageCode);
 
             $this->displayName = $this->t('module_name');
             $this->description = $this->t('module_description');
@@ -109,7 +114,7 @@ class Acumulus extends Module
     public function getAcumulusContainer()
     {
         $this->init();
-        return $this->container;
+        return $this->acumulusContainer;
     }
 
     /**
@@ -120,7 +125,8 @@ class Acumulus extends Module
         $this->init();
         return $this->checkRequirements()
           and parent::install()
-          and $this->createTables();
+          and $this->createTables()
+          and $this->initConfig();
     }
 
     /**
@@ -168,7 +174,7 @@ class Acumulus extends Module
      */
     protected function checkRequirements()
     {
-        $requirements = $this->container->getRequirements();
+        $requirements = $this->getAcumulusContainer()->getRequirements();
         $messages = $requirements->check();
         foreach ($messages as $key => $message) {
             $translatedMessage = $this->t($key);
@@ -204,7 +210,7 @@ class Acumulus extends Module
         }
         $result = true;
         foreach ($hooks as $hook) {
-            $result = $this->registerHook($hook) and $result;
+            $result = $this->registerHook($hook) && $result;
         }
         return $result;
     }
@@ -232,106 +238,118 @@ class Acumulus extends Module
 
     /**
      * Adds menu-items.
-     *
      * - Proudly copied from gamification.
      * - Public so it can be called by update functions.
      *
      * @return bool
+     *   Success.
      *
-     * @noinspection PhpDeprecationInspection Tab::getIdFromClassName() is
-     *   deprecated.
+     * @noinspection PhpRedundantCatchClauseInspection
      */
     public function installTabs()
     {
-        $this->init();
+        try {
+            /** @var EntityManagerInterface $entityManager */
+            $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
+            /** @var \PrestaShopBundle\Entity\Repository\TabRepository $tabRepository */
+            $tabRepository = $entityManager->getRepository(\PrestaShopBundle\Entity\Tab::class);
+            $id_orders_parent = $tabRepository->findOneIdByClassName('AdminParentOrders');
+            $id_settings_parent = $tabRepository->findOneIdByClassName('AdminAdvancedParameters');
 
-        // Add the batch form.
-        $this->container->getTranslator()->add(new BatchFormTranslations());
-        $tab = new Tab();
-        $tab->active = true;
-        $tab->class_name = 'AdminAcumulusBatch';
-        $tab->name = array();
-        foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = $this->t('batch_form_header');
-        }
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminParentOrders');
-        $tab->module = $this->name;
-        $tab->position = 1001;
-        $result1 = $tab->add();
+            // Add the batch form.
+            $this->getAcumulusContainer()->getTranslator()->add(new BatchFormTranslations());
+            $tab = new Tab();
+            $tab->active = true;
+            $tab->class_name = 'AdminAcumulusBatch';
+            $tab->name = array();
+            foreach (Language::getLanguages(true) as $lang) {
+                $tab->name[$lang['id_lang']] = $this->t('batch_form_header');
+            }
+            $tab->id_parent = $id_orders_parent;
+            $tab->module = $this->name;
+            $tab->position = 1001;
+            try {
+                $result1 = $tab->add();
+            } catch (PrestaShopException $e) {
+                $result1 = false;
+            }
 
-        // Add the config form.
-        $this->container->getTranslator()->add(new ConfigFormTranslations());
-        $tab = new Tab();
-        $tab->active = true;
-        $tab->class_name = 'AdminAcumulusConfig';
-        $tab->name = array();
-        foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = $this->t('config_form_header');
-        }
-        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
-        if ($tab->id_parent === 0) {
-            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
-        }
-        $tab->module = $this->name;
-        $tab->position = 1001;
-        $result2 = $tab->add();
+            // Add the config form.
+            $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
+            $tab = new Tab();
+            $tab->active = true;
+            $tab->class_name = 'AdminAcumulusConfig';
+            $tab->name = array();
+            foreach (Language::getLanguages(true) as $lang) {
+                $tab->name[$lang['id_lang']] = $this->t('config_form_header');
+            }
+            $tab->id_parent = $id_settings_parent;
+            $tab->module = $this->name;
+            $tab->position = 1001;
+            try {
+                $result2 = $tab->add();
+            } catch (PrestaShopException $e) {
+                $result2 = false;
+            }
 
-        // Add the advanced config form.
-        $this->container->getTranslator()->add(new ConfigFormTranslations());
-        $tab = new Tab();
-        $tab->active = true;
-        $tab->class_name = 'AdminAcumulusAdvanced';
-        $tab->name = array();
-        foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = $this->t('advanced_form_header');
-        }
-        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
-        if ($tab->id_parent === 0) {
-            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
-        }
-        $tab->module = $this->name;
-        $tab->position = 1002;
-        $result3 = $tab->add();
+            // Add the advanced config form.
+            $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
+            $tab = new Tab();
+            $tab->active = true;
+            $tab->class_name = 'AdminAcumulusAdvanced';
+            $tab->name = array();
+            foreach (Language::getLanguages(true) as $lang) {
+                $tab->name[$lang['id_lang']] = $this->t('advanced_form_header');
+            }
+            $tab->id_parent = $id_settings_parent;
+            $tab->module = $this->name;
+            $tab->position = 1002;
+            try {
+                $result3 = $tab->add();
+            } catch (PrestaShopException $e) {
+                $result3 = false;
+            }
 
-        // Add the register form.
-        $this->container->getTranslator()->add(new RegisterFormTranslations());
-        $tab = new Tab();
-        $tab->active = false;
-        $tab->class_name = 'AdminAcumulusRegister';
-        $tab->name = array();
-        foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = $this->t('register_form_header');
-        }
-        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
-        if ($tab->id_parent === 0) {
-            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
-        }
-        $tab->module = $this->name;
-        $tab->position = 1003;
-        $result4 = $tab->add();
+            // Add the register form.
+            $this->getAcumulusContainer()->getTranslator()->add(new RegisterFormTranslations());
+            $tab = new Tab();
+            $tab->active = false;
+            $tab->class_name = 'AdminAcumulusRegister';
+            $tab->name = array();
+            foreach (Language::getLanguages(true) as $lang) {
+                $tab->name[$lang['id_lang']] = $this->t('register_form_header');
+            }
+            $tab->id_parent = $id_settings_parent;
+            $tab->module = $this->name;
+            $tab->position = 1003;
+            try {
+                $result4 = $tab->add();
+            } catch (PrestaShopException $e) {
+                $result4 = false;
+            }
 
-        // Add the invoice form.
-        $this->container->getTranslator()->add(new InvoiceStatusFormTranslations());
-        $tab = new Tab();
-        $tab->active = false;
-        $tab->class_name = 'AdminAcumulusInvoice';
-        $tab->name = array();
-        foreach (Language::getLanguages(true) as $lang) {
-            $tab->name[$lang['id_lang']] = $this->t('invoice_form_header');
-        }
-        // Tab 'AdminAdvancedParameters' exists as of 1.7, check result.
-        $tab->id_parent = (int) Tab::getIdFromClassName('AdminAdvancedParameters');
-        if ($tab->id_parent === 0) {
-            $tab->id_parent = (int) Tab::getIdFromClassName('AdminTools');
-        }
-        $tab->module = $this->name;
-        $tab->position = 1004;
-        $result5 = $tab->add();
+            // Add the invoice form.
+            $this->getAcumulusContainer()->getTranslator()->add(new InvoiceStatusFormTranslations());
+            $tab = new Tab();
+            $tab->active = false;
+            $tab->class_name = 'AdminAcumulusInvoice';
+            $tab->name = array();
+            foreach (Language::getLanguages(true) as $lang) {
+                $tab->name[$lang['id_lang']] = $this->t('invoice_form_header');
+            }
+            $tab->id_parent = $id_settings_parent;
+            $tab->module = $this->name;
+            $tab->position = 1004;
+            try {
+                $result5 = $tab->add();
+            } catch (PrestaShopException $e) {
+                $result5 = false;
+            }
 
-        return $result1 && $result2 && $result3 && $result4 && $result5;
+            return $result1 && $result2 && $result3 && $result4 && $result5;
+        } catch (ContainerNotFoundException $e) {
+            return false;
+        }
     }
 
     /**
@@ -343,50 +361,43 @@ class Acumulus extends Module
      *   deactivate this module.
      *
      * @return bool
-     *
-     * @noinspection PhpDeprecationInspection Tab::getIdFromClassName() is deprecated.
-     * @noinspection PhpDocMissingThrowsInspection
      */
     public function uninstallTabs()
     {
-        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusBatch');
-        if ($id_tab) {
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab = new Tab($id_tab);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab->delete();
-        }
-
-        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusConfig');
-        if ($id_tab) {
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab = new Tab($id_tab);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab->delete();
-        }
-
-        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusAdvanced');
-        if ($id_tab) {
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab = new Tab($id_tab);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab->delete();
-        }
-
-        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusRegister');
-        if ($id_tab) {
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab = new Tab($id_tab);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab->delete();
-        }
-
-        $id_tab = (int) Tab::getIdFromClassName('AdminAcumulusInvoice');
-        if ($id_tab) {
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab = new Tab($id_tab);
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $tab->delete();
+        try {
+            /** @var EntityManagerInterface $entityManager */
+            $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
+            /** @var \PrestaShopBundle\Entity\Repository\TabRepository $tabRepository */
+            $tabRepository = $entityManager->getRepository(\PrestaShopBundle\Entity\Tab::class);
+            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusBatch');
+            if ($id_tab) {
+                $tab = new Tab($id_tab);
+                $tab->delete();
+            }
+            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusConfig');
+            if ($id_tab) {
+                $tab = new Tab($id_tab);
+                $tab->delete();
+            }
+            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusAdvanced');
+            if ($id_tab) {
+                $tab = new Tab($id_tab);
+                $tab->delete();
+            }
+            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusRegister');
+            if ($id_tab) {
+                $tab = new Tab($id_tab);
+                $tab->delete();
+            }
+            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusInvoice');
+            if ($id_tab) {
+                $tab = new Tab($id_tab);
+                $tab->delete();
+            }
+        } catch (PrestaShopException $e) {
+            return false;
+        } catch (ContainerNotFoundException $e) {
+            return false;
         }
 
         return true;
@@ -518,12 +529,12 @@ class Acumulus extends Module
      *
      * @return bool
      *
-     * @noinspection PhpUnused
+     * @noinspection PhpUnused : hook
      */
     public function hookactionOrderHistoryAddAfter(array $params)
     {
         $this->init();
-        $source = $this->container->getSource(Source::Order, $params['order_history']->id_order);
+        $source = $this->getAcumulusContainer()->getSource(Source::Order, $params['order_history']->id_order);
         $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
         return true;
     }
@@ -539,7 +550,7 @@ class Acumulus extends Module
      *
      * @return bool
      *
-     * @noinspection PhpUnused
+     * @noinspection PhpUnused : hook
      */
     public function hookactionOrderSlipAdd(array $params)
     {
@@ -555,7 +566,7 @@ class Acumulus extends Module
                 $newestOrderSlip = $orderSlip;
             }
         }
-        $source = $this->container->getSource(Source::CreditNote, $newestOrderSlip);
+        $source = $this->getAcumulusContainer()->getSource(Source::CreditNote, $newestOrderSlip);
         $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
         return true;
     }
@@ -570,7 +581,7 @@ class Acumulus extends Module
      * @return string
      *   The html we want to be output on the order details screen.
      *
-     * @noinspection PhpUnused
+     * @noinspection PhpUnused : hook
      */
     public function hookDisplayAdminOrderLeft(array $params)
     {
@@ -603,7 +614,6 @@ class Acumulus extends Module
 
     /**
      * Hook displayAdminOrderTabContent. Since 1.7.7.0
-     *
      * {@see https://devdocs.prestashop.com/1.7/modules/core-updates/img/order-view-page-hooks.jpg}
      *
      * @param array $params
@@ -613,12 +623,14 @@ class Acumulus extends Module
      * @return string
      *   The html we want to be output on the order details screen.
      *
-     * @noinspection PhpUnused
+     * @noinspection PhpUnused : hook
+     * @noinspection PhpUnusedParameterInspection
      */
     public function hookDisplayAdminOrderTabLink(array $params)
     {
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
+            /** @noinspection HtmlUnknownAnchorTarget  false positive*/
             return '<li class="nav-item"><a class="nav-link" id="orderAcumulusTab" data-toggle="tab" href="#orderAcumulusTabContent" role="tab" aria-controls="orderAcumulusTabContent" aria-expanded="true" aria-selected="false">
                     <i class="icon-acumulus"></i>Acumulus</a></li>';
         }
@@ -637,7 +649,7 @@ class Acumulus extends Module
      * @return string
      *   The html we want to be output on the order details screen.
      *
-     * @noinspection PhpUnused
+     * @noinspection PhpUnused : hook
      */
     public function hookDisplayAdminOrderTabContent(array $params)
     {
@@ -648,7 +660,7 @@ class Acumulus extends Module
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
             $form = $this->getAcumulusContainer()->getForm('invoice');
             $orderId = $params['id_order'];
-            $source = $this->container->getSource(Source::Order, $orderId);
+            $source = $this->getAcumulusContainer()->getSource(Source::Order, $orderId);
             $form->setSource($source);
 
             return $this->renderFormInvoice($form);
@@ -681,17 +693,41 @@ class Acumulus extends Module
     }
 
     /**
+     * Initialises the config: set the configVersion value.
+     *
+     * @return bool
+     *   Success.
+     */
+    protected function initConfig()
+    {
+        // Set initial config version.
+        if (empty($this->getAcumulusContainer()->getConfig()->get(Config::configVersion))) {
+            $values= [Config::configVersion => Version];
+            return $this->getAcumulusContainer()->getConfig()->save($values);
+        }
+        return true;
+    }
+
+    /**
      * Creates the tables this module uses. Called during install() or update
      * (install-4.0.2.php).
      *
-     * Actual creation is done by the models. This method might get called via an
-     * install or update script: make it public and call init().
+     * Actual creation is done by the models. This method might get called via
+     * an installation or update script: make it public and call init().
      *
      * @return bool
+     *   Success.
      */
     public function createTables()
     {
         $this->init();
+
+        // Set initial config version.
+        if (empty($this->getAcumulusContainer()->getConfig()->get(Config::configVersion))) {
+            $values= [Config::configVersion => Version];
+            $this->getAcumulusContainer()->getConfig()->save($values);
+        }
+
         return $this->getAcumulusContainer()->getAcumulusEntryManager()->install();
     }
 
@@ -701,6 +737,7 @@ class Acumulus extends Module
      * Actual creation is done by the models.
      *
      * @return bool
+     *   Success.
      */
     protected function dropTables()
     {

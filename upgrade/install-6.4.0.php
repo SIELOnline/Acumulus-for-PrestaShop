@@ -12,10 +12,10 @@
  * @param Acumulus $object
  *
  * @return bool
- *
- * @throws \Exception
  */
 function upgrade_module_6_4_0($object)
 {
-    return $object->getAcumulusContainer()->getConfig()->upgrade('6.4.0');
+    $version = \Db::getInstance()->getValue(
+        sprintf('SELECT version FROM `%smodule` WHERE name = "%s"', _DB_PREFIX_, Db::getInstance()->escape($object->name)));
+    return $object->getAcumulusContainer()->getConfigUpgrade()->upgrade($version);
 }

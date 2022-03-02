@@ -19,9 +19,5 @@ function upgrade_module_6_1_0($object)
     // registered tabs.
     $result1 = $object->uninstallTabs();
     $result2 = $object->installTabs();
-    // Update hooks, ignore errors on unregisterHooks() as that removes
-    // non-registered hooks.
-    $result3 = $object->unregisterHooks();
-    $result4 = $object->registerHooks();
-    return $result2 && $result4;
+    return $result2;
 }

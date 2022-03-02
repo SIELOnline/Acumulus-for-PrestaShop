@@ -26,6 +26,5 @@ function upgrade_module_4_6_0($object)
     }
 
     // Install new tabs.
-    $result2 = $object->installTabs();
-    return $result1 && $result2;
+    return $result1;
 }
