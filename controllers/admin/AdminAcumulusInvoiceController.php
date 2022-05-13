@@ -32,7 +32,7 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
      *
      * @return bool
      */
-    public function ajaxProcess()
+    public function ajaxProcess(): bool
     {
         // Check where the ajax call came from.
         if (isset($_POST['area'])) {
@@ -63,7 +63,7 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
      * @return string
      *   The rendered form.
      */
-    public function renderForm()
+    public function renderForm(): string
     {
         /** @noinspection PhpParamsInspection */
         return $this->module->renderFormInvoice($this->getForm());

@@ -6,6 +6,8 @@
  * @author    Buro RaDer, https://burorader.com/
  * @copyright SIEL BV, https://www.siel.nl/acumulus/
  * @license   GPL v3, see license.txt
+ *
+ * @noinspection PhpUnused
  */
 
 /**
@@ -13,7 +15,7 @@
  *
  * @return bool
  */
-function upgrade_module_6_1_0($object)
+function upgrade_module_6_1_0(Acumulus $object): bool
 {
     // Update tabs, ignore errors on uninstallTabs() as that removes not yet
     // registered tabs.

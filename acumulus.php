@@ -1,8 +1,6 @@
 <?php
 /**
  * @noinspection PhpUndefinedClassInspection
- * @noinspection PhpMissingParamTypeInspection
- * @noinspection PhpMissingReturnTypeInspection
  * @noinspection PhpConcatenationWithEmptyStringCanBeInlinedInspection
  * @noinspection AutoloadingIssuesInspection
  *
@@ -16,6 +14,7 @@ use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
+use Siel\Acumulus\Helpers\MessageCollection;
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\BatchFormTranslations;
@@ -58,7 +57,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '6.4.0';
+        $this->version = '7.2.2';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -85,7 +84,7 @@ class Acumulus extends Module
      *   The translation for the given key or the key itself if no translation
      *   could be found.
      */
-    protected function t($key)
+    protected function t(string $key): string
     {
         return $this->getAcumulusContainer()->getTranslator()->get($key);
     }
@@ -108,10 +107,7 @@ class Acumulus extends Module
         }
     }
 
-    /**
-     * @return \Siel\Acumulus\Helpers\Container
-     */
-    public function getAcumulusContainer()
+    public function getAcumulusContainer(): Container
     {
         $this->init();
         return $this->acumulusContainer;
@@ -120,19 +116,19 @@ class Acumulus extends Module
     /**
      * {@inheritdoc}
      */
-    public function install()
+    public function install(): bool
     {
         $this->init();
         return $this->checkRequirements()
           and parent::install()
-          and $this->createTables()
-          and $this->initConfig();
+          and $this->initConfig()
+          and $this->createTables();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function uninstall()
+    public function uninstall(): bool
     {
         $this->init();
         $this->confirmUninstallMsg = $this->t('message_uninstall');
@@ -149,7 +145,7 @@ class Acumulus extends Module
     /**
      * {@inheritdoc}
      */
-    public function enable($force_all = false)
+    public function enable($force_all = false): bool
     {
         return parent::enable($force_all)
             and $this->installTabs()
@@ -159,7 +155,7 @@ class Acumulus extends Module
     /**
      * {@inheritdoc}
      */
-    public function disable($force_all = false)
+    public function disable($force_all = false): bool
     {
         return parent::disable($force_all)
                and $this->unregisterHooks()
@@ -172,7 +168,7 @@ class Acumulus extends Module
      * @return bool
      *   Success.
      */
-    protected function checkRequirements()
+    protected function checkRequirements(): bool
     {
         $requirements = $this->getAcumulusContainer()->getRequirements();
         $messages = $requirements->check();
@@ -191,7 +187,7 @@ class Acumulus extends Module
      *
      * @return bool
      */
-    public function registerHooks()
+    public function registerHooks(): bool
     {
         $hooks = [
             'actionOrderHistoryAddAfter',
@@ -220,7 +216,7 @@ class Acumulus extends Module
      *
      * @return bool
      */
-    public function unregisterHooks()
+    public function unregisterHooks(): bool
     {
         $hooks = [
             'actionOrderHistoryAddAfter',
@@ -245,8 +241,9 @@ class Acumulus extends Module
      *   Success.
      *
      * @noinspection PhpRedundantCatchClauseInspection
+     * @noinspection DuplicatedCode
      */
-    public function installTabs()
+    public function installTabs(): bool
     {
         try {
             /** @var EntityManagerInterface $entityManager */
@@ -362,7 +359,7 @@ class Acumulus extends Module
      *
      * @return bool
      */
-    public function uninstallTabs()
+    public function uninstallTabs(): bool
     {
         try {
             /** @var EntityManagerInterface $entityManager */
@@ -394,9 +391,7 @@ class Acumulus extends Module
                 $tab = new Tab($id_tab);
                 $tab->delete();
             }
-        } catch (PrestaShopException $e) {
-            return false;
-        } catch (ContainerNotFoundException $e) {
+        } catch (ContainerNotFoundException|PrestaShopException $e) {
             return false;
         }
 
@@ -407,94 +402,71 @@ class Acumulus extends Module
      * Renders the configuration form.
      *
      * @return string
+     *
+     * @throws \Throwable
      */
-    public function getContent()
+    public function getContent(): string
     {
         $form = $this->getAcumulusContainer()->getForm('config');
-        $output = '';
-        $output .= $this->processForm($form);
-        $output .= $this->renderForm($form);
-        return $output;
-    }
-
-    /**
-     * Processes the form (if it was submitted).
-     *
-     * @param \Siel\Acumulus\Helpers\Form $form
-     *
-     * @return string
-     *   Any output from the processing stage that has to be rendered: messages.
-     */
-    protected function processForm(Form $form)
-    {
-        $output = '';
-        $form->process();
-        // Force the creation of the fields to get connection error messages
-        // shown.
-        $form->getFields();
-        foreach ($form->getMessages(Severity::RealMessages) as $message) {
-            switch ($message->getSeverity()) {
-                case Severity::Success:
-                    $output .= $this->displayConfirmation($message->format(Message::Format_PlainWithSeverity));
-                    break;
-                case Severity::Info:
-                case Severity::Notice:
-                    $output .= $this->displayInformation($message->format(Message::Format_PlainWithSeverity));
-                    break;
-                case Severity::Warning:
-                    $output .= $this->displayWarning($message->format(Message::Format_PlainWithSeverity));
-                    break;
-                case Severity::Error:
-                case Severity::Exception:
-                    $output .= $this->displayError($message->format(Message::Format_PlainWithSeverity));
-                    break;
-                default:
-                    break;
+        try {
+            $form->process();
+            $formHtml = $this->renderForm($form);
+        } catch (Throwable $e) {
+            // We handle our "own" exceptions but only when we can process them
+            // as we want, i.e. show it as an error at the beginning of the
+            // form. That's why we start catching only after we have a form, and
+            // stop catching just before we render our messages.
+            $formHtml = $formHtml ?? '';
+            try {
+                $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
+                $message = $crashReporter->logAndMail($e);
+                $form->createAndAddMessage($message, Severity::Exception);
+            } catch (Throwable $inner) {
+                // We do not know if we have informed the user per mail or
+                // screen, so assume not, and rethrow the original exception.
+                throw $e;
             }
         }
-        return $output;
+        $messagesHtml = $this->renderMessages($form);
+        return $messagesHtml . $formHtml;
     }
 
     /**
      * Renders the HTML for the form.
+     *
+     * As a side effect, any needed css and js is added to the controller.
      *
      * @param \Siel\Acumulus\Helpers\Form $form
      *
      * @return string
      *   The rendered form HTML.
      */
-    protected function renderForm(Form $form)
+    protected function renderForm(Form $form): string
     {
         $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
         $this->context->controller->addJS($this->_path . 'views/js/acumulus.js');
 
         // Create and initialize form helper.
         $helper = new HelperForm();
-
-        $adminTokenLite = Tools::getAdminTokenLite('AdminModules');
-        $currentIndex = AdminController::$currentIndex;
-
         // Module, token and currentIndex.
         $helper->module = $this;
         $helper->name_controller = $this->name;
-        $helper->token = $adminTokenLite;
-        $helper->currentIndex = $currentIndex . '&configure=' . $this->name;
-
-        // Language.
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->currentIndex = AdminController::$currentIndex . '&configure=' . $this->name;
+        // Language, title and multi-fieldset.
         $default_lang = (int) Configuration::get('PS_LANG_DEFAULT');
         $helper->default_form_language = $default_lang;
         $helper->allow_employee_form_lang = $default_lang;
-
         $helper->title = $this->displayName;
         /** @noinspection PhpUndefinedFieldInspection */
         $helper->multiple_fieldsets = true;
+
         $formMapper = $this->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
-
         if ($form->isFullPage()) {
             // Title and toolbar.
             $helper->show_toolbar = true; // false -> remove toolbar
-            $helper->toolbar_scroll = true; // yes - > Toolbar is always visible on the top of the screen.
+            $helper->toolbar_scroll = true; // yes - > Toolbar is always visible at the top of the screen.
             $helper->submit_action = 'submit' . $this->name;
 
             $fields_form['formSubmit']['form'] = array(
@@ -521,22 +493,49 @@ class Acumulus extends Module
     }
 
     /**
+     * Returns an HTML string with the messages rendered in PS style.
+     */
+    public function renderMessages(MessageCollection $messageCollection): string
+    {
+        $output = '';
+        foreach ($messageCollection->getMessages(Severity::RealMessages) as $message) {
+            switch ($message->getSeverity()) {
+                case Severity::Success:
+                    $output .= $this->displayConfirmation($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                case Severity::Info:
+                case Severity::Notice:
+                    $output .= $this->displayInformation($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                case Severity::Warning:
+                    $output .= $this->displayWarning($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                case Severity::Error:
+                case Severity::Exception:
+                    $output .= $this->displayError($message->format(Message::Format_PlainWithSeverity));
+                    break;
+                default:
+                    assert(false, 'Unknown severity ' . $message->getSeverity());
+            }
+        }
+        return $output;
+    }
+
+    /**
      * Hook actionOrderHistoryAddAfter.
      *
      * @param array $params
      *   Array with the following entries:
      *   - order_history: OrderHistory
      *
-     * @return bool
+     * @throws \Throwable
      *
      * @noinspection PhpUnused : hook
      */
-    public function hookactionOrderHistoryAddAfter(array $params)
+    public function hookactionOrderHistoryAddAfter(array $params): void
     {
         $this->init();
-        $source = $this->getAcumulusContainer()->getSource(Source::Order, $params['order_history']->id_order);
-        $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
-        return true;
+        $this->sourceStatusChange(Source::Order, $params['order_history']->id_order);
     }
 
     /**
@@ -548,11 +547,11 @@ class Acumulus extends Module
      *   - productList: array
      *   - qtyList: array
      *
-     * @return bool
+     * @throws \Throwable
      *
      * @noinspection PhpUnused : hook
      */
-    public function hookactionOrderSlipAdd(array $params)
+    public function hookactionOrderSlipAdd(array $params): void
     {
         $this->init();
         /** @var Order $order */
@@ -566,9 +565,37 @@ class Acumulus extends Module
                 $newestOrderSlip = $orderSlip;
             }
         }
-        $source = $this->getAcumulusContainer()->getSource(Source::CreditNote, $newestOrderSlip);
-        $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
-        return true;
+        $this->sourceStatusChange(Source::CreditNote, $newestOrderSlip);
+    }
+
+    /**
+     * @param string $invoiceSourceType
+     *   The type of the invoice source to create.
+     * @param int|object|array $invoiceSourceOrId
+     *   The invoice source itself or its id to create a
+     *   \Siel\Acumulus\Invoice\Source instance for.
+     *
+     * @return void
+     *
+     * @throws \Throwable
+     */
+    private function sourceStatusChange(string $invoiceSourceType, $invoiceSourceOrId): void
+    {
+        try {
+            $source = $this->getAcumulusContainer()->createSource($invoiceSourceType, $invoiceSourceOrId);
+            $this->getAcumulusContainer()->getInvoiceManager()->sourceStatusChange($source);
+        } catch (Throwable $e) {
+            try {
+                $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
+                // We do not know if we are on the admin side, so we should not
+                // try to display the message returned by logAndMail().
+                $crashReporter->logAndMail($e);
+            } catch (Throwable $inner) {
+                // We do not know if we have informed the user per mail or
+                // screen, so assume not, and rethrow the original exception.
+                throw $e;
+            }
+        }
     }
 
     /**
@@ -579,11 +606,11 @@ class Acumulus extends Module
      *   - id_order: Order id
      *
      * @return string
-     *   The html we want to be output on the order details screen.
+     *   The HTML we want to be output on the order details screen.
      *
      * @noinspection PhpUnused : hook
      */
-    public function hookDisplayAdminOrderLeft(array $params)
+    public function hookDisplayAdminOrderLeft(array $params): string
     {
         return $this->hookDisplayAdminOrderTabContent($params);
     }
@@ -598,6 +625,8 @@ class Acumulus extends Module
      *
      * We only want to add css and js to the order detail page, but the order
      * overview page also gets our css and js loaded. It is as it is.
+     *
+     * @noinspection PhpUnused : hook
      */
     public function hookActionAdminControllerSetMedia()
     {
@@ -621,12 +650,12 @@ class Acumulus extends Module
      *   - id_order: Order id
      *
      * @return string
-     *   The html we want to be output on the order details screen.
+     *   The HTML we want to be output on the order details screen.
      *
      * @noinspection PhpUnused : hook
      * @noinspection PhpUnusedParameterInspection
      */
-    public function hookDisplayAdminOrderTabLink(array $params)
+    public function hookDisplayAdminOrderTabLink(array $params): string
     {
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
@@ -647,11 +676,11 @@ class Acumulus extends Module
      *   - id_order: Order id
      *
      * @return string
-     *   The html we want to be output on the order details screen.
+     *   The HTML we want to be output on the order details screen.
      *
      * @noinspection PhpUnused : hook
      */
-    public function hookDisplayAdminOrderTabContent(array $params)
+    public function hookDisplayAdminOrderTabContent(array $params): string
     {
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
@@ -660,7 +689,7 @@ class Acumulus extends Module
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
             $form = $this->getAcumulusContainer()->getForm('invoice');
             $orderId = $params['id_order'];
-            $source = $this->getAcumulusContainer()->getSource(Source::Order, $orderId);
+            $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
             $form->setSource($source);
 
             return $this->renderFormInvoice($form);
@@ -671,15 +700,17 @@ class Acumulus extends Module
     /**
      * Renders the form.
      *
-     * This method is called by either hookDisplayAdminOrderLeft() or by the
-     * AdminAcumulusInvoiceController and should return the rendered form.
+     * This method is called by either {@see hookDisplayAdminOrderTabContent()},
+     * {@see hookDisplayAdminOrderLeft()} (before 1.7.7), or by the
+     * {@see AdminAcumulusInvoiceController::renderForm()} and should return the
+     * rendered form.
      *
      * @param \Siel\Acumulus\Shop\InvoiceStatusForm $form
      *
      * @return string
      *   The rendered form.
      */
-    public function renderFormInvoice(InvoiceStatusForm $form)
+    public function renderFormInvoice(InvoiceStatusForm $form): string
     {
         $id = 'acumulus-' . $form->getType();
         $url = $this->getAcumulusContainer()->getShopCapabilities()->getLink('invoice');
@@ -698,11 +729,11 @@ class Acumulus extends Module
      * @return bool
      *   Success.
      */
-    protected function initConfig()
+    protected function initConfig(): bool
     {
         // Set initial config version.
         if (empty($this->getAcumulusContainer()->getConfig()->get(Config::configVersion))) {
-            $values= [Config::configVersion => Version];
+            $values = [Config::configVersion => Version];
             return $this->getAcumulusContainer()->getConfig()->save($values);
         }
         return true;
@@ -718,16 +749,8 @@ class Acumulus extends Module
      * @return bool
      *   Success.
      */
-    public function createTables()
+    public function createTables(): bool
     {
-        $this->init();
-
-        // Set initial config version.
-        if (empty($this->getAcumulusContainer()->getConfig()->get(Config::configVersion))) {
-            $values= [Config::configVersion => Version];
-            $this->getAcumulusContainer()->getConfig()->save($values);
-        }
-
         return $this->getAcumulusContainer()->getAcumulusEntryManager()->install();
     }
 
@@ -739,7 +762,7 @@ class Acumulus extends Module
      * @return bool
      *   Success.
      */
-    protected function dropTables()
+    protected function dropTables(): bool
     {
         return $this->getAcumulusContainer()->getAcumulusEntryManager()->uninstall();
     }

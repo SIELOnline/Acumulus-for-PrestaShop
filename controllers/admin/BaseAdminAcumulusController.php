@@ -7,6 +7,7 @@
  * @license   GPL v3, see license.txt
  */
 
+use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Helpers\Message;
 
@@ -58,7 +59,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
      *   The translation for the given key or the key itself if no translation
      *   could be found.
      */
-    protected function t($key)
+    protected function t(string $key): string
     {
         return $this->module->getAcumulusContainer()->getTranslator()->get($key);
     }
@@ -67,7 +68,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
     /**
      * @return \Siel\Acumulus\Helpers\Form
      */
-    protected function getForm()
+    protected function getForm(): Form
     {
         return $this->module->getAcumulusContainer()->getForm($this->formType);
     }
@@ -76,6 +77,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
     {
         parent::initToolbarTitle();
 
+        /** @noinspection PhpSwitchStatementWitSingleBranchInspection */
         switch ($this->display) {
             case 'add':
                 $this->meta_title = array($this->t("{$this->formType}_form_title"));
@@ -85,54 +87,84 @@ class BaseAdminAcumulusController extends ModuleAdminController
     }
 
     /**
+     * Processes the form (it was submitted).
+     *
+     * @throws \Throwable
+     */
+    public function processSave()
+    {
+        $this->display = 'add';
+        $form = $this->getForm();
+        try {
+            $form->process();
+        } catch (Throwable $e) {
+            // We handle our "own" exceptions but only when we can process them
+            // as we want, i.e. show it as an error at the beginning of the
+            // form. That's why we start catching only after we have a form.
+            // The messages will be displayed in {@see renderForm()}.
+            try {
+                $crashReporter = $this->module->getAcumulusContainer()->getCrashReporter();
+                $message = $crashReporter->logAndMail($e);
+                $form->createAndAddMessage($message, Severity::Exception);
+            } catch (Throwable $inner) {
+                // We do not know if we have informed the user per mail or
+                // screen, so assume not, and rethrow the original exception.
+                throw $e;
+            }
+        }
+    }
+
+    /**
      * Renders the form.
      *
      * @return string
      *   The rendered form.
      *
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function renderForm()
+    public function renderForm(): string
     {
         $this->show_form_cancel_button = true;
         $this->multiple_fieldsets = true;
         $form = $this->getForm();
-        if (!$this->ajax) {
-            Context::getContext()->controller->addCSS(__PS_BASE_URI__ . 'modules/acumulus/views/css/acumulus.css');
-            $this->context->controller->addJS(__PS_BASE_URI__ . 'modules/acumulus/views/js/acumulus.js');
-        }
-        $formMapper = $this->module->getAcumulusContainer()->getFormMapper();
-        $fields_form = $formMapper->map($form);
-        if ($form->isFullPage()) {
-            if ($this->formType === 'batch') {
-                // On the batch form we place the send button before the extended
-                // help fieldset.
-                reset($fields_form);
-            } else {
-                // On other forms we place it in the last fieldset.
-                end($fields_form);
+        try {
+            if (!$this->ajax) {
+                Context::getContext()->controller->addCSS(__PS_BASE_URI__ . 'modules/acumulus/views/css/acumulus.css');
+                $this->context->controller->addJS(__PS_BASE_URI__ . 'modules/acumulus/views/js/acumulus.js');
             }
-            $key = key($fields_form);
-            $fields_form[$key]['form']['submit'] = array(
-                'title' => $this->t("button_submit_{$this->formType}"),
-                'icon' => $this->icon,
-            );
+            $formMapper = $this->module->getAcumulusContainer()->getFormMapper();
+            $this->fields_form = $formMapper->map($form);
+            if ($form->isFullPage()) {
+                if ($this->formType === 'batch') {
+                    // On the batch form we place the send button before the extended
+                    // help fieldset.
+                    reset($this->fields_form);
+                } else {
+                    // On other forms we place it in the last fieldset.
+                    end($this->fields_form);
+                }
+                $key = key($this->fields_form);
+                $this->fields_form[$key]['form']['submit'] = [
+                    'title' => $this->t("button_submit_$this->formType"),
+                    'icon' => $this->icon,
+                ];
+            }
+        } catch (Throwable $e) {
+            // We handle our "own" exceptions but only when we can process them
+            // as we want, i.e. show it as an error at the beginning of the
+            // form. That's why we start catching only after we have a form, and
+            // stop catching just before display...() our messages in
+            // processSave().
+            try {
+                $crashReporter = $this->module->getAcumulusContainer()->getCrashReporter();
+                $message = $crashReporter->logAndMail($e);
+                $form->createAndAddMessage($message, Severity::Exception);
+            } catch (Throwable $inner) {
+                // We do not know if we have informed the user per mail or
+                // screen, so assume not, and rethrow the original exception.
+                throw $e;
+            }
         }
-        $this->fields_form = $fields_form;
-
-        return parent::renderForm();
-    }
-
-    /**
-     * Processes the form (it was submitted).
-     */
-    public function processSave()
-    {
-        $form = $this->getForm();
-        $form->process();
-        // Force the creation of the fields to get connection error messages
-        // shown.
-        $form->getFields();
         foreach ($form->getMessages() as $message) {
             if (($message->getSeverity() & Severity::WarningOrWorse) !== 0) {
                 $this->displayWarning($message->format(Message::Format_PlainWithSeverity));
@@ -140,7 +172,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
                 $this->displayInformation($message->format(Message::Format_PlainWithSeverity));
             }
         }
-        $this->display = 'add';
+        return parent::renderForm() ?? '';
     }
 
     /**
