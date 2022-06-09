@@ -179,3 +179,8 @@
   width: 24%;
   height: 2em;
 }
+
+#content .panel-footer [class^="icon-"], #content .panel-footer [class^="process-icon-"] {
+  display: inline-block;
+  padding-right: 1em;
+}
