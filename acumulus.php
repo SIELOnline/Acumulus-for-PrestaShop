@@ -17,6 +17,7 @@ use Siel\Acumulus\Helpers\Message;
 use Siel\Acumulus\Helpers\MessageCollection;
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Invoice\Source;
+use Siel\Acumulus\Shop\ActivateSupportFormTranslations;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
 use Siel\Acumulus\Shop\RegisterFormTranslations;
@@ -57,7 +58,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '7.2.2';
+        $this->version = '7.3.0';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -282,7 +283,7 @@ class Acumulus extends Module
             }
             $tab->id_parent = $id_settings_parent;
             $tab->module = $this->name;
-            $tab->position = 1001;
+            $tab->position = 1002;
             try {
                 $result2 = $tab->add();
             } catch (PrestaShopException $e) {
@@ -300,11 +301,29 @@ class Acumulus extends Module
             }
             $tab->id_parent = $id_settings_parent;
             $tab->module = $this->name;
-            $tab->position = 1002;
+            $tab->position = 1003;
             try {
                 $result3 = $tab->add();
             } catch (PrestaShopException $e) {
                 $result3 = false;
+            }
+
+            // Add the "Activate pro-support" form.
+            $this->getAcumulusContainer()->getTranslator()->add(new ActivateSupportFormTranslations());
+            $tab = new Tab();
+            $tab->active = true;
+            $tab->class_name = 'AdminAcumulusActivate';
+            $tab->name = array();
+            foreach (Language::getLanguages(true) as $lang) {
+                $tab->name[$lang['id_lang']] = $this->t('activate_form_header');
+            }
+            $tab->id_parent = $id_settings_parent;
+            $tab->module = $this->name;
+            $tab->position = 1004;
+            try {
+                $result4 = $tab->add();
+            } catch (PrestaShopException $e) {
+                $result4 = false;
             }
 
             // Add the register form.
@@ -318,11 +337,11 @@ class Acumulus extends Module
             }
             $tab->id_parent = $id_settings_parent;
             $tab->module = $this->name;
-            $tab->position = 1003;
+            $tab->position = 1005;
             try {
-                $result4 = $tab->add();
+                $result5 = $tab->add();
             } catch (PrestaShopException $e) {
-                $result4 = false;
+                $result5 = false;
             }
 
             // Add the invoice form.
@@ -336,14 +355,14 @@ class Acumulus extends Module
             }
             $tab->id_parent = $id_settings_parent;
             $tab->module = $this->name;
-            $tab->position = 1004;
+            $tab->position = 1006;
             try {
-                $result5 = $tab->add();
+                $result6 = $tab->add();
             } catch (PrestaShopException $e) {
-                $result5 = false;
+                $result6 = false;
             }
 
-            return $result1 && $result2 && $result3 && $result4 && $result5;
+            return $result1 && $result2 && $result3 && $result4 && $result5 && $result6;
         } catch (ContainerNotFoundException $e) {
             return false;
         }
@@ -377,6 +396,11 @@ class Acumulus extends Module
                 $tab->delete();
             }
             $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusAdvanced');
+            if ($id_tab) {
+                $tab = new Tab($id_tab);
+                $tab->delete();
+            }
+            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusActivate');
             if ($id_tab) {
                 $tab = new Tab($id_tab);
                 $tab->delete();
