@@ -58,7 +58,7 @@ class Acumulus extends Module
          *
          * @var string
          */
-        $this->version = '7.3.3';
+        $this->version = '7.4.3';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -643,7 +643,7 @@ class Acumulus extends Module
      * Hook actionAdminControllerSetMedia
      *
      * This hook gets called on the order overview and order detail page when we
-     * can till add css and js. However, using the context, values or set of
+     * can still add css and js. However, using the context, values or set of
      * parameters, it is not possible to distinguish which type of page is
      * actually rendered.
      *
