@@ -99,6 +99,13 @@
   display: inline-block;
 }
 
+#acumulus-invoice [id$="_documents"].col-lg-9 > .col-lg-9 {
+  display: inline-block;
+  width: 11em;
+  margin-right: 1em;
+  padding: 0;
+}
+
 #acumulus-invoice .col-lg-9 > .col-lg-9 {
   padding-left: 0;
 }
