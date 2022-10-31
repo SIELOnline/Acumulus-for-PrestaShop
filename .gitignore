@@ -14,3 +14,6 @@ interdiff.txt
 #Generated files
 config.xml
 config_nl.xml
+
+# Library
+lib/
