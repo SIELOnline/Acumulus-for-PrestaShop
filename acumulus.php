@@ -38,7 +38,7 @@ use const Siel\Acumulus\Version;
 class Acumulus extends Module
 {
     /** @var array */
-    protected $options = array();
+    protected $options = [];
 
     /** @var \Siel\Acumulus\Helpers\Container */
     protected $acumulusContainer;
@@ -49,22 +49,15 @@ class Acumulus extends Module
     public function __construct()
     {
         /**
-         * Increase this value on each change:
-         * - point release: bug fixes
-         * - minor version: addition of minor features, backwards compatible
-         * - major version: major or backwards incompatible changes
-         *
          * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
-         *
-         * @var string
          */
-        $this->version = '7.4.3';
+        $this->version = '7.5.0';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.7', 'max' => '1.9');
-        $this->dependencies = array();
+        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => '1.9'];
+        $this->dependencies = [];
         $this->bootstrap = true;
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
 
@@ -259,7 +252,7 @@ class Acumulus extends Module
             $tab = new Tab();
             $tab->active = true;
             $tab->class_name = 'AdminAcumulusBatch';
-            $tab->name = array();
+            $tab->name = [];
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $this->t('batch_form_header');
             }
@@ -277,7 +270,7 @@ class Acumulus extends Module
             $tab = new Tab();
             $tab->active = true;
             $tab->class_name = 'AdminAcumulusConfig';
-            $tab->name = array();
+            $tab->name = [];
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $this->t('config_form_header');
             }
@@ -295,7 +288,7 @@ class Acumulus extends Module
             $tab = new Tab();
             $tab->active = true;
             $tab->class_name = 'AdminAcumulusAdvanced';
-            $tab->name = array();
+            $tab->name = [];
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $this->t('advanced_form_header');
             }
@@ -313,7 +306,7 @@ class Acumulus extends Module
             $tab = new Tab();
             $tab->active = true;
             $tab->class_name = 'AdminAcumulusActivate';
-            $tab->name = array();
+            $tab->name = [];
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $this->t('activate_form_header');
             }
@@ -331,7 +324,7 @@ class Acumulus extends Module
             $tab = new Tab();
             $tab->active = false;
             $tab->class_name = 'AdminAcumulusRegister';
-            $tab->name = array();
+            $tab->name = [];
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $this->t('register_form_header');
             }
@@ -349,7 +342,7 @@ class Acumulus extends Module
             $tab = new Tab();
             $tab->active = false;
             $tab->class_name = 'AdminAcumulusInvoice';
-            $tab->name = array();
+            $tab->name = [];
             foreach (Language::getLanguages(true) as $lang) {
                 $tab->name[$lang['id_lang']] = $this->t('invoice_form_header');
             }
@@ -493,26 +486,26 @@ class Acumulus extends Module
             $helper->toolbar_scroll = true; // yes - > Toolbar is always visible at the top of the screen.
             $helper->submit_action = 'submit' . $this->name;
 
-            $fields_form['formSubmit']['form'] = array(
-                'legend' => array(
+            $fields_form['formSubmit']['form'] = [
+                'legend' => [
                     'title' => $this->t("button_submit_{$form->getType()}"),
                     'icon' => 'icon-save',
-                ),
-                'submit' => array(
+                ],
+                'submit' => [
                     'title' => $this->t("button_submit_{$form->getType()}"),
-                )
-            );
+                ]
+            ];
             $helper->show_cancel_button = true;
         } else {
             $helper->show_toolbar = false; // false -> remove toolbar
             $helper->show_cancel_button = false;
             $helper->multiple_fieldsets = true;
         }
-        $helper->tpl_vars = array(
+        $helper->tpl_vars = [
             'fields_value' => $form->getFormValues(),
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
-        );
+        ];
         return $helper->generateForm($fields_form);
     }
 
