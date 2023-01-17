@@ -1,16 +1,15 @@
 <?php
 /**
- * @noinspection PhpUndefinedClassInspection
- * @noinspection PhpConcatenationWithEmptyStringCanBeInlinedInspection
- * @noinspection AutoloadingIssuesInspection
- *
  * @author    Buro RaDer, https://burorader.com/
  * @copyright SIEL BV, https://www.siel.nl/acumulus/
  * @license   GPL v3, see license.txt
  */
 
+declare(strict_types=1);
+
 use Doctrine\ORM\EntityManagerInterface;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
+use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Message;
@@ -34,29 +33,26 @@ use const Siel\Acumulus\Version;
  * this module's code can be found on the PrestaShop documentation site:
  * http://doc.prestashop.com/display/PS16/Creating+a+PrestaShop+module
  *
+ * @noinspection EfferentObjectCouplingInspection
+ * @noinspection AutoloadingIssuesInspection
+ * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  */
 class Acumulus extends Module
 {
-    /** @var array */
-    protected $options = [];
-
-    /** @var \Siel\Acumulus\Helpers\Container */
-    protected $acumulusContainer;
-
-    /** @var string */
-    protected $confirmUninstallMsg;
+    protected Container $acumulusContainer;
+    protected string $confirmUninstallMsg;
 
     public function __construct()
     {
         /**
          * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
          */
-        $this->version = '7.5.0';
+        $this->version = '7.6.1';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => '1.9'];
+        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => '8.0'];
         $this->dependencies = [];
         $this->bootstrap = true;
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
@@ -86,9 +82,9 @@ class Acumulus extends Module
     /**
      * Initializes the properties
      */
-    protected function init()
+    protected function init(): void
     {
-        if ($this->acumulusContainer === null) {
+        if (!isset($this->acumulusContainer)) {
             // Load autoloader
             require_once(__DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
             SielAcumulusAutoloader::register();
@@ -171,7 +167,11 @@ class Acumulus extends Module
             if ($translatedMessage === $key) {
                 $translatedMessage = $message;
             }
-            $this->displayError($translatedMessage);
+            if (strpos($key, 'warning') !== false) {
+                $this->adminDisplayWarning($translatedMessage);
+            } else {
+                $this->_errors[] = $translatedMessage;
+            }
         }
         return empty($this->messages);
     }
@@ -475,8 +475,6 @@ class Acumulus extends Module
         $helper->default_form_language = $default_lang;
         $helper->allow_employee_form_lang = $default_lang;
         $helper->title = $this->displayName;
-        /** @noinspection PhpUndefinedFieldInspection */
-        $helper->multiple_fieldsets = true;
 
         $formMapper = $this->getAcumulusContainer()->getFormMapper();
         $fields_form = $formMapper->map($form);
@@ -499,7 +497,6 @@ class Acumulus extends Module
         } else {
             $helper->show_toolbar = false; // false -> remove toolbar
             $helper->show_cancel_button = false;
-            $helper->multiple_fieldsets = true;
         }
         $helper->tpl_vars = [
             'fields_value' => $form->getFormValues(),
@@ -645,7 +642,7 @@ class Acumulus extends Module
      *
      * @noinspection PhpUnused : hook
      */
-    public function hookActionAdminControllerSetMedia()
+    public function hookActionAdminControllerSetMedia(): void
     {
         $controller = Tools::getValue('controller');
         if ($controller === 'AdminOrders') {
@@ -749,8 +746,8 @@ class Acumulus extends Module
     protected function initConfig(): bool
     {
         // Set initial config version.
-        if (empty($this->getAcumulusContainer()->getConfig()->get(Config::configVersion))) {
-            $values = [Config::configVersion => Version];
+        if (empty($this->getAcumulusContainer()->getConfig()->get(Config::VersionKey))) {
+            $values = [Config::VersionKey => Version];
             return $this->getAcumulusContainer()->getConfig()->save($values);
         }
         return true;

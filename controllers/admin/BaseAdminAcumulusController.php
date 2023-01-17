@@ -7,6 +7,8 @@
  * @license   GPL v3, see license.txt
  */
 
+declare(strict_types=1);
+
 use Siel\Acumulus\Helpers\Form;
 use Siel\Acumulus\Helpers\Severity;
 use Siel\Acumulus\Helpers\Message;
@@ -21,20 +23,8 @@ use Siel\Acumulus\Helpers\Message;
  */
 class BaseAdminAcumulusController extends ModuleAdminController
 {
-
-    /**
-     * The form type.
-     *
-     * @var string
-     */
-    protected $formType = '';
-
-    /**
-     * The form icon.
-     *
-     * @var string
-     */
-    protected $icon;
+    protected string $formType = '';
+    protected string $icon;
 
     public function __construct()
     {
@@ -64,23 +54,22 @@ class BaseAdminAcumulusController extends ModuleAdminController
         return $this->module->getAcumulusContainer()->getTranslator()->get($key);
     }
 
-
     /**
-     * @return \Siel\Acumulus\Helpers\Form
+     * Returns the Acumulus Form for the set $this->formType.
      */
     protected function getForm(): Form
     {
         return $this->module->getAcumulusContainer()->getForm($this->formType);
     }
 
-    public function initToolbarTitle()
+    public function initToolbarTitle(): void
     {
         parent::initToolbarTitle();
 
         /** @noinspection PhpSwitchStatementWitSingleBranchInspection */
         switch ($this->display) {
             case 'add':
-                $this->meta_title = array($this->t("{$this->formType}_form_title"));
+                $this->meta_title = [$this->t("{$this->formType}_form_title")];
                 $this->toolbar_title[] = $this->t("{$this->formType}_form_header");
                 break;
         }
@@ -124,7 +113,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
      */
     public function renderForm(): string
     {
-        $this->show_form_cancel_button = true;
+        $this->show_form_cancel_button = false;
         $this->multiple_fieldsets = true;
         $form = $this->getForm();
         try {
@@ -177,6 +166,9 @@ class BaseAdminAcumulusController extends ModuleAdminController
 
     /**
      * {@inheritdoc}
+     *
+     * @noinspection ReturnTypeCanBeDeclaredInspection  We have to follow the
+     *   parent, which we can't change.
      */
     public function getFieldsValue($obj)
     {

@@ -9,7 +9,9 @@
  * @license   GPL v3, see license.txt
  */
 
-include_once('BaseAdminAcumulusController.php');
+declare(strict_types=1);
+
+include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
  * AdminAcumulusBatchController provides the send batch form feature.
