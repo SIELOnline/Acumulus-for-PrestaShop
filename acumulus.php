@@ -35,7 +35,6 @@ use const Siel\Acumulus\Version;
  *
  * @noinspection EfferentObjectCouplingInspection
  * @noinspection AutoloadingIssuesInspection
- * @noinspection PhpClassHasTooManyDeclaredMembersInspection
  */
 class Acumulus extends Module
 {
@@ -206,7 +205,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Disables the hooks that this module wants to respond to.
+     * Disables the hooks that this module wanted to respond to.
      *
      * @return bool
      */
@@ -219,6 +218,7 @@ class Acumulus extends Module
             'displayAdminOrderTabLink',
             'displayAdminOrderTabContent',
             'displayAdminOrderLeft',
+            'actionGetAdminOrderButtons',
         ];
         foreach ($hooks as $hook) {
             $this->unregisterHook($hook);
@@ -633,12 +633,12 @@ class Acumulus extends Module
      * Hook actionAdminControllerSetMedia
      *
      * This hook gets called on the order overview and order detail page when we
-     * can still add css and js. However, using the context, values or set of
-     * parameters, it is not possible to distinguish which type of page is
-     * actually rendered.
+     * can still add css and js. However, regardless the information we use,
+     * context, values, or set of parameters, it is impossible to distinguish
+     * which type of page is actually rendered.
      *
-     * We only want to add css and js to the order detail page, but the order
-     * overview page also gets our css and js loaded. It is as it is.
+     * So, even if we only want to add our css and js to the order detail page,
+     * the order overview page also gets our css and js loaded. It is as it is.
      *
      * @noinspection PhpUnused : hook
      */
@@ -674,8 +674,10 @@ class Acumulus extends Module
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
             /** @noinspection HtmlUnknownAnchorTarget  false positive*/
-            return '<li class="nav-item"><a class="nav-link" id="orderAcumulusTab" data-toggle="tab" href="#orderAcumulusTabContent" role="tab" aria-controls="orderAcumulusTabContent" aria-expanded="true" aria-selected="false">
-                    <i class="icon-acumulus"></i>Acumulus</a></li>';
+            return '<li class="nav-item">'
+                . '<a class="nav-link" id="orderAcumulusTab" data-toggle="tab" href="#orderAcumulusTabContent"'
+                . ' role="tab" aria-controls="orderAcumulusTabContent" aria-expanded="true" aria-selected="false">'
+                . '<i class="icon-acumulus"></i>Acumulus</a></li>';
         }
         return '';
     }
