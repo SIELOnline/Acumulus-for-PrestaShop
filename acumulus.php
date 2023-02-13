@@ -51,7 +51,7 @@ class Acumulus extends Module
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => '8.0'];
+        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => '9'];
         $this->dependencies = [];
         $this->bootstrap = true;
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
