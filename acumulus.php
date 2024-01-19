@@ -85,8 +85,7 @@ class Acumulus extends Module
     {
         if (!isset($this->acumulusContainer)) {
             // Load autoloader
-            require_once(__DIR__ . '/lib/siel/acumulus/SielAcumulusAutoloader.php');
-            SielAcumulusAutoloader::register();
+            require_once __DIR__ . '/vendor/autoload.php';
 
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
             $this->acumulusContainer = new Container('PrestaShop', $languageCode);

@@ -1,0 +1,35 @@
+{
+    "name": "siel/acumulus-prestashop",
+    "description": "Integrates PrestaShop with your Siel Acumulus online administration",
+    "type": "prestashop-module",
+    "version": "8.1.2",
+    "license": [
+        "GPL-3.0"
+    ],
+    "homepage": "https://github.com/SIELOnline/Acumulus-for-PrestaShop",
+    "authors": [
+        {
+            "name": "Buro RaDer",
+            "homepage": "https://burorader.com",
+            "role": "developer"
+        },
+        {
+            "name": "SIEL",
+            "homepage": "https://siel.nl",
+            "role": "copyright owner"
+        }
+    ],
+    "require": {
+        "siel/acumulus": "^8.1.1",
+        "ext-dom": "*",
+        "ext-json": "*"
+    },
+    "comment1": "We ought to add a require-dev for phpunit. However, PrestaShop has its own vendor folder with phpunit and php-parser in it",
+    "comment2": "As these are used by the runtime, we cannot add our own version of these liraries as that will clash.",
+    "comment3": "So just use PrestaShop's version of phpunit and let's hope tis compatible.",
+    "autoload-dev": {
+        "psr-4": {
+            "Siel\\Acumulus\\Tests\\PrestaShop\\": "tests/PrestaShop/"
+        }
+    }
+}

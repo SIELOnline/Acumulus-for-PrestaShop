@@ -1,3 +1,11 @@
+# Ignore dependencies that are managed with Composer.
+# We only want to commit our own stuff, that is unique to this project. So we do not
+# commit the vendor directory, not even autoload.php and vendor/siel/acumulus. If you want
+# to use this project from GitHub instead of via WordPress.org, you will have to run
+# "composer update --no-dev" yourself.
+composer.lock
+vendor/
+
 # patches, diffs, merges
 *.patch
 interdiff.txt
@@ -15,5 +23,4 @@ interdiff.txt
 config.xml
 config_nl.xml
 
-# Library
-lib/
+
