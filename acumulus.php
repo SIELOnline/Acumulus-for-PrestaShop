@@ -543,7 +543,7 @@ class Acumulus extends Module
      *
      * @throws \Throwable
      *
-     * @noinspection PhpUnused : hook
+     * @noinspection PhpUnused  hook
      */
     public function hookactionOrderHistoryAddAfter(array $params): void
     {
@@ -562,7 +562,7 @@ class Acumulus extends Module
      *
      * @throws \Throwable
      *
-     * @noinspection PhpUnused : hook
+     * @noinspection PhpUnused  hook
      */
     public function hookactionOrderSlipAdd(array $params): void
     {
@@ -621,7 +621,7 @@ class Acumulus extends Module
      * @return string
      *   The HTML we want to be output on the order details screen.
      *
-     * @noinspection PhpUnused : hook
+     * @noinspection PhpUnused  hook
      */
     public function hookDisplayAdminOrderLeft(array $params): string
     {
@@ -639,7 +639,7 @@ class Acumulus extends Module
      * So, even if we only want to add our css and js to the order detail page,
      * the order overview page also gets our css and js loaded. It is as it is.
      *
-     * @noinspection PhpUnused : hook
+     * @noinspection PhpUnused  hook
      */
     public function hookActionAdminControllerSetMedia(): void
     {
@@ -665,14 +665,14 @@ class Acumulus extends Module
      * @return string
      *   The HTML we want to be output on the order details screen.
      *
-     * @noinspection PhpUnused : hook
+     * @noinspection PhpUnused  hook
      * @noinspection PhpUnusedParameterInspection
      */
     public function hookDisplayAdminOrderTabLink(array $params): string
     {
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
-            /** @noinspection HtmlUnknownAnchorTarget  false positive*/
+            /** @noinspection HtmlUnknownAnchorTarget  false positive */
             return '<li class="nav-item">'
                 . '<a class="nav-link" id="orderAcumulusTab" data-toggle="tab" href="#orderAcumulusTabContent"'
                 . ' role="tab" aria-controls="orderAcumulusTabContent" aria-expanded="true" aria-selected="false">'
@@ -693,7 +693,7 @@ class Acumulus extends Module
      * @return string
      *   The HTML we want to be output on the order details screen.
      *
-     * @noinspection PhpUnused : hook
+     * @noinspection PhpUnused  hook
      */
     public function hookDisplayAdminOrderTabContent(array $params): string
     {

@@ -24,9 +24,15 @@
         "ext-dom": "*",
         "ext-json": "*"
     },
-    "comment1": "We ought to add a require-dev for phpunit. However, PrestaShop has its own vendor folder with phpunit and php-parser in it",
-    "comment2": "As these are used by the runtime, we cannot add our own version of these liraries as that will clash.",
-    "comment3": "So just use PrestaShop's version of phpunit and let's hope tis compatible.",
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
+    "conflict": {
+        "comment1": "PrestaShop has its own vendor folder with nikic/php-parser in it.",
+        "comment2": "However, usage of that version (v415.2) clashes with newer versions of it (v4.17.0) as methods were renamed.",
+        "comment3": "So restrict the max version (and let's hope it's compatible).",
+        "nikic/php-parser": ">v4.15.4"
+    },
     "autoload-dev": {
         "psr-4": {
             "Siel\\Acumulus\\Tests\\PrestaShop\\": "tests/PrestaShop/"

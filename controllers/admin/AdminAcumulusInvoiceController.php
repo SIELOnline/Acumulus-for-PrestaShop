@@ -100,7 +100,7 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
         // The json_encode() was added.
         $html = '';
         $html .= $this->context->smarty->fetch($templates, null, $this->getLayout());
-        $html = json_encode(['content' => $html], Util::JsonFlags);
+        $html = json_encode(['content' => $html], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         echo trim($html);
     }
 
