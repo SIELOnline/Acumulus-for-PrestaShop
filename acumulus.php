@@ -356,6 +356,7 @@ class Acumulus extends Module
 
             return $result1 && $result2 && $result3 && $result4 && $result5 && $result6;
         } catch (ContainerNotFoundException $e) {
+            $this->getAcumulusContainer()->getLog()->exception($e);
             return false;
         }
     }
@@ -408,6 +409,7 @@ class Acumulus extends Module
                 $tab->delete();
             }
         } catch (ContainerNotFoundException|PrestaShopException $e) {
+            $this->getAcumulusContainer()->getLog()->exception($e);
             return false;
         }
 
