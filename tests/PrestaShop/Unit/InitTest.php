@@ -26,7 +26,7 @@ class InitTest extends PrestaShopTest
     {
         // 1.
         /** @var \Acumulus $module */
-        $module = Module::getInstanceByName('acumulus')->version;
+        $module = Module::getInstanceByName('acumulus');
         $container = $module->getAcumulusContainer();
         $environmentInfo = $container->getEnvironment()->get();
         // 2.

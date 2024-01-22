@@ -6,21 +6,13 @@
 composer.lock
 vendor/
 
-# patches, diffs, merges
-*.patch
-interdiff.txt
-*.orig
-*.bak
-*.old
-
-# PHPStorm
-.idea/*
-
-# Resulting installer files
-/*.zip
+# Not all tests artifacts are committed.
+/tests/.phpunit.result.cache
+/tests/PrestaShop/Data/*.latest.json
 
 #Generated files
 config.xml
 config_nl.xml
 
-
+# PHPStorm
+.idea/*

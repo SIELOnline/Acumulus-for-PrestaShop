@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<testsuites>
+    <testsuite name="all">
+        <directory>PrestaShop</directory>
+    </testsuite>
+    <testsuite name="unit">
+        <directory>PrestaShop/Unit</directory>
+    </testsuite>
+    <testsuite name="integration">
+        <directory>PrestaShop/Integration</directory>
+    </testsuite>
+</testsuites>
