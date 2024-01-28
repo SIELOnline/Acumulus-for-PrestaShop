@@ -80,7 +80,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
      *
      * @throws \Throwable
      */
-    public function processSave()
+    public function processSave(): void
     {
         $this->display = 'add';
         $form = $this->getForm();

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use Doctrine\ORM\EntityManagerInterface;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException;
+use PrestaShop\PrestaShop\Core\Version;
 use Siel\Acumulus\Config\Config;
 use Siel\Acumulus\Helpers\Container;
 use Siel\Acumulus\Helpers\Form;
@@ -185,8 +186,9 @@ class Acumulus extends Module
             'actionOrderHistoryAddAfter',
             'actionOrderSlipAdd',
             'actionAdminControllerSetMedia',
+            'actionAdminMenuTabsModifier',
         ];
-        if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+        if (version_compare($this->getVersion(), '1.7.7.0', '>=')) {
             $hooks = array_merge($hooks, [
                 'displayAdminOrderTabLink',
                 'displayAdminOrderTabContent',
@@ -207,6 +209,8 @@ class Acumulus extends Module
      * Disables the hooks that this module wanted to respond to.
      *
      * @return bool
+     *   True, some hooks are bound to not be registered (1.7 vs 8.x), so we ignore the
+     *   results of the calls to {@see \Module::unregisterHook()}.
      */
     public function unregisterHooks(): bool
     {
@@ -214,6 +218,8 @@ class Acumulus extends Module
             'actionOrderHistoryAddAfter',
             'actionOrderSlipAdd',
             'actionAdminControllerSetMedia',
+            'actionAdminMenuTabsModifier',
+            'displaybackOfficeEmployeeMenu',
             'displayAdminOrderTabLink',
             'displayAdminOrderTabContent',
             'displayAdminOrderLeft',
@@ -239,126 +245,38 @@ class Acumulus extends Module
     public function installTabs(): bool
     {
         try {
-            /** @var EntityManagerInterface $entityManager */
-            $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
-            /** @var \PrestaShopBundle\Entity\Repository\TabRepository $tabRepository */
-            $tabRepository = $entityManager->getRepository(\PrestaShopBundle\Entity\Tab::class);
-            $id_orders_parent = $tabRepository->findOneIdByClassName('AdminParentOrders');
-            $id_settings_parent = $tabRepository->findOneIdByClassName('AdminAdvancedParameters');
+            $this->uninstallTabs();
+            $tabs = $this->getAcumulusTabs();
 
-            // Add the batch form.
             $this->getAcumulusContainer()->getTranslator()->add(new BatchFormTranslations());
-            $tab = new Tab();
-            $tab->active = true;
-            $tab->class_name = 'AdminAcumulusBatch';
-            $tab->name = [];
-            foreach (Language::getLanguages(true) as $lang) {
-                $tab->name[$lang['id_lang']] = $this->t('batch_form_header');
-            }
-            $tab->id_parent = $id_orders_parent;
-            $tab->module = $this->name;
-            $tab->position = 1001;
-            try {
-                $result1 = $tab->add();
-            } catch (PrestaShopException $e) {
-                $result1 = false;
-            }
-
-            // Add the config form.
             $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
-            $tab = new Tab();
-            $tab->active = true;
-            $tab->class_name = 'AdminAcumulusConfig';
-            $tab->name = [];
-            foreach (Language::getLanguages(true) as $lang) {
-                $tab->name[$lang['id_lang']] = $this->t('config_form_header');
-            }
-            $tab->id_parent = $id_settings_parent;
-            $tab->module = $this->name;
-            $tab->position = 1002;
-            try {
-                $result2 = $tab->add();
-            } catch (PrestaShopException $e) {
-                $result2 = false;
-            }
-
-            // Add the advanced config form.
-            $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
-            $tab = new Tab();
-            $tab->active = true;
-            $tab->class_name = 'AdminAcumulusAdvanced';
-            $tab->name = [];
-            foreach (Language::getLanguages(true) as $lang) {
-                $tab->name[$lang['id_lang']] = $this->t('advanced_form_header');
-            }
-            $tab->id_parent = $id_settings_parent;
-            $tab->module = $this->name;
-            $tab->position = 1003;
-            try {
-                $result3 = $tab->add();
-            } catch (PrestaShopException $e) {
-                $result3 = false;
-            }
-
-            // Add the "Activate pro-support" form.
             $this->getAcumulusContainer()->getTranslator()->add(new ActivateSupportFormTranslations());
-            $tab = new Tab();
-            $tab->active = true;
-            $tab->class_name = 'AdminAcumulusActivate';
-            $tab->name = [];
-            foreach (Language::getLanguages(true) as $lang) {
-                $tab->name[$lang['id_lang']] = $this->t('activate_form_header');
-            }
-            $tab->id_parent = $id_settings_parent;
-            $tab->module = $this->name;
-            $tab->position = 1004;
-            try {
-                $result4 = $tab->add();
-            } catch (PrestaShopException $e) {
-                $result4 = false;
-            }
-
-            // Add the register form.
             $this->getAcumulusContainer()->getTranslator()->add(new RegisterFormTranslations());
-            $tab = new Tab();
-            $tab->active = false;
-            $tab->class_name = 'AdminAcumulusRegister';
-            $tab->name = [];
-            foreach (Language::getLanguages(true) as $lang) {
-                $tab->name[$lang['id_lang']] = $this->t('register_form_header');
-            }
-            $tab->id_parent = $id_settings_parent;
-            $tab->module = $this->name;
-            $tab->position = 1005;
-            try {
-                $result5 = $tab->add();
-            } catch (PrestaShopException $e) {
-                $result5 = false;
-            }
-
-            // Add the invoice form.
             $this->getAcumulusContainer()->getTranslator()->add(new InvoiceStatusFormTranslations());
-            $tab = new Tab();
-            $tab->active = false;
-            $tab->class_name = 'AdminAcumulusInvoice';
-            $tab->name = [];
-            foreach (Language::getLanguages(true) as $lang) {
-                $tab->name[$lang['id_lang']] = $this->t('invoice_form_header');
-            }
-            $tab->id_parent = $id_settings_parent;
-            $tab->module = $this->name;
-            $tab->position = 1006;
-            try {
-                $result6 = $tab->add();
-            } catch (PrestaShopException $e) {
-                $result6 = false;
-            }
 
-            return $result1 && $result2 && $result3 && $result4 && $result5 && $result6;
+            $result = true;
+            foreach ($tabs as $tabInfo) {
+                $tab = new Tab();
+                $tab->active = $tabInfo['active'];
+                $tab->class_name = $tabInfo['className'];
+                $tab->name = [];
+                foreach (Language::getLanguages(true) as $lang) {
+                    $tab->name[$lang['id_lang']] = $this->t($tabInfo['header']);
+                }
+                $tab->id_parent = $tabInfo['parent'];
+                $tab->module = $this->name;
+                $tab->position = $tabInfo['position'];
+                try {
+                    $result = $tab->add() && $result;
+                } catch (PrestaShopException $e) {
+                    $result = false;
+                }
+            }
         } catch (ContainerNotFoundException $e) {
             $this->getAcumulusContainer()->getLog()->exception($e);
-            return false;
+            $result = false;
         }
+        return $result;
     }
 
     /**
@@ -373,47 +291,99 @@ class Acumulus extends Module
      */
     public function uninstallTabs(): bool
     {
+        $result = true;
         try {
             /** @var EntityManagerInterface $entityManager */
             $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
             /** @var \PrestaShopBundle\Entity\Repository\TabRepository $tabRepository */
             $tabRepository = $entityManager->getRepository(\PrestaShopBundle\Entity\Tab::class);
-            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusBatch');
-            if ($id_tab) {
-                $tab = new Tab($id_tab);
-                $tab->delete();
-            }
-            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusConfig');
-            if ($id_tab) {
-                $tab = new Tab($id_tab);
-                $tab->delete();
-            }
-            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusAdvanced');
-            if ($id_tab) {
-                $tab = new Tab($id_tab);
-                $tab->delete();
-            }
-            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusActivate');
-            if ($id_tab) {
-                $tab = new Tab($id_tab);
-                $tab->delete();
-            }
-            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusRegister');
-            if ($id_tab) {
-                $tab = new Tab($id_tab);
-                $tab->delete();
-            }
-            $id_tab = $tabRepository->findOneIdByClassName('AdminAcumulusInvoice');
-            if ($id_tab) {
-                $tab = new Tab($id_tab);
-                $tab->delete();
+            $tabs = $this->getAcumulusTabs();
+            foreach ($tabs as $tabInfo) {
+                $id_tab = $tabRepository->findOneIdByClassName($tabInfo['className']);
+                if ($id_tab) {
+                    $tab = new Tab($id_tab);
+                    $result = $tab->delete() && $result;
+                }
             }
         } catch (ContainerNotFoundException|PrestaShopException $e) {
             $this->getAcumulusContainer()->getLog()->exception($e);
-            return false;
+            $result = false;
         }
+        return $result;
+    }
 
-        return true;
+    /**
+     * Returns the set of Acumulus tabs (menu-items).
+     *
+     * @throws \PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException
+     */
+    protected function getAcumulusTabs(): array
+    {
+        /** @var \PrestaShop\PrestaShop\Core\Foundation\Database\EntityManager $entityManager */
+        $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
+        /** @var \PrestaShopBundle\Entity\Repository\TabRepository $tabRepository */
+        $tabRepository = $entityManager->getRepository(\PrestaShopBundle\Entity\Tab::class);
+        $id_orders_parent = $tabRepository->findOneIdByClassName('AdminParentOrders');
+        $id_settings_parent = $tabRepository->findOneIdByClassName('AdminAdvancedParameters');
+
+        return [
+            [
+                'className' => 'AdminAcumulusBatch',
+                'header' => 'batch_form_header',
+                'active' => true,
+                'parent' => $id_orders_parent,
+                'position' => 1001,
+            ],
+            [
+                'className' => 'AdminAcumulusSettings',
+                'header' => 'settings_form_header',
+                'active' => true,
+                'parent' => $id_settings_parent,
+                'position' => 1005,
+            ],
+            [
+                'className' => 'AdminAcumulusConfig',
+                'header' => 'config_form_header',
+                'active' => true,
+                'parent' => $id_settings_parent,
+                'position' => 1006,
+            ],
+            [
+                'className' => 'AdminAcumulusMappings',
+                'header' => 'mappings_form_header',
+                'active' => true,
+                'parent' => $id_settings_parent,
+                'position' => 1010,
+            ],
+            [
+                'className' => 'AdminAcumulusAdvanced',
+                'header' => 'advanced_form_header',
+                'active' => true,
+                'parent' => $id_settings_parent,
+                'position' => 1011,
+            ],
+            [
+                'className' => 'AdminAcumulusActivate',
+                'header' => 'activate_form_header',
+                'active' => true,
+                'parent' => $id_settings_parent,
+                'position' => 1015,
+            ],
+            [
+                'className' => 'AdminAcumulusRegister',
+                'header' => 'register_form_header',
+                'active' => true,
+                'parent' => $id_settings_parent,
+                'position' => 1016,
+            ],
+            [
+                'className' => 'AdminAcumulusInvoice',
+                'header' => 'invoice_form_header',
+                'active' => false,
+                'parent' => $id_settings_parent,
+                'position' => 1019,
+            ],
+        ];
     }
 
     /**
@@ -425,7 +395,8 @@ class Acumulus extends Module
      */
     public function getContent(): string
     {
-        $form = $this->getAcumulusContainer()->getForm('config');
+        $type = $this->getAcumulusContainer()->getShopCapabilities()->usesNewCode() ? 'settings' : 'config';
+        $form = $this->getAcumulusContainer()->getForm($type);
         try {
             $form->process();
             $formHtml = $this->renderForm($form);
@@ -492,7 +463,7 @@ class Acumulus extends Module
                 ],
                 'submit' => [
                     'title' => $this->t("button_submit_{$form->getType()}"),
-                ]
+                ],
             ];
             $helper->show_cancel_button = true;
         } else {
@@ -647,12 +618,50 @@ class Acumulus extends Module
     {
         $controller = Tools::getValue('controller');
         if ($controller === 'AdminOrders') {
-            if (version_compare(_PS_VERSION_, '1.7.7.0', '>=')) {
+            if (version_compare($this->getVersion(), '1.7.7.0', '>=')) {
                 $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
             } else {
                 $this->context->controller->addCSS($this->_path . 'views/css/acumulus-176-.css');
             }
             $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
+        }
+    }
+
+    /**
+     * Hook actionAdminMenuTabsModifier
+     *
+     * This hook gets called on the back office pages and can be used to dynamically show/
+     * hide menu-items. We do so for our configuration forms based on
+     * {@see \Siel\Acumulus\Config\ShopCapabilities::usesNewCode()}.
+     *
+     * @param array $params
+     *    Array with the following entries:
+     *    - tabs: array with tabs, a tab being an array containing the definition of a tab.
+     *
+     * @noinspection PhpUnused  hook
+     */
+    public function hookActionAdminMenuTabsModifier(array $params): void
+    {
+        $this->adminMenuTabsModifier($params['tabs']);
+    }
+
+    protected function adminMenuTabsModifier(array &$tabs): void
+    {
+        $usesNewCode = $this->getAcumulusContainer()->getShopCapabilities()->usesNewCode();
+        foreach ($tabs as &$tab) {
+            switch($tab['class_name']) {
+                case 'AdminAcumulusSettings':
+                case 'AdminAcumulusMappings':
+                    $tab['active'] = $usesNewCode;
+                    break;
+                case 'AdminAcumulusConfig':
+                case 'AdminAcumulusAdvanced':
+                    $tab['active'] = !$usesNewCode;
+                    break;
+            }
+            if (!empty($tab['sub_tabs'])) {
+                $this->adminMenuTabsModifier($tab['sub_tabs']);
+            }
         }
     }
 
@@ -782,5 +791,16 @@ class Acumulus extends Module
     protected function dropTables(): bool
     {
         return $this->getAcumulusContainer()->getAcumulusEntryManager()->uninstall();
+    }
+
+    /**
+     * Description.
+     *
+     * @return string
+     *   Description.
+     */
+    private function getVersion(): string
+    {
+        return Version::VERSION;
     }
 }

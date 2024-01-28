@@ -14,13 +14,13 @@ declare(strict_types=1);
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusConfigController provides the config form.
+ * AdminAcumulusConfigController provides the settings form.
  */
-class AdminAcumulusConfigController extends BaseAdminAcumulusController
+class AdminAcumulusSettingsController extends BaseAdminAcumulusController
 {
     public function __construct()
     {
-        $this->formType = 'config';
+        $this->formType = 'settings';
         $this->icon = 'process-icon-save';
         parent::__construct();
     }

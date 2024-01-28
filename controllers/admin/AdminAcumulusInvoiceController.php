@@ -11,8 +11,6 @@
 
 declare(strict_types=1);
 
-use Siel\Acumulus\Helpers\Util;
-
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
