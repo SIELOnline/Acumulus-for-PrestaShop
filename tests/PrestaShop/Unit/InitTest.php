@@ -25,10 +25,7 @@ class InitTest extends PrestaShopTest
     public function testInit(): void
     {
         // 1.
-        /** @var \Acumulus $module */
-        $module = Module::getInstanceByName('acumulus');
-        $container = $module->getAcumulusContainer();
-        $environmentInfo = $container->getEnvironment()->get();
+        $environmentInfo = $this->getAcumulusContainer()->getEnvironment()->get();
         // 2.
         $this->assertMatchesRegularExpression('|\d+\.\d+\.\d+|', $environmentInfo['shopVersion']);
         $this->assertNotEquals(Environment::Unknown, $environmentInfo['dbVersion']);
