@@ -248,14 +248,11 @@ class Acumulus extends Module
             $this->uninstallTabs();
             $tabs = $this->getAcumulusTabs();
 
-            $this->getAcumulusContainer()->getTranslator()->add(new BatchFormTranslations());
-            $this->getAcumulusContainer()->getTranslator()->add(new ConfigFormTranslations());
-            $this->getAcumulusContainer()->getTranslator()->add(new ActivateSupportFormTranslations());
-            $this->getAcumulusContainer()->getTranslator()->add(new RegisterFormTranslations());
-            $this->getAcumulusContainer()->getTranslator()->add(new InvoiceStatusFormTranslations());
-
             $result = true;
             foreach ($tabs as $tabInfo) {
+                if ($tabInfo['translations'] !== null) {
+                    $this->getAcumulusContainer()->getTranslator()->add(new $tabInfo['translations']());
+                }
                 $tab = new Tab();
                 $tab->active = $tabInfo['active'];
                 $tab->class_name = $tabInfo['className'];
@@ -333,6 +330,7 @@ class Acumulus extends Module
                 'active' => true,
                 'parent' => $id_orders_parent,
                 'position' => 1001,
+                'translations' => BatchFormTranslations::class,
             ],
             [
                 'className' => 'AdminAcumulusSettings',
@@ -340,6 +338,7 @@ class Acumulus extends Module
                 'active' => true,
                 'parent' => $id_settings_parent,
                 'position' => 1005,
+                'translations' => ConfigFormTranslations::class,
             ],
             [
                 'className' => 'AdminAcumulusConfig',
@@ -347,6 +346,7 @@ class Acumulus extends Module
                 'active' => true,
                 'parent' => $id_settings_parent,
                 'position' => 1006,
+                'translations' => null,
             ],
             [
                 'className' => 'AdminAcumulusMappings',
@@ -354,6 +354,7 @@ class Acumulus extends Module
                 'active' => true,
                 'parent' => $id_settings_parent,
                 'position' => 1010,
+                'translations' => null,
             ],
             [
                 'className' => 'AdminAcumulusAdvanced',
@@ -361,6 +362,7 @@ class Acumulus extends Module
                 'active' => true,
                 'parent' => $id_settings_parent,
                 'position' => 1011,
+                'translations' => null,
             ],
             [
                 'className' => 'AdminAcumulusActivate',
@@ -368,6 +370,7 @@ class Acumulus extends Module
                 'active' => true,
                 'parent' => $id_settings_parent,
                 'position' => 1015,
+                'translations' => ActivateSupportFormTranslations::class,
             ],
             [
                 'className' => 'AdminAcumulusRegister',
@@ -375,6 +378,7 @@ class Acumulus extends Module
                 'active' => true,
                 'parent' => $id_settings_parent,
                 'position' => 1016,
+                'translations' => RegisterFormTranslations::class,
             ],
             [
                 'className' => 'AdminAcumulusInvoice',
@@ -382,6 +386,7 @@ class Acumulus extends Module
                 'active' => false,
                 'parent' => $id_settings_parent,
                 'position' => 1019,
+                'translations' => InvoiceStatusFormTranslations::class,
             ],
         ];
     }
