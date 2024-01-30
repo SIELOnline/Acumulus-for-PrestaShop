@@ -21,11 +21,12 @@ class InvoiceCreateTest extends PrestaShopTest
     {
         $dataPath = dirname(__FILE__, 2) . '/Data';
         return [
-            'NL consument, standard rate, virtual' => [$dataPath, Source::Order, 6,],
             'NL consument, mixed rates, virtual + physical' => [$dataPath, Source::Order, 7,],
             'FR consument, mixed rates, NL shipping' => [$dataPath, Source::Order, 8,],
             'FR consument, mixed rates, FR shipping' => [$dataPath, Source::Order, 9,],
             'FR bedrijf, standard rate' => [$dataPath, Source::Order, 10,],
+            'FR bedrijf, reverse vat' => [$dataPath, Source::Order, 11,],
+            'FR consument, productkorting + coupon code' => [$dataPath, Source::Order, 12,],
         ];
     }
 
