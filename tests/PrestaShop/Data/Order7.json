@@ -24,7 +24,7 @@
         "altMeta-shop-country-code": "13",
         "altMeta-shop-country-name": "Nederland",
         "meta-shop-vat-based-on": "id_address_delivery",
-        "meta-main-address": "shipping",
+        "meta-main-address-type": "shipping",
         "invoice": {
             "concept": 0,
             "vatType": 1,

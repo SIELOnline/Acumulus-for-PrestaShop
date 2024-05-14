@@ -26,8 +26,15 @@ class InvoiceCreateTest extends PrestaShopTest
             'FR consument, mixed rates, FR shipping' => [$dataPath, Source::Order, 9,],
             'FR bedrijf, standard rate' => [$dataPath, Source::Order, 10,],
             'FR bedrijf, reverse vat' => [$dataPath, Source::Order, 11,],
-            'FR consument, productkorting + coupon code' => [$dataPath, Source::Order, 12,],
+            'FR consument, productkorting + coupon code' => [$dataPath, Source::Order, 14,],
+            'Credit note for FR consument, productkorting + coupon code' => [$dataPath, Source::CreditNote, 3,],
+            'FR consument, productkorting + coupon code that will not be refunded' => [$dataPath, Source::Order, 15,],
+            'Credit note for FR consument, productkorting + coupon code not refunded' => [$dataPath, Source::CreditNote, 4,],
+            'FR consument, partial refund, coupon code will be revoked' => [$dataPath, Source::Order, 16,],
+            'Credit note for FR consument, partial refund, productkorting + coupon code refunded' => [$dataPath, Source::CreditNote, 5,],
         ];
+
+
     }
 
     /**
