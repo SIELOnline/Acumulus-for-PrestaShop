@@ -76,9 +76,14 @@ class AcumulusTestsBootstrap
         /** @noinspection UntrustedInclusionInspection  false positive */
         require_once("$root/config/config.inc.php");
 
-        // Create PrestaShop object
+        // Create PrestaShop object and initialize Context (where necessary).
         $this->prestashop = new Shop();
-//        $this->prestashop->context = Context::getContext();
+        // Error: Cannot access protected property Shop::$context
+        //$this->prestashop->context = Context::getContext();
+        // Exception: Trying to get property 'precision' of non-object in
+        //   classes\Context.php 557:  ...($this->currency->precision);
+        Context::getContext()->currency = Currency::getDefaultCurrency();
+
     }
 }
 
