@@ -5,14 +5,13 @@
 
 declare(strict_types=1);
 
-namespace Siel\Acumulus\Tests\Joomla\Unit;
+namespace Siel\Acumulus\Tests\PrestaShop\Unit;
 
-use Module;
 use Siel\Acumulus\Config\Environment;
 use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
 
 /**
- * Tests that WooCommerce and Acumulus have been initialized.
+ * Tests that WooPrestaShop and Acumulus have been initialized.
  */
 class InitTest extends PrestaShopTest
 {
