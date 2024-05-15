@@ -32,6 +32,8 @@ class InvoiceCreateTest extends PrestaShopTest
             'Credit note for FR consument, productkorting + coupon code not refunded' => [$dataPath, Source::CreditNote, 4,],
             'FR consument, partial refund, coupon code will be revoked' => [$dataPath, Source::Order, 16,],
             'Credit note for FR consument, partial refund, productkorting + coupon code refunded' => [$dataPath, Source::CreditNote, 5,],
+            'FR consument,NL shipping, partial refund, coupon code revoked, shipping refunded' => [$dataPath, Source::Order, 17,],
+            'Credit note FR consument, NL shipping, partial, coupon code revoked, shipping refunded' => [$dataPath, Source::CreditNote, 6,],
         ];
 
 
