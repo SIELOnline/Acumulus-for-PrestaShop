@@ -47,7 +47,7 @@ class Acumulus extends Module
         /**
          * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
          */
-        $this->version = '8.1.2';
+        $this->version = '8.2.0';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
