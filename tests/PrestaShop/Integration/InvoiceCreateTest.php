@@ -14,6 +14,11 @@ use function dirname;
 
 /**
  * InvoiceCreateTest tests the process of creating an {@see Invoice}.
+ *
+ * Note that the VAT checker module installs an override of the
+ * {@see \TaxRulesTaxManagerCore} class that will always return an "empty" tax rule
+ * manager once it has decided that tax calculations should be disabled. This is a problem
+ * this test class but also for the batch send form.
  */
 class InvoiceCreateTest extends PrestaShopTest
 {

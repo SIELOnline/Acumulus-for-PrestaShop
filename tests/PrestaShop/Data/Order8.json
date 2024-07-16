@@ -12,7 +12,7 @@
         "countryCode": "NL",
         "countryAutoName": 2,
         "meta-address-type": "shipping",
-        "meta-shop-country-code": "13",
+        "meta-shop-country-code": 13,
         "meta-shop-country-name": "Nederland",
         "altFullName": "Consument Frankrijk",
         "altAddress1": "123 Champs-Élysées",
@@ -21,7 +21,7 @@
         "altCountryCode": "FR",
         "altCountryAutoName": 2,
         "altMeta-address-type": "invoice",
-        "altMeta-shop-country-code": "8",
+        "altMeta-shop-country-code": 8,
         "altMeta-shop-country-name": "Frankrijk",
         "meta-shop-vat-based-on": "id_address_delivery",
         "meta-main-address-type": "shipping",
@@ -52,8 +52,7 @@
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-line-type": "order-item",
-                    "vatamount": 1.89,
-                    "meta-vattypes-possible": "[1]"
+                    "vatamount": 1.89
                 },
                 {
                     "itemNumber": "demo_10",
@@ -72,8 +71,7 @@
                     "meta-vatrate-lookup-label": "BTW NL 9%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-line-type": "order-item",
-                    "vatamount": 1.15596333,
-                    "meta-vattypes-possible": "[1]"
+                    "vatamount": 1.15596333
                 },
                 {
                     "product": "My carrier",
@@ -88,8 +86,7 @@
                     "meta-vatclass-name": "NL Standard Rate (21%)",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-line-type": "shipping",
-                    "meta-vattypes-possible": "[1]"
+                    "meta-line-type": "shipping"
                 }
             ],
             "meta-source-type": "Order",
@@ -108,10 +105,7 @@
             "meta-lines-amount": 28.844037,
             "meta-lines-amountinc": 33.36,
             "meta-lines-vatamount": 4.51596333,
-            "meta-vattype-source": "Completor::completeVatType: Only 1 choice fits all",
-            "meta-vattypes-possible-invoice": "[1,6]",
-            "meta-vattypes-possible-lines-intersection": "[1]",
-            "meta-vattypes-possible-lines-union": "[1]"
+            "meta-vattype-source": "Completor::checkForKnownVatType: only 1 possible vat type"
         }
     }
 }
