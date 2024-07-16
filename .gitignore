@@ -13,6 +13,7 @@ vendor/
 #Generated files
 config.xml
 config_nl.xml
+config_gb.xml
 
 # PHPStorm
 .idea/*
