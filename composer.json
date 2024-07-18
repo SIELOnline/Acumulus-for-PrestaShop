@@ -2,7 +2,7 @@
     "name": "siel/acumulus-prestashop",
     "description": "Integrates PrestaShop with your Siel Acumulus online administration",
     "type": "prestashop-module",
-    "version": "8.1.2",
+    "version": "8.2.0",
     "license": [
         "GPL-3.0"
     ],
@@ -20,7 +20,8 @@
         }
     ],
     "require": {
-        "siel/acumulus": "^8.1.2",
+        "php": "^8",
+        "siel/acumulus": "^8.2.0",
         "ext-dom": "*",
         "ext-json": "*"
     },
