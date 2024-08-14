@@ -105,6 +105,8 @@ class Acumulus extends Module
 
     /**
      * {@inheritdoc}
+     *
+     * @throws \JsonException
      */
     public function install(): bool
     {
@@ -266,7 +268,7 @@ class Acumulus extends Module
                 $tab->position = $tabInfo['position'];
                 try {
                     $result = $tab->add() && $result;
-                } catch (PrestaShopException $e) {
+                } catch (PrestaShopException) {
                     $result = false;
                 }
             }
@@ -401,8 +403,7 @@ class Acumulus extends Module
      */
     public function getContent(): string
     {
-        $type = $this->getAcumulusContainer()->getShopCapabilities()->usesNewCode() ? 'settings' : 'config';
-        $form = $this->getAcumulusContainer()->getForm($type);
+        $form = $this->getAcumulusContainer()->getForm('settings');
         try {
             $form->process();
             $formHtml = $this->renderForm($form);
@@ -416,7 +417,7 @@ class Acumulus extends Module
                 $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
                 $message = $crashReporter->logAndMail($e);
                 $form->createAndAddMessage($message, Severity::Exception);
-            } catch (Throwable $inner) {
+            } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
                 // screen, so assume not, and rethrow the original exception.
                 throw $e;
@@ -582,7 +583,7 @@ class Acumulus extends Module
                 // We do not know if we are on the admin side, so we should not
                 // try to display the message returned by logAndMail().
                 $crashReporter->logAndMail($e);
-            } catch (Throwable $inner) {
+            } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
                 // screen, so assume not, and rethrow the original exception.
                 throw $e;
@@ -653,17 +654,10 @@ class Acumulus extends Module
 
     protected function adminMenuTabsModifier(array &$tabs): void
     {
-        $usesNewCode = $this->getAcumulusContainer()->getShopCapabilities()->usesNewCode();
+        $checkAccount = $this->getAcumulusContainer()->getCheckAccount()->doCheck();
         foreach ($tabs as &$tab) {
-            switch($tab['class_name']) {
-                case 'AdminAcumulusSettings':
-                case 'AdminAcumulusMappings':
-                    $tab['active'] = $usesNewCode;
-                    break;
-                case 'AdminAcumulusConfig':
-                case 'AdminAcumulusAdvanced':
-                    $tab['active'] = !$usesNewCode;
-                    break;
+            if ($tab['class_name'] === 'AdminAcumulusActivate') {
+                $tab['active'] = !empty($checkAccount);
             }
             if (!empty($tab['sub_tabs'])) {
                 $this->adminMenuTabsModifier($tab['sub_tabs']);
@@ -760,6 +754,8 @@ class Acumulus extends Module
      *
      * @return bool
      *   Success.
+     *
+     * @throws \JsonException
      */
     protected function initConfig(): bool
     {
