@@ -4,9 +4,9 @@
         <directory>PrestaShop</directory>
     </testsuite>
     <testsuite name="unit">
-        <directory>PrestaShop/Unit</directory>
+        <directory>Unit/PrestaShop</directory>
     </testsuite>
     <testsuite name="integration">
-        <directory>PrestaShop/Integration</directory>
+        <directory>Integration/PrestaShop</directory>
     </testsuite>
 </testsuites>
