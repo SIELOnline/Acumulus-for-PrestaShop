@@ -44,16 +44,16 @@
                     "costPrice": 5.49,
                     "meta-id": 10,
                     "meta-product-id": 12,
-                    "meta-vatclass-id": 5,
-                    "meta-vatclass-name": "Standard rate (EU VAT)",
                     "unitpriceinc": 10.89,
                     "meta-line-amount": 9.0,
                     "meta-line-amountinc": 10.89,
                     "meta-vatrate-source": "exact",
+                    "meta-vatclass-id": 5,
+                    "meta-vatclass-name": "Standard rate (EU VAT)",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-sub-type": "Item",
+                    "meta-sub-type": "ItemLine",
                     "vatamount": 1.89
                 },
                 {
@@ -65,16 +65,16 @@
                     "costPrice": 5.49,
                     "meta-id": 11,
                     "meta-product-id": 17,
-                    "meta-vatclass-id": 6,
-                    "meta-vatclass-name": "Reduced rate (EU VAT)",
                     "unitpriceinc": 14.99,
                     "meta-line-amount": 13.752294,
                     "meta-line-amountinc": 14.99,
                     "meta-vatrate-source": "exact",
+                    "meta-vatclass-id": 6,
+                    "meta-vatclass-name": "Reduced rate (EU VAT)",
                     "meta-vatrate-lookup": 9.0,
                     "meta-vatrate-lookup-label": "BTW NL 9%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-sub-type": "Item",
+                    "meta-sub-type": "ItemLine",
                     "vatamount": 1.2377064599999998
                 },
                 {
@@ -90,7 +90,7 @@
                     "meta-vatclass-name": "NL Standard Rate (21%)",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-sub-type": "Shipping"
+                    "meta-sub-type": "ShippingLine"
                 }
             ],
             "meta-source-type": "Order",

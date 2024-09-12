@@ -45,8 +45,6 @@
                     "costPrice": -5.49,
                     "meta-id": 31,
                     "meta-product-id": 2,
-                    "meta-vatclass-id": 1,
-                    "meta-vatclass-name": "NL Standard Rate (21%)",
                     "unitpriceinc": -34.7512,
                     "meta-line-amount": -28.72,
                     "meta-line-amountinc": -34.75,
@@ -56,10 +54,12 @@
                     "meta-unitprice-precision": 0.01,
                     "meta-vatamount-precision": 0.01,
                     "meta-vatrate-source": "completor-range",
+                    "meta-vatclass-id": 1,
+                    "meta-vatclass-name": "NL Standard Rate (21%)",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "vatamount",
-                    "meta-sub-type": "Item",
+                    "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]"
                 },
                 {
@@ -75,7 +75,7 @@
                     "meta-vatclass-name": "Standard rate (EU VAT)",
                     "meta-vatrate-lookup": 20.0,
                     "meta-vatrate-lookup-label": "TVA FR 20%",
-                    "meta-sub-type": "Shipping"
+                    "meta-sub-type": "ShippingLine"
                 }
             ],
             "meta-source-type": "CreditNote",
