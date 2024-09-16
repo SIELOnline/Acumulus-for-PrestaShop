@@ -113,7 +113,7 @@
                     "meta-vatrate-source": "completor-range",
                     "meta-fields-calculated": "['vatamount']",
                     "meta-sub-type": "DiscountLine",
-                    "meta-vatrate-range-matches": "[{'vatrate':'21.0000','vattype':1}]"
+                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]"
                 }
             ],
             "meta-source-type": "Order",

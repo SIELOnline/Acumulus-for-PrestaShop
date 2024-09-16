@@ -47,7 +47,7 @@
                     "meta-vatrate-lookup-label": "TVA FR 10%",
                     "meta-fields-calculated": "['vatamount']",
                     "meta-sub-type": "Item",
-                    "meta-vatrate-range-matches": "[{'vatrate':'10.0000','vattype':6}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':10.0,'vattype':6}]",
                     "meta-vattypes-possible": "[6]"
                 },
                 {
@@ -72,7 +72,7 @@
                     "meta-vatrate-lookup-label": "TVA FR 10%",
                     "meta-fields-calculated": "['vatamount']",
                     "meta-sub-type": "Item",
-                    "meta-vatrate-range-matches": "[{'vatrate':'10.0000','vattype':6}]",
+                    "meta-vatrate-range-matches": "[{'vatrate':10.0,'vattype':6}]",
                     "meta-vattypes-possible": "[6]"
                 },
                 {
