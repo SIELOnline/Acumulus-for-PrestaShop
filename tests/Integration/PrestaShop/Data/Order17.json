@@ -93,8 +93,8 @@
                     "meta-fields-calculated": "['unitprice','vatamount']",
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "Standard rate (EU VAT)",
-                    "meta-vatrate-lookup": 20.0,
-                    "meta-vatrate-lookup-label": "TVA FR 20%",
+                    "meta-vatrate-lookup": 21.0,
+                    "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-sub-type": "ShippingLine"
                 },
                 {

@@ -58,7 +58,7 @@
                     "meta-vatclass-name": "Reduced rate (EU VAT)",
                     "meta-vatrate-lookup": 10.0,
                     "meta-vatrate-lookup-label": "TVA FR 10%",
-                    "meta-fields-calculated": "vatamount",
+                    "meta-fields-calculated": "['vatamount']",
                     "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':10.0,'vattype':6}]",
                     "meta-vattypes-possible": "[6]"
@@ -85,7 +85,7 @@
                     "meta-vatclass-name": "Reduced rate (EU VAT)",
                     "meta-vatrate-lookup": 10.0,
                     "meta-vatrate-lookup-label": "TVA FR 10%",
-                    "meta-fields-calculated": "vatamount",
+                    "meta-fields-calculated": "['vatamount']",
                     "meta-sub-type": "ItemLine",
                     "meta-vatrate-range-matches": "[{'vatrate':10.0,'vattype':6}]",
                     "meta-vattypes-possible": "[6]"
