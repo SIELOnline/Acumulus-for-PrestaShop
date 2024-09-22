@@ -11,18 +11,18 @@
         "city": "Eindhoven",
         "countryCode": "NL",
         "countryAutoName": 2,
+        "meta-sub-type": "ShippingAddress",
         "meta-shop-country-code": 13,
         "meta-shop-country-name": "Nederland",
-        "meta-sub-type": "ShippingAddress",
         "altFullName": "Consument Frankrijk",
         "altAddress1": "123 Champs-Élysées",
         "altPostalCode": "75000",
         "altCity": "Paris",
         "altCountryCode": "FR",
         "altCountryAutoName": 2,
+        "altMeta-sub-type": "InvoiceAddress",
         "altMeta-shop-country-code": 8,
         "altMeta-shop-country-name": "Frankrijk",
-        "altMeta-sub-type": "InvoiceAddress",
         "meta-shop-vat-based-on": "id_address_delivery",
         "meta-main-address-type": "ShippingAddress",
         "invoice": {
@@ -43,6 +43,7 @@
                     "vatRate": 21.0,
                     "quantity": 1.0,
                     "costPrice": 5.49,
+                    "meta-sub-type": "ItemLine",
                     "meta-id": 30,
                     "meta-product-id": 1,
                     "unitpriceinc": 23.1352,
@@ -55,7 +56,6 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)','meta-line-discount-amountinc']",
-                    "meta-sub-type": "ItemLine",
                     "vatamount": 4.0152,
                     "meta-line-discount-amountinc": -1.997249047619049
                 },
@@ -66,6 +66,7 @@
                     "vatRate": 21.0,
                     "quantity": 1.0,
                     "costPrice": 5.49,
+                    "meta-sub-type": "ItemLine",
                     "meta-id": 31,
                     "meta-product-id": 2,
                     "unitpriceinc": 34.7512,
@@ -78,7 +79,6 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)','meta-line-discount-amountinc']",
-                    "meta-sub-type": "ItemLine",
                     "vatamount": 6.031199999999999,
                     "meta-line-discount-amountinc": -3.000050952380942
                 },
@@ -87,6 +87,7 @@
                     "unitPrice": 7.000000000000001,
                     "vatRate": 21.0,
                     "quantity": 1.0,
+                    "meta-sub-type": "ShippingLine",
                     "unitpriceinc": 8.47,
                     "vatamount": 1.4699999999999998,
                     "meta-vatrate-source": "exact",
@@ -94,8 +95,7 @@
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "Standard rate (EU VAT)",
                     "meta-vatrate-lookup": 21.0,
-                    "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-sub-type": "ShippingLine"
+                    "meta-vatrate-lookup-label": "BTW NL 21%"
                 },
                 {
                     "itemNumber": "1",
@@ -103,6 +103,7 @@
                     "unitPrice": -4.132231,
                     "vatRate": 21.0,
                     "quantity": 1.0,
+                    "meta-sub-type": "DiscountLine",
                     "unitpriceinc": -5.0,
                     "meta-strategy-split": true,
                     "meta-vatrate-min": 20.700917944691312,
@@ -112,7 +113,6 @@
                     "meta-vatamount-precision": 0.02,
                     "meta-vatrate-source": "completor-range",
                     "meta-fields-calculated": "['vatamount']",
-                    "meta-sub-type": "DiscountLine",
                     "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]"
                 }
             ],

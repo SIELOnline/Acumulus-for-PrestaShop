@@ -13,9 +13,9 @@
         "city": "Nyons",
         "countryCode": "FR",
         "countryAutoName": 2,
+        "meta-sub-type": "ShippingAddress",
         "meta-shop-country-code": 8,
         "meta-shop-country-name": "Frankrijk",
-        "meta-sub-type": "ShippingAddress",
         "altCompanyName1": "SARL LRP",
         "altFullName": "Bedrijf Frankrijk",
         "altAddress1": "1 chemin de la rien",
@@ -23,9 +23,9 @@
         "altCity": "Nyons",
         "altCountryCode": "FR",
         "altCountryAutoName": 2,
+        "altMeta-sub-type": "InvoiceAddress",
         "altMeta-shop-country-code": 8,
         "altMeta-shop-country-name": "Frankrijk",
-        "altMeta-sub-type": "InvoiceAddress",
         "meta-shop-vat-based-on": "id_address_delivery",
         "meta-main-address-type": "ShippingAddress",
         "invoice": {
@@ -46,6 +46,7 @@
                     "vatRate": 0.0,
                     "quantity": 2.0,
                     "costPrice": 5.49,
+                    "meta-sub-type": "ItemLine",
                     "meta-id": 18,
                     "meta-product-id": 16,
                     "unitpriceinc": 13.752294,
@@ -58,7 +59,6 @@
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "",
                     "meta-fields-calculated": "['vatamount']",
-                    "meta-sub-type": "ItemLine",
                     "meta-vattypes-possible": "[3]"
                 },
                 {
@@ -68,6 +68,7 @@
                     "vatRate": 0.0,
                     "quantity": 1.0,
                     "costPrice": 5.49,
+                    "meta-sub-type": "ItemLine",
                     "meta-id": 19,
                     "meta-product-id": 16,
                     "unitpriceinc": 13.752294,
@@ -80,7 +81,6 @@
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "",
                     "meta-fields-calculated": "['vatamount']",
-                    "meta-sub-type": "ItemLine",
                     "meta-vattypes-possible": "[3]"
                 },
                 {
@@ -88,6 +88,7 @@
                     "unitPrice": 7.000000000000001,
                     "vatRate": 0.0,
                     "quantity": 1.0,
+                    "meta-sub-type": "ShippingLine",
                     "unitpriceinc": 7.0,
                     "vatamount": -8.881784197001252e-16,
                     "meta-vatrate-source": "exact",
@@ -96,7 +97,6 @@
                     "meta-vatclass-name": "Standard rate (EU VAT)",
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "",
-                    "meta-sub-type": "ShippingLine",
                     "meta-vattypes-possible": "[3]"
                 }
             ],

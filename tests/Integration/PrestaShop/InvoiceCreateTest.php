@@ -17,6 +17,8 @@ use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
  * {@see \TaxRulesTaxManagerCore} class that will always return an "empty" tax rule
  * manager once it has decided that tax calculations should be disabled. This is a problem
  * this test class but also for the batch send form.
+ *
+ * @todo: add tests for gift wrapping and payment fee (paypal with a fee module) lines.
  */
 class InvoiceCreateTest extends PrestaShopTest
 {

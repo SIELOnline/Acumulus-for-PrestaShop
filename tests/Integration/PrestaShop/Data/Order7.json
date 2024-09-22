@@ -11,18 +11,18 @@
         "city": "Nijmegen",
         "countryCode": "NL",
         "countryAutoName": 2,
+        "meta-sub-type": "ShippingAddress",
         "meta-shop-country-code": 13,
         "meta-shop-country-name": "Nederland",
-        "meta-sub-type": "ShippingAddress",
         "altFullName": "Consument Nederland",
         "altAddress1": "Straat 1",
         "altPostalCode": "1234 AB",
         "altCity": "Nijmegen",
         "altCountryCode": "NL",
         "altCountryAutoName": 2,
+        "altMeta-sub-type": "InvoiceAddress",
         "altMeta-shop-country-code": 13,
         "altMeta-shop-country-name": "Nederland",
-        "altMeta-sub-type": "InvoiceAddress",
         "meta-shop-vat-based-on": "id_address_delivery",
         "meta-main-address-type": "ShippingAddress",
         "invoice": {
@@ -42,6 +42,7 @@
                     "vatRate": 21.0,
                     "quantity": 1.0,
                     "costPrice": 5.49,
+                    "meta-sub-type": "ItemLine",
                     "meta-id": 10,
                     "meta-product-id": 12,
                     "unitpriceinc": 10.89,
@@ -53,7 +54,6 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-sub-type": "ItemLine",
                     "vatamount": 1.89
                 },
                 {
@@ -63,6 +63,7 @@
                     "vatRate": 9.0,
                     "quantity": 1.0,
                     "costPrice": 5.49,
+                    "meta-sub-type": "ItemLine",
                     "meta-id": 11,
                     "meta-product-id": 17,
                     "unitpriceinc": 14.99,
@@ -74,7 +75,6 @@
                     "meta-vatrate-lookup": 9.0,
                     "meta-vatrate-lookup-label": "BTW NL 9%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-sub-type": "ItemLine",
                     "vatamount": 1.2377064599999998
                 },
                 {
@@ -82,6 +82,7 @@
                     "unitPrice": 7.000000000000001,
                     "vatRate": 21.0,
                     "quantity": 1.0,
+                    "meta-sub-type": "ShippingLine",
                     "unitpriceinc": 8.47,
                     "vatamount": 1.4699999999999998,
                     "meta-vatrate-source": "exact",
@@ -89,8 +90,7 @@
                     "meta-vatclass-id": 1,
                     "meta-vatclass-name": "NL Standard Rate (21%)",
                     "meta-vatrate-lookup": 21.0,
-                    "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-sub-type": "ShippingLine"
+                    "meta-vatrate-lookup-label": "BTW NL 21%"
                 }
             ],
             "meta-source-type": "Order",
