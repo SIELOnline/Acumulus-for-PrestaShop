@@ -19,6 +19,7 @@ use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
  * this test class but also for the batch send form.
  *
  * @todo: add tests for gift wrapping and payment fee (paypal with a fee module) lines.
+ * @todo: add a margin scheme invoice.
  */
 class InvoiceCreateTest extends PrestaShopTest
 {
