@@ -54,6 +54,7 @@
                     "meta-vatrate-lookup": 20.0,
                     "meta-vatrate-lookup-label": "TVA FR 20%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
+                    "meta-margin-line": false,
                     "vatamount": 1.8,
                     "meta-vattypes-possible": "[6]"
                 },
@@ -76,6 +77,7 @@
                     "meta-vatrate-lookup": 10.0,
                     "meta-vatrate-lookup-label": "TVA FR 10%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
+                    "meta-margin-line": false,
                     "vatamount": 1.3752294,
                     "meta-vattypes-possible": "[6]"
                 },

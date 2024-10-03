@@ -54,6 +54,7 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
+                    "meta-margin-line": false,
                     "vatamount": 1.89
                 },
                 {
@@ -75,6 +76,7 @@
                     "meta-vatrate-lookup": 9.0,
                     "meta-vatrate-lookup-label": "BTW NL 9%",
                     "meta-fields-calculated": "['vatamount (from vatrate)']",
+                    "meta-margin-line": false,
                     "vatamount": 1.2377064599999998
                 },
                 {

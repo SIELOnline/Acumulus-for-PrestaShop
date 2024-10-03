@@ -56,6 +56,7 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)','meta-line-discount-amountinc']",
+                    "meta-margin-line": false,
                     "vatamount": 4.0152,
                     "meta-line-discount-amountinc": -1.997249047619049
                 },
@@ -79,6 +80,7 @@
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
                     "meta-fields-calculated": "['vatamount (from vatrate)','meta-line-discount-amountinc']",
+                    "meta-margin-line": false,
                     "vatamount": 6.031199999999999,
                     "meta-line-discount-amountinc": -3.000050952380942
                 },

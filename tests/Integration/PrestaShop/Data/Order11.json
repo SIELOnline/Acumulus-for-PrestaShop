@@ -59,6 +59,7 @@
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "",
                     "meta-fields-calculated": "['vatamount']",
+                    "meta-margin-line": false,
                     "meta-vattypes-possible": "[3]"
                 },
                 {
@@ -81,6 +82,7 @@
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "",
                     "meta-fields-calculated": "['vatamount']",
+                    "meta-margin-line": false,
                     "meta-vattypes-possible": "[3]"
                 },
                 {

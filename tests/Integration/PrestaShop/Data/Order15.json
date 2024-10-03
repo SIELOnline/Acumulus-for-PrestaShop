@@ -56,6 +56,7 @@
                     "meta-vatrate-lookup": 10.0,
                     "meta-vatrate-lookup-label": "TVA FR 10%",
                     "meta-fields-calculated": "['vatamount (from vatrate)','meta-line-discount-amountinc']",
+                    "meta-margin-line": false,
                     "vatamount": 1.3752294,
                     "meta-line-discount-amountinc": -1.3527910000000098,
                     "meta-vattypes-possible": "[6]"
@@ -80,6 +81,7 @@
                     "meta-vatrate-lookup": 10.0,
                     "meta-vatrate-lookup-label": "TVA FR 10%",
                     "meta-fields-calculated": "['vatamount (from vatrate)','meta-line-discount-amountinc']",
+                    "meta-margin-line": false,
                     "vatamount": 1.2377065,
                     "meta-line-discount-amountinc": -1.2175129999999912,
                     "meta-vattypes-possible": "[6]"
