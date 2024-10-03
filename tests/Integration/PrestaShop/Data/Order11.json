@@ -53,13 +53,15 @@
                     "meta-line-amount": 27.504588,
                     "meta-line-amountinc": 27.504588,
                     "vatamount": 0.0,
-                    "meta-vatrate-source": "exact-0",
+                    "meta-unitprice-precision": 0.01,
+                    "meta-vatamount-precision": 0.01,
                     "meta-vatclass-id": 6,
                     "meta-vatclass-name": "Reduced rate (EU VAT)",
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "",
                     "meta-fields-calculated": "['vatamount']",
                     "meta-margin-line": false,
+                    "meta-vatrate-source": "exact-0",
                     "meta-vattypes-possible": "[3]"
                 },
                 {
@@ -76,13 +78,15 @@
                     "meta-line-amount": 13.752294,
                     "meta-line-amountinc": 13.752294,
                     "vatamount": 0.0,
-                    "meta-vatrate-source": "exact-0",
+                    "meta-unitprice-precision": 0.01,
+                    "meta-vatamount-precision": 0.01,
                     "meta-vatclass-id": 6,
                     "meta-vatclass-name": "Reduced rate (EU VAT)",
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "",
                     "meta-fields-calculated": "['vatamount']",
                     "meta-margin-line": false,
+                    "meta-vatrate-source": "exact-0",
                     "meta-vattypes-possible": "[3]"
                 },
                 {
