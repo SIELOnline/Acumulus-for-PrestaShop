@@ -47,7 +47,7 @@ class Acumulus extends Module
         /**
          * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
          */
-        $this->version = '8.3.0';
+        $this->version = '8.3.4';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -169,7 +169,7 @@ class Acumulus extends Module
             if ($translatedMessage === $key) {
                 $translatedMessage = $message;
             }
-            if (strpos($key, 'warning') !== false) {
+            if (str_contains($key, 'warning')) {
                 $this->adminDisplayWarning($translatedMessage);
             } else {
                 $this->_errors[] = $translatedMessage;
@@ -519,7 +519,7 @@ class Acumulus extends Module
      *
      * @param array $params
      *   Array with the following entries:
-     *   - order_history: OrderHistory
+     *   - order_history: {@see \OrderHistoryCore}
      *
      * @throws \Throwable
      *
@@ -528,7 +528,7 @@ class Acumulus extends Module
     public function hookactionOrderHistoryAddAfter(array $params): void
     {
         $this->init();
-        $this->sourceStatusChange(Source::Order, $params['order_history']->id_order);
+        $this->sourceStatusChange(Source::Order, (int) $params['order_history']->id_order);
     }
 
     /**
@@ -564,15 +564,13 @@ class Acumulus extends Module
     /**
      * @param string $invoiceSourceType
      *   The type of the invoice source to create.
-     * @param int|object|array $invoiceSourceOrId
+     * @param \OrderSlip|int $invoiceSourceOrId
      *   The invoice source itself or its id to create a
      *   \Siel\Acumulus\Invoice\Source instance for.
      *
-     * @return void
-     *
      * @throws \Throwable
      */
-    private function sourceStatusChange(string $invoiceSourceType, $invoiceSourceOrId): void
+    private function sourceStatusChange(string $invoiceSourceType, int|OrderSlip $invoiceSourceOrId): void
     {
         try {
             $source = $this->getAcumulusContainer()->createSource($invoiceSourceType, $invoiceSourceOrId);
@@ -654,10 +652,10 @@ class Acumulus extends Module
 
     protected function adminMenuTabsModifier(array &$tabs): void
     {
-        $checkAccount = $this->getAcumulusContainer()->getCheckAccount()->doCheck();
+        $accountStatus = $this->getAcumulusContainer()->getCheckAccount()->getAccountStatus();
         foreach ($tabs as &$tab) {
             if ($tab['class_name'] === 'AdminAcumulusActivate') {
-                $tab['active'] = !empty($checkAccount);
+                $tab['active'] = $accountStatus !== true;
             }
             if (!empty($tab['sub_tabs'])) {
                 $this->adminMenuTabsModifier($tab['sub_tabs']);
