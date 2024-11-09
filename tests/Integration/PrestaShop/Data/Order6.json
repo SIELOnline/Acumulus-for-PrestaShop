@@ -42,17 +42,17 @@
                     "vatRate": 21.0,
                     "quantity": 1.0,
                     "costPrice": 5.49,
-                    "unitpriceinc": 10.89,
+                    "unitPriceInc": 10.89,
                     "meta-line-amount": 9.0,
                     "meta-line-amountinc": 10.89,
-                    "meta-vatrate-source": "exact",
+                    "meta-vat-rate-source": "exact",
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "Standard rate (EU VAT)",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
+                    "meta-fields-calculated": "['vatAmount (from vatRate)']",
                     "meta-sub-type": "Item",
-                    "vatamount": 1.89
+                    "vatAmount": 1.89
                 },
                 {
                     "itemNumber": "demo_19",
@@ -61,17 +61,17 @@
                     "vatRate": 21.0,
                     "quantity": 1.0,
                     "costPrice": 5.49,
-                    "unitpriceinc": 10.89,
+                    "unitPriceInc": 10.89,
                     "meta-line-amount": 9.0,
                     "meta-line-amountinc": 10.89,
-                    "meta-vatrate-source": "exact",
+                    "meta-vat-rate-source": "exact",
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "Standard rate (EU VAT)",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
+                    "meta-fields-calculated": "['vatAmount (from vatRate)']",
                     "meta-sub-type": "Item",
-                    "vatamount": 1.89
+                    "vatAmount": 1.89
                 }
             ],
             "meta-source-type": "Order",
