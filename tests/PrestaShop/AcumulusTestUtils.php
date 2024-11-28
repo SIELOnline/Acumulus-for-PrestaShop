@@ -11,12 +11,13 @@ use Siel\Acumulus\Tests\AcumulusTestUtils as BaseAcumulusTestUtils;
 use function dirname;
 
 /**
- * AcumulusTestUtils contains WC specific test functionalities
+ * AcumulusTestUtils contains PS specific test functionalities
  */
 trait AcumulusTestUtils
 {
     use BaseAcumulusTestUtils {
         copyLatestTestSources as protected parentCopyLatestTestSources;
+        updateTestSources as protected parentUpdateTestSources;
     }
 
     protected static function getAcumulusContainer(): Container
@@ -43,5 +44,16 @@ trait AcumulusTestUtils
             require_once dirname(__FILE__, 2) . '/bootstrap-acumulus.php';
         }
         $this->parentCopyLatestTestSources();
+    }
+
+    public function updateTestSources(): void
+    {
+        static $hasRun = false;
+
+        if (!$hasRun) {
+            $hasRun = true;
+            require_once dirname(__FILE__, 2) . '/bootstrap-acumulus.php';
+        }
+        $this->parentUpdateTestSources();
     }
 }
