@@ -20,7 +20,7 @@ trait AcumulusTestUtils
         updateTestSources as protected parentUpdateTestSources;
     }
 
-    protected static function getAcumulusContainer(): Container
+    protected static function createContainer(): Container
     {
         /** @var \Acumulus $module */
         $module = Module::getInstanceByName('acumulus');
