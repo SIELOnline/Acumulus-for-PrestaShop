@@ -9,7 +9,7 @@ vendor/
 # Not all tests artifacts are committed.
 /tests/.phpunit.result.cache
 # Our own tests are committed, but not the *.latest.json files
-/tests/Integration/PrestaShop/Data/*.latest.json
+/tests/PrestaShop/Data/Invoice/*.latest.json
 
 #Generated files
 config.xml
