@@ -47,7 +47,7 @@ class Acumulus extends Module
         /**
          * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
          */
-        $this->version = '8.3.4';
+        $this->version = '8.5.1';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -237,7 +237,7 @@ class Acumulus extends Module
     /**
      * Adds menu-items.
      * - Proudly copied from gamification.
-     * - Public so it can be called by update functions.
+     * - Public, so it can be called by update functions.
      *
      * @return bool
      *   Success.
@@ -283,7 +283,7 @@ class Acumulus extends Module
      * Removes menu-items.
      *
      * - Proudly copied from gamification.
-     * - Public so it can be called by update functions.
+     * - Public, so it can be called by update functions.
      * - Returns true as to not worry users about messages that PS could not
      *   deactivate this module.
      *
@@ -410,7 +410,7 @@ class Acumulus extends Module
         } catch (Throwable $e) {
             // We handle our "own" exceptions but only when we can process them
             // as we want, i.e. show it as an error at the beginning of the
-            // form. That's why we start catching only after we have a form, and
+            // form. That's why we start catching only after we have a form and
             // stop catching just before we render our messages.
             $formHtml = $formHtml ?? '';
             try {
@@ -419,7 +419,7 @@ class Acumulus extends Module
                 $form->createAndAddMessage($message, Severity::Exception);
             } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
-                // screen, so assume not, and rethrow the original exception.
+                // screen, so assume not and rethrow the original exception.
                 throw $e;
             }
         }
@@ -430,7 +430,7 @@ class Acumulus extends Module
     /**
      * Renders the HTML for the form.
      *
-     * As a side effect, any needed css and js is added to the controller.
+     * As a side effect, any required CSS and JS are added to the controller.
      *
      * @param \Siel\Acumulus\Helpers\Form $form
      *
@@ -583,7 +583,7 @@ class Acumulus extends Module
                 $crashReporter->logAndMail($e);
             } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
-                // screen, so assume not, and rethrow the original exception.
+                // screen, so assume not and rethrow the original exception.
                 throw $e;
             }
         }
@@ -610,12 +610,12 @@ class Acumulus extends Module
      * Hook actionAdminControllerSetMedia
      *
      * This hook gets called on the order overview and order detail page when we
-     * can still add css and js. However, regardless the information we use,
+     * can still add CSS and JS. However, regardless of the information we use,
      * context, values, or set of parameters, it is impossible to distinguish
      * which type of page is actually rendered.
      *
-     * So, even if we only want to add our css and js to the order detail page,
-     * the order overview page also gets our css and js loaded. It is as it is.
+     * So, even though we only want to add our CSS and JS to the order detail page,
+     * the order overview page also gets our CSS and JS loaded. This is as it is.
      *
      * @noinspection PhpUnused  hook
      */
@@ -709,7 +709,7 @@ class Acumulus extends Module
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
 
-            // Create form to already load form translations and to set the Source.
+            // Create the form to already load form translations and to set the Source.
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
             $form = $this->getAcumulusContainer()->getForm('invoice');
             $orderId = $params['id_order'];
@@ -781,7 +781,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Drops the tables this module uses. Called during uninstall.
+     * Drops the tables this module uses. Called during uninstallation.
      *
      * Actual creation is done by the models.
      *
