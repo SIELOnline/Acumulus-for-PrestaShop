@@ -36,6 +36,7 @@ use const Siel\Acumulus\Version;
  *
  * @noinspection EfferentObjectCouplingInspection
  * @noinspection AutoloadingIssuesInspection
+ * @noinspection PhpIllegalPsrClassPathInspection
  */
 class Acumulus extends Module
 {
@@ -103,11 +104,6 @@ class Acumulus extends Module
         return $this->acumulusContainer;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @throws \JsonException
-     */
     public function install(): bool
     {
         $this->init();
@@ -117,9 +113,6 @@ class Acumulus extends Module
           and $this->createTables();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function uninstall(): bool
     {
         $this->init();
@@ -134,9 +127,6 @@ class Acumulus extends Module
         return parent::uninstall();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function enable($force_all = false): bool
     {
         return parent::enable($force_all)
@@ -144,9 +134,6 @@ class Acumulus extends Module
             and $this->registerHooks();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function disable($force_all = false): bool
     {
         return parent::disable($force_all)
@@ -752,8 +739,6 @@ class Acumulus extends Module
      *
      * @return bool
      *   Success.
-     *
-     * @throws \JsonException
      */
     protected function initConfig(): bool
     {
@@ -794,10 +779,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Description.
-     *
-     * @return string
-     *   Description.
+     * Returns the version of PrestaShop.
      */
     private function getVersion(): string
     {
