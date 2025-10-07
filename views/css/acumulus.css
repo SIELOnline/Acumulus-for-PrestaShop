@@ -43,6 +43,10 @@
   margin-left: -15px;
 }
 
+#acumulus-invoice .panel-heading.details:hover {
+    cursor: pointer;
+}
+
 #acumulus-invoice .form-group {
   display: flex;
 }
