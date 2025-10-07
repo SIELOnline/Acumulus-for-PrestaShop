@@ -35,6 +35,8 @@ use const Siel\Acumulus\Version;
  * http://doc.prestashop.com/display/PS16/Creating+a+PrestaShop+module
  *
  * @noinspection EfferentObjectCouplingInspection
+ * @noinspection PhpClassHasTooManyDeclaredMembersInspection
+ * @noinspection PhpLackOfCohesionInspection
  * @noinspection AutoloadingIssuesInspection
  * @noinspection PhpIllegalPsrClassPathInspection
  */
@@ -48,12 +50,12 @@ class Acumulus extends Module
         /**
          * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
          */
-        $this->version = '8.5.1';
+        $this->version = '8.6.1';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => '9'];
+        $this->ps_versions_compliancy = ['min' => '1.7', 'max' => '10'];
         $this->dependencies = [];
         $this->bootstrap = true;
         $this->module_key = 'bf7e535d7c51990bdbf70f00e1209521';
@@ -83,7 +85,7 @@ class Acumulus extends Module
     /**
      * Initializes the properties
      */
-    protected function init(): void
+    protected function init(string $shopNameSpace = 'PrestaShop'): void
     {
         if (!isset($this->acumulusContainer)) {
             // Load autoloader
@@ -91,16 +93,16 @@ class Acumulus extends Module
 
             // Load our Container.
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
-            $this->acumulusContainer = new Container('PrestaShop', $languageCode);
+            $this->acumulusContainer = new Container($shopNameSpace, $languageCode);
 
             $this->displayName = $this->t('module_name');
             $this->description = $this->t('module_description');
         }
     }
 
-    public function getAcumulusContainer(): Container
+    public function getAcumulusContainer(string $shopNameSpace = 'PrestaShop'): Container
     {
-        $this->init();
+        $this->init($shopNameSpace);
         return $this->acumulusContainer;
     }
 
@@ -127,6 +129,9 @@ class Acumulus extends Module
         return parent::uninstall();
     }
 
+    /**
+     * @param bool $force_all
+     */
     public function enable($force_all = false): bool
     {
         return parent::enable($force_all)
@@ -134,6 +139,9 @@ class Acumulus extends Module
             and $this->registerHooks();
     }
 
+    /**
+     * @param bool $force_all
+     */
     public function disable($force_all = false): bool
     {
         return parent::disable($force_all)
@@ -199,7 +207,7 @@ class Acumulus extends Module
      * Disables the hooks that this module wanted to respond to.
      *
      * @return bool
-     *   True, some hooks are bound to not be registered (1.7 vs 8.x), so we ignore the
+     *   True, some hooks are bound to not be registered (1.7 vs >= 8.x), so we ignore the
      *   results of the calls to {@see \Module::unregisterHook()}.
      */
     public function unregisterHooks(): bool
@@ -240,23 +248,26 @@ class Acumulus extends Module
 
             $result = true;
             foreach ($tabs as $tabInfo) {
-                if ($tabInfo['translations'] !== null) {
-                    $this->getAcumulusContainer()->getTranslator()->add(new $tabInfo['translations']());
-                }
-                $tab = new Tab();
-                $tab->active = $tabInfo['active'];
-                $tab->class_name = $tabInfo['className'];
-                $tab->name = [];
-                foreach (Language::getLanguages(true) as $lang) {
-                    $tab->name[$lang['id_lang']] = $this->t($tabInfo['header']);
-                }
-                $tab->id_parent = $tabInfo['parent'];
-                $tab->module = $this->name;
-                $tab->position = $tabInfo['position'];
-                try {
-                    $result = $tab->add() && $result;
-                } catch (PrestaShopException) {
-                    $result = false;
+                if (!($tabInfo['retired'] ?? false)) {
+                    if ($tabInfo['translations'] !== null) {
+                        $this->getAcumulusContainer()->getTranslator()->add(new $tabInfo['translations']());
+                    }
+                    $tab = new Tab();
+                    $tab->active = $tabInfo['active'];
+                    $tab->class_name = $tabInfo['className'];
+                    $tab->name = [];
+                    foreach (Language::getLanguages(true) as $lang) {
+                        /** @var array $lang */
+                        $tab->name[$lang['id_lang']] = $this->t($tabInfo['header']);
+                    }
+                    $tab->id_parent = $tabInfo['parent'];
+                    $tab->module = $this->name;
+                    $tab->position = $tabInfo['position'];
+                    try {
+                        $result = $tab->add() && $result;
+                    } catch (PrestaShopException) {
+                        $result = false;
+                    }
                 }
             }
         } catch (ContainerNotFoundException $e) {
@@ -331,6 +342,7 @@ class Acumulus extends Module
                 'translations' => ConfigFormTranslations::class,
             ],
             [
+                'retired' => true,
                 'className' => 'AdminAcumulusConfig',
                 'header' => 'config_form_header',
                 'active' => true,
@@ -347,6 +359,7 @@ class Acumulus extends Module
                 'translations' => null,
             ],
             [
+                'retired' => true,
                 'className' => 'AdminAcumulusAdvanced',
                 'header' => 'advanced_form_header',
                 'active' => true,
@@ -427,7 +440,7 @@ class Acumulus extends Module
     protected function renderForm(Form $form): string
     {
         $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
-        $this->context->controller->addJS($this->_path . 'views/js/acumulus.js');
+        $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
 
         // Create and initialize form helper.
         $helper = new HelperForm();
@@ -623,8 +636,8 @@ class Acumulus extends Module
      * Hook actionAdminMenuTabsModifier
      *
      * This hook gets called on the back office pages and can be used to dynamically show/
-     * hide menu-items. We do so for our configuration forms based on
-     * {@see \Siel\Acumulus\Config\ShopCapabilities::usesNewCode()}.
+     * hide menu-items. We show/hide the "activate support" form based on the validity of
+     * the account settings.
      *
      * @param array $params
      *    Array with the following entries:
@@ -755,7 +768,7 @@ class Acumulus extends Module
      * (install-4.0.2.php).
      *
      * Actual creation is done by the models. This method might get called via
-     * an installation or update script: make it public and call init().
+     * an installation or update script: make it public.
      *
      * @return bool
      *   Success.
