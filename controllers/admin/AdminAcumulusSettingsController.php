@@ -1,6 +1,7 @@
 <?php
 /**
  * @noinspection PhpUnused
+ * @noinspection LongInheritanceChainInspection  long inheritance chain is in PS
  *
  * Validator says: Missing short description in file comment.
  *

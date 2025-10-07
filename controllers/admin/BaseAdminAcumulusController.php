@@ -1,5 +1,8 @@
 <?php
 /**
+ * @noinspection PhpUnused
+ * @noinspection LongInheritanceChainInspection  long inheritance chain is in PS
+ *
  * Validator says: Missing short description in file comment.
  *
  * @author    Buro RaDer, https://burorader.com/
@@ -70,6 +73,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
         switch ($this->display) {
             case 'add':
                 $this->meta_title = [$this->t("{$this->formType}_form_title")];
+                /** @noinspection UnsupportedStringOffsetOperationsInspection will be an array. */
                 $this->toolbar_title[] = $this->t("{$this->formType}_form_header");
                 break;
         }
@@ -79,6 +83,9 @@ class BaseAdminAcumulusController extends ModuleAdminController
      * Processes the form (it was submitted).
      *
      * @throws \Throwable
+     *
+     * @noinspection PhpMissingParentCallCommonInspection This is not an insert or update,
+     *   so parent method should not be used.
      */
     public function processSave(): void
     {
@@ -92,10 +99,9 @@ class BaseAdminAcumulusController extends ModuleAdminController
             // form. That's why we start catching only after we have a form.
             // The messages will be displayed in {@see renderForm()}.
             try {
-                $crashReporter = $this->module->getAcumulusContainer()->getCrashReporter();
-                $message = $crashReporter->logAndMail($e);
+                $message = $this->module->getAcumulusContainer()->getCrashReporter()->logAndMail($e);
                 $form->createAndAddMessage($message, Severity::Exception);
-            } catch (Throwable $inner) {
+            } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
                 // screen, so assume not, and rethrow the original exception.
                 throw $e;
@@ -145,10 +151,9 @@ class BaseAdminAcumulusController extends ModuleAdminController
             // stop catching just before display...() our messages in
             // processSave().
             try {
-                $crashReporter = $this->module->getAcumulusContainer()->getCrashReporter();
-                $message = $crashReporter->logAndMail($e);
+                $message = $this->module->getAcumulusContainer()->getCrashReporter()->logAndMail($e);
                 $form->createAndAddMessage($message, Severity::Exception);
-            } catch (Throwable $inner) {
+            } catch (Throwable) {
                 // We do not know if we have informed the user per mail or
                 // screen, so assume not, and rethrow the original exception.
                 throw $e;
@@ -165,12 +170,9 @@ class BaseAdminAcumulusController extends ModuleAdminController
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @noinspection ReturnTypeCanBeDeclaredInspection  We have to follow the
-     *   parent, which we can't change.
+     * {@inheritDoc}
      */
-    public function getFieldsValue($obj)
+    public function getFieldsValue($obj): array
     {
         parent::getFieldsValue($obj);
         $this->fields_value = $this->getForm()->getFormValues();

@@ -1,6 +1,7 @@
 <?php
 /**
  * @noinspection PhpUnused
+ * @noinspection LongInheritanceChainInspection  long inheritance chain is in PS
  *
  * Validator says: Missing short description in file comment.
  *
@@ -66,6 +67,9 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
      *
      * @return string
      *   The rendered form.
+     *
+     * @noinspection PhpMissingParentCallCommonInspection Parent method assumes the form
+     *   to be a full page form.
      */
     public function renderForm(): string
     {
@@ -77,6 +81,8 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
      * {@inheritdoc}
      *
      * @noinspection PhpVariableVariableInspection
+     * @noinspection PhpMissingParentCallCommonInspection The parent method returns HTML,
+     *   we return JSON (encoded HTML).
      */
     protected function smartyOutputContent($templates): void
     {
