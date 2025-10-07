@@ -7,6 +7,10 @@
         <directory>Unit/PrestaShop</directory>
     </testsuite>
     <testsuite name="integration">
-        <directory>Integration/PrestaShop</directory>
+        <file>Integration/PrestaShop/InvoiceCreateTest.php</file>
+        <file>Integration/PrestaShop/Shop/AcumulusEntryManagerTest.php</file>
+    </testsuite>
+    <testsuite name="integration8">
+        <directory>Integration/PrestaShop/PrestaShop8</directory>
     </testsuite>
 </testsuites>

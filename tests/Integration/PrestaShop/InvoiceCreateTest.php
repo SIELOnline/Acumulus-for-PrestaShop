@@ -23,24 +23,12 @@ use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
  */
 class InvoiceCreateTest extends PrestaShopTest
 {
-    public function InvoiceDataProvider(): array
+    public static function InvoiceDataProvider(): array
     {
         return [
-            'NL consument, mixed rates, virtual + physical' => [Source::Order, 7,],
-            'FR consument, mixed rates, NL shipping' => [Source::Order, 8,],
-            'FR consument, mixed rates, FR shipping' => [Source::Order, 9,],
-            'FR bedrijf, standard rate' => [Source::Order, 10,],
-            'FR bedrijf, reverse vat' => [Source::Order, 11,],
-            'FR consument, productkorting + coupon code' => [Source::Order, 14,],
-            'Credit note for FR consument, productkorting + coupon code' => [Source::CreditNote, 3,],
-            'FR consument, productkorting + coupon code that will not be refunded' => [Source::Order, 15,],
-            'Credit note for FR consument, productkorting + coupon code not refunded' => [Source::CreditNote, 4,],
-            'FR consument, partial refund, coupon code will be revoked' => [Source::Order, 16,],
-            'Credit note for FR consument, partial refund, productkorting + coupon code refunded' => [Source::CreditNote, 5,],
-            'FR consument,NL shipping, partial refund, coupon code revoked, shipping refunded' => [Source::Order, 17,],
-            'Credit note FR consument, NL shipping, partial, coupon code revoked, shipping refunded' => [Source::CreditNote, 6,],
-            'FR consument, EUR 85.84' => [Source::Order, 20,],
-            'FR consument, GBP 72.96' => [Source::Order, 21,],
+            'NL consument' => [Source::Order, 6,],
+            'NL bedrijf' => [Source::Order, 7,],
+            'BE consument' => [Source::Order, 8,],
         ];
 
 

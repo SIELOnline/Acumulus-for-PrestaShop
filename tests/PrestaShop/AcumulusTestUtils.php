@@ -20,11 +20,11 @@ trait AcumulusTestUtils
         updateTestSources as protected parentUpdateTestSources;
     }
 
-    protected static function createContainer(): Container
+    protected static function createContainer(string $shopNameSpace = 'PrestaShop'): Container
     {
         /** @var \Acumulus $module */
         $module = Module::getInstanceByName('acumulus');
-        return $module->getAcumulusContainer();
+        return $module->getAcumulusContainer($shopNameSpace);
     }
 
     protected function getTestsPath(): string

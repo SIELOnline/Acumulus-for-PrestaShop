@@ -10,6 +10,7 @@ vendor/
 /tests/.phpunit.result.cache
 # Our own tests are committed, but not the *.latest.json files
 /tests/PrestaShop/Data/Invoice/*.latest.json
+/tests/PrestaShop/PrestaShop8/Data/Invoice/*.latest.json
 
 #Generated files
 config.xml
