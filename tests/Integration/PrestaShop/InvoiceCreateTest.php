@@ -29,6 +29,8 @@ class InvoiceCreateTest extends PrestaShopTest
             'NL consument' => [Source::Order, 6,],
             'NL bedrijf' => [Source::Order, 7,],
             'BE consument' => [Source::Order, 8,],
+            'FR consument' => [Source::Order, 9,],
+            'FR bedrijf' => [Source::Order, 10,],
         ];
 
 
