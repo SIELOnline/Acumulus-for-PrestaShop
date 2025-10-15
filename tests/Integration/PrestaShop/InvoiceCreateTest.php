@@ -26,7 +26,7 @@ class InvoiceCreateTest extends PrestaShopTest
     public static function InvoiceDataProvider(): array
     {
         return [
-            'NL consument' => [Source::Order, 6,],
+            'NL consument + Mollie betaal fee' => [Source::Order, 6,],
             'NL bedrijf' => [Source::Order, 7,],
             'BE consument' => [Source::Order, 8,],
             'FR consument' => [Source::Order, 9,],

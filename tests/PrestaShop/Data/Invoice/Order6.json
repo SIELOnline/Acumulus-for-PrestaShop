@@ -96,6 +96,23 @@
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%"
+                },
+                {
+                    "product": "Betaalkosten",
+                    "unitprice": 1.0,
+                    "vatrate": 21.0,
+                    "quantity": 1.0,
+                    "meta-sub-type": "PaymentFeeLine",
+                    "meta-unitprice-precision": 0.01,
+                    "unitpriceinc": 1.21,
+                    "meta-unitpriceinc-precision": 0.01,
+                    "meta-vatrate-source": "completor-range",
+                    "vatamount": 0.20999999999999996,
+                    "meta-vatamount-precision": 0.02,
+                    "meta-fields-calculated": "['vatamount']",
+                    "meta-vatrate-min": 19.769291964996018,
+                    "meta-vatrate-max": 22.24456958970233,
+                    "meta-vatrate-range-matches": "[{'vatrate':21.0,'vattype':1}]"
                 }
             ],
             "meta-source-type": "Order",
@@ -108,12 +125,12 @@
             "meta-shop-invoice-reference": "#IN000001",
             "meta-shop-invoice-date": "2025-10-02",
             "meta-currency": "{'currency':'EUR','rate':1.0,'doConvert':true}",
-            "meta-totals": "{'amountEx':69.0,'amountInc':83.49000000000001,'amountVat':14.490000000000009,'calculated':['amountVat']}",
+            "meta-totals": "{'amountEx':70.0,'amountInc':84.7,'amountVat':14.70000000000001,'calculated':['amountVat']}",
             "meta-prices-include-vat": null,
             "meta-add-emailaspdf-section": false,
-            "meta-lines-amount": 69.0,
-            "meta-lines-amountinc": 83.49000000000001,
-            "meta-lines-vatamount": 14.489999999999998,
+            "meta-lines-amount": 70.0,
+            "meta-lines-amountinc": 84.7,
+            "meta-lines-vatamount": 14.7,
             "meta-vattype-source": "Completor::checkForKnownVatType: only 1 possible vat type"
         }
     }

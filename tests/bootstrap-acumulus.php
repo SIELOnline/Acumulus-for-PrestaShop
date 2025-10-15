@@ -89,7 +89,8 @@ class AcumulusTestsBootstrap
         // Exception: Trying to get property 'precision' of non-object in
         //   classes\Context.php 557:  ...($this->currency->precision);
         Context::getContext()->currency = Currency::getDefaultCurrency();
-
+        Module::getInstanceByName('mollie');
+        Module::getInstanceByName('acumulus');
     }
 }
 
