@@ -525,7 +525,7 @@ class Acumulus extends Module
      *
      * @noinspection PhpUnused  hook
      */
-    public function hookactionOrderHistoryAddAfter(array $params): void
+    public function hookActionOrderHistoryAddAfter(array $params): void
     {
         $this->init();
         $this->sourceStatusChange(Source::Order, (int) $params['order_history']->id_order);
@@ -544,7 +544,7 @@ class Acumulus extends Module
      *
      * @noinspection PhpUnused  hook
      */
-    public function hookactionOrderSlipAdd(array $params): void
+    public function hookActionOrderSlipAdd(array $params): void
     {
         $this->init();
         /** @var Order $order */
