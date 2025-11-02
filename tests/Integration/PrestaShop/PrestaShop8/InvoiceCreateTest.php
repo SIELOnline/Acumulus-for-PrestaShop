@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Siel\Acumulus\Tests\Integration\PrestaShop\PrestaShop8;
 
 use Siel\Acumulus\Invoice\Source;
-use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
+use Siel\Acumulus\Tests\PrestaShop\TestCase;
 
 /**
  * InvoiceCreateTest tests the process of creating an {@see Invoice}.
@@ -18,7 +18,7 @@ use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
  * manager once it has decided that tax calculations should be disabled. This is a problem
  * this test class but also for the batch send form.
  */
-class InvoiceCreateTest extends PrestaShopTest
+class InvoiceCreateTest extends TestCase
 {
     protected function setUp(): void
     {

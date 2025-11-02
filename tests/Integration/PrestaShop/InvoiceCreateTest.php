@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Siel\Acumulus\Tests\Integration\PrestaShop;
 
 use Siel\Acumulus\Invoice\Source;
-use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
+use Siel\Acumulus\Tests\PrestaShop\TestCase;
 
 /**
  * InvoiceCreateTest tests the process of creating an {@see Invoice}.
@@ -21,7 +21,7 @@ use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
  * @todo: add tests for gift wrapping and payment fee (paypal with a fee module) lines.
  * @todo: add a margin scheme invoice.
  */
-class InvoiceCreateTest extends PrestaShopTest
+class InvoiceCreateTest extends TestCase
 {
     public static function InvoiceDataProvider(): array
     {

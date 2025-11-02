@@ -14,12 +14,12 @@ use DateTimeZone;
 use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\AcumulusEntry;
 use Siel\Acumulus\Shop\AcumulusEntryManager;
-use Siel\Acumulus\Tests\PrestaShop\PrestaShopTest;
+use Siel\Acumulus\Tests\PrestaShop\TestCase;
 
 /**
  * AcumulusEntryTest tests the CRUD actions on the acumulus entries storage in WordPress.
  */
-class AcumulusEntryManagerTest extends PrestaShopTest
+class AcumulusEntryManagerTest extends TestCase
 {
     /**
      * Choose a test source (type and id) that does exist but for which the Acumulus entry
