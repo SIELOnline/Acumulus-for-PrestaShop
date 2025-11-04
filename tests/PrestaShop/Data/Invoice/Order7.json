@@ -58,9 +58,9 @@
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
                     "vatamount": 6.048,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-vattypes-possible": "[1]"
                 },
                 {
@@ -81,9 +81,9 @@
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
                     "vatamount": 4.2,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-vattypes-possible": "[1]"
                 },
                 {

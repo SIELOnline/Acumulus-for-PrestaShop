@@ -56,9 +56,9 @@
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
-                    "vatamount": 7.35
+                    "vatamount": 7.35,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']"
                 },
                 {
                     "itemnumber": "demo_5",
@@ -78,9 +78,9 @@
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "BTW NL 21%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
-                    "vatamount": 6.3
+                    "vatamount": 6.3,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']"
                 },
                 {
                     "product": "My cheap carrier",

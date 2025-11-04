@@ -58,9 +58,9 @@
                     "meta-vatclass-name": "Verlegde btw",
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "BTW Verlegd",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
                     "vatamount": 0.0,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-vattypes-possible": "[3]"
                 },
                 {
@@ -81,9 +81,9 @@
                     "meta-vatclass-name": "Verlegde btw",
                     "meta-vatrate-lookup": 0.0,
                     "meta-vatrate-lookup-label": "BTW Verlegd",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
                     "vatamount": 0.0,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-vattypes-possible": "[3]"
                 },
                 {

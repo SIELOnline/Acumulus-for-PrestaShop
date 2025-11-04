@@ -55,9 +55,9 @@
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 20.0,
                     "meta-vatrate-lookup-label": "TVA FR 20%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
                     "vatamount": 2.0,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-vattypes-possible": "[6]"
                 },
                 {
@@ -78,9 +78,9 @@
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 20.0,
                     "meta-vatrate-lookup-label": "TVA FR 20%",
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-margin-line": false,
                     "vatamount": 5.760000000000001,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']",
                     "meta-vattypes-possible": "[6]"
                 },
                 {
