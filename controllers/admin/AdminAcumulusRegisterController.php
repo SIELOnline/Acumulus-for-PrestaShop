@@ -15,7 +15,7 @@ declare(strict_types=1);
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusRegisterController provides the register form.
+ * AdminAcumulusRegisterController is the controller for the register form.
  */
 class AdminAcumulusRegisterController extends BaseAdminAcumulusController
 {

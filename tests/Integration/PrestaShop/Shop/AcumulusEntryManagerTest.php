@@ -69,8 +69,8 @@ class AcumulusEntryManagerTest extends TestCase
         self::assertNull($entry->getEntryId());
         self::assertNull($entry->getToken());
         // Checks that the timezone is correct, 25s is a large interval but is for when we are debugging.
-        self::assertEqualsWithDelta(0, $this->getDiffInSeconds($entry->getCreated(), $now), 25);
-        $diff = $this->getDiffInSeconds($entry->getCreated(), $entry->getUpdated());
+        self::assertEqualsWithDelta(0, static::getDiffInSeconds($entry->getCreated(), $now), 25);
+        $diff = static::getDiffInSeconds($entry->getCreated(), $entry->getUpdated());
         self::assertSame(0, $diff);
 
         return $source;
@@ -96,14 +96,14 @@ class AcumulusEntryManagerTest extends TestCase
         self::assertSame(static::testSourceType, $entry->getSourceType());
         self::assertSame(static::testSourceId, $entry->getSourceId());
         self::assertNull($entry->getConceptId());
-        self::assertSame($entry->getEntryId(), static::testEntryId);
-        self::assertSame($entry->getToken(), static::testToken);
-        $diff = $this->getDiffInSeconds($entry->getCreated(), $created);
+        self::assertSame(static::testEntryId, $entry->getEntryId());
+        self::assertSame(static::testToken, $entry->getToken());
+        $diff = static::getDiffInSeconds($entry->getCreated(), $created);
         self::assertSame(0, $diff);
-        $diff = $this->getDiffInSeconds($entry->getUpdated(), $updated);
+        $diff = static::getDiffInSeconds($entry->getUpdated(), $updated);
         self::assertNotSame(0, $diff);
-        // Checks that the timezone is correct
-        $diff = $this->getDiffInSeconds($entry->getUpdated(), $now);
+        // Checks that the timezone is correct.
+        $diff = static::getDiffInSeconds($entry->getUpdated(), $now);
         self::assertEqualsWithDelta(0, $diff, 25);
 
         return $source;

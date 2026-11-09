@@ -15,7 +15,7 @@ declare(strict_types=1);
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusActivateController provides the "Activate pro-support" form.
+ * AdminAcumulusActivateController is the controller for the "Activate pro-support" form.
  */
 class AdminAcumulusActivateController extends BaseAdminAcumulusController
 {

@@ -15,7 +15,7 @@ declare(strict_types=1);
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusConfigController provides the settings form.
+ * AdminAcumulusConfigController is the controller for the settings form.
  */
 class AdminAcumulusSettingsController extends BaseAdminAcumulusController
 {

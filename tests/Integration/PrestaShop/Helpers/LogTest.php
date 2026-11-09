@@ -15,6 +15,7 @@ use Siel\Acumulus\Tests\PrestaShop\TestCase;
  */
 class LogTest extends TestCase
 {
+    /** @noinspection PhpMissingParentCallCommonInspection */
     protected function getLogPath(): string
     {
         return Log::LogFolder . '/' . Log::LogFile;

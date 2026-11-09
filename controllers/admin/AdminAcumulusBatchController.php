@@ -15,7 +15,7 @@ declare(strict_types=1);
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusBatchController provides the send batch form.
+ * AdminAcumulusBatchController is the controller for the send batch form.
  */
 class AdminAcumulusBatchController extends BaseAdminAcumulusController
 {

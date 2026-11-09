@@ -27,7 +27,7 @@ trait AcumulusTestUtils
         return $module->getAcumulusContainer($shopNameSpace);
     }
 
-    protected function getTestsPath(): string
+    protected static function getTestsPath(): string
     {
         return dirname(__FILE__, 2);
     }

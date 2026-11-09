@@ -15,7 +15,7 @@ declare(strict_types=1);
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusRegisterController provides the invoice status overview form.
+ * AdminAcumulusRegisterController is the controller for the invoice status overview form.
  */
 class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
 {
@@ -73,8 +73,7 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
      */
     public function renderForm(): string
     {
-        /** @noinspection PhpParamsInspection */
-        return $this->module->renderFormInvoice($this->getForm());
+        return $this->module->renderSubForm($this->getForm());
     }
 
     /**
@@ -107,6 +106,4 @@ class AdminAcumulusInvoiceController extends BaseAdminAcumulusController
         $html = json_encode(['content' => $html], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         echo trim($html);
     }
-
-
 }

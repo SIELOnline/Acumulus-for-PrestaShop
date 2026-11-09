@@ -1,7 +1,4 @@
 <?php
-/**
- * @noinspection PhpStaticAsDynamicMethodCallInspection
- */
 
 declare(strict_types=1);
 
@@ -17,16 +14,16 @@ class InitTest extends TestCase
 {
     /**
      * A single test to see if the test framework (including the plugins) has been
-     * initialized correctly:
+     * initialised correctly:
      * 1 We have access to the Container.
-     * 2 PrestaShop and the database have been initialized.
+     * 2 PrestaShop and the database have been initialised.
      */
     public function testInit(): void
     {
         // 1.
         $environmentInfo = self::getContainer()->getEnvironment()->toArray();
         // 2.
-        $this->assertMatchesRegularExpression('|\d+\.\d+\.\d+|', $environmentInfo['shopVersion']);
-        $this->assertNotEquals(Environment::Unknown, $environmentInfo['dbVersion']);
+        static::assertMatchesRegularExpression('|\d+\.\d+\.\d+|', $environmentInfo['shopVersion']);
+        static::assertNotEquals(Environment::Unknown, $environmentInfo['dbVersion']);
     }
 }

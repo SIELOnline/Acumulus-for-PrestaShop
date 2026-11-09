@@ -15,7 +15,7 @@ declare(strict_types=1);
 include_once(__DIR__ . '/BaseAdminAcumulusController.php');
 
 /**
- * AdminAcumulusAdvancedController provides the mappings form.
+ * AdminAcumulusAdvancedController is the controller for the mappings form.
  */
 class AdminAcumulusMappingsController extends BaseAdminAcumulusController
 {
