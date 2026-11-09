@@ -20,8 +20,8 @@ use Siel\Acumulus\Invoice\Source;
 use Siel\Acumulus\Shop\ActivateSupportFormTranslations;
 use Siel\Acumulus\Shop\BatchFormTranslations;
 use Siel\Acumulus\Shop\ConfigFormTranslations;
+use Siel\Acumulus\Shop\MessageFormTranslations;
 use Siel\Acumulus\Shop\RegisterFormTranslations;
-use Siel\Acumulus\Shop\InvoiceStatusForm;
 use Siel\Acumulus\Shop\InvoiceStatusFormTranslations;
 
 use const Siel\Acumulus\Version;
@@ -50,7 +50,7 @@ class Acumulus extends Module
         /**
          * PrestaShop Note: maximum version length = 8, so do not use alpha or beta.
          */
-        $this->version = '8.7.0';
+        $this->version = '8.7.3';
         $this->name = 'acumulus';
         $this->tab = 'billing_invoicing';
         $this->author = 'Acumulus';
@@ -83,12 +83,12 @@ class Acumulus extends Module
     }
 
     /**
-     * Initializes the properties
+     * Initialises the properties
      */
     protected function init(string $shopNameSpace = 'PrestaShop'): void
     {
         if (!isset($this->acumulusContainer)) {
-            // Load autoloader
+            // Load our autoloader
             require_once __DIR__ . '/vendor/autoload.php';
 
             // Load our Container.
@@ -110,9 +110,9 @@ class Acumulus extends Module
     {
         $this->init();
         return $this->checkRequirements()
-          and parent::install()
-          and $this->initConfig()
-          and $this->createTables();
+            and parent::install()
+            and $this->initConfig()
+            and $this->createTables();
     }
 
     public function uninstall(): bool
@@ -145,8 +145,8 @@ class Acumulus extends Module
     public function disable($force_all = false): bool
     {
         return parent::disable($force_all)
-               and $this->unregisterHooks()
-               and $this->uninstallTabs();
+            and $this->unregisterHooks()
+            and $this->uninstallTabs();
     }
 
     /**
@@ -248,26 +248,24 @@ class Acumulus extends Module
 
             $result = true;
             foreach ($tabs as $tabInfo) {
-                if (!($tabInfo['retired'] ?? false)) {
-                    if ($tabInfo['translations'] !== null) {
-                        $this->getAcumulusContainer()->getTranslator()->add(new $tabInfo['translations']());
-                    }
-                    $tab = new Tab();
-                    $tab->active = $tabInfo['active'];
-                    $tab->class_name = $tabInfo['className'];
-                    $tab->name = [];
-                    foreach (Language::getLanguages(true) as $lang) {
-                        /** @var array $lang */
-                        $tab->name[$lang['id_lang']] = $this->t($tabInfo['header']);
-                    }
-                    $tab->id_parent = $tabInfo['parent'];
-                    $tab->module = $this->name;
-                    $tab->position = $tabInfo['position'];
-                    try {
-                        $result = $tab->add() && $result;
-                    } catch (PrestaShopException) {
-                        $result = false;
-                    }
+                if ($tabInfo['translations'] !== null) {
+                    $this->getAcumulusContainer()->getTranslator()->add(new $tabInfo['translations']());
+                }
+                $tab = new Tab();
+                $tab->active = $tabInfo['active'];
+                $tab->class_name = $tabInfo['className'];
+                $tab->name = [];
+                foreach (Language::getLanguages(true) as $lang) {
+                    /** @var array $lang */
+                    $tab->name[$lang['id_lang']] = $this->t($tabInfo['header']);
+                }
+                $tab->id_parent = $tabInfo['parent'];
+                $tab->module = $this->name;
+                $tab->position = $tabInfo['position'];
+                try {
+                    $result = $tab->add() && $result;
+                } catch (PrestaShopException) {
+                    $result = false;
                 }
             }
         } catch (ContainerNotFoundException $e) {
@@ -311,7 +309,7 @@ class Acumulus extends Module
     }
 
     /**
-     * Returns the set of Acumulus tabs (menu-items).
+     * Returns the set of Acumulus tabs (menu-items and controller entry points).
      *
      * @throws \PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException
      */
@@ -342,29 +340,11 @@ class Acumulus extends Module
                 'translations' => ConfigFormTranslations::class,
             ],
             [
-                'retired' => true,
-                'className' => 'AdminAcumulusConfig',
-                'header' => 'config_form_header',
-                'active' => true,
-                'parent' => $id_settings_parent,
-                'position' => 1006,
-                'translations' => null,
-            ],
-            [
                 'className' => 'AdminAcumulusMappings',
                 'header' => 'mappings_form_header',
                 'active' => true,
                 'parent' => $id_settings_parent,
                 'position' => 1010,
-                'translations' => null,
-            ],
-            [
-                'retired' => true,
-                'className' => 'AdminAcumulusAdvanced',
-                'header' => 'advanced_form_header',
-                'active' => true,
-                'parent' => $id_settings_parent,
-                'position' => 1011,
                 'translations' => null,
             ],
             [
@@ -391,6 +371,14 @@ class Acumulus extends Module
                 'position' => 1019,
                 'translations' => InvoiceStatusFormTranslations::class,
             ],
+            [
+                'className' => 'AdminAcumulusMessage',
+                'header' => 'message_form_header',
+                'active' => false,
+                'parent' => $id_settings_parent,
+                'position' => 1021,
+                'translations' => MessageFormTranslations::class,
+            ],
         ];
     }
 
@@ -403,28 +391,50 @@ class Acumulus extends Module
      */
     public function getContent(): string
     {
+        $this->addCssAndJs();
         $form = $this->getAcumulusContainer()->getForm('settings');
+        $exceptionMessage = $formHtml = $messagesHtml = $messageHtml = '';
         try {
             $form->process();
             $formHtml = $this->renderForm($form);
+            if ($form->isFullPage()) {
+                $messageHtml = $this->checkForNewRelease();
+            }
+            $messagesHtml = $this->renderMessages($form);
         } catch (Throwable $e) {
-            // We handle our "own" exceptions but only when we can process them
-            // as we want, i.e. show it as an error at the beginning of the
-            // form. That's why we start catching only after we have a form and
-            // stop catching just before we render our messages.
-            $formHtml = $formHtml ?? '';
+            // We process our "own" exceptions, i.e. mail it and show it as an error at
+            // the beginning of the form.
             try {
-                $crashReporter = $this->getAcumulusContainer()->getCrashReporter();
-                $message = $crashReporter->logAndMail($e);
-                $form->createAndAddMessage($message, Severity::Exception);
-            } catch (Throwable) {
-                // We do not know if we have informed the user per mail or
-                // screen, so assume not and rethrow the original exception.
-                throw $e;
+                $message = $this->getAcumulusContainer()->getCrashReporter()->logAndMail($e);
+                $exceptionMessage =
+                    $this->renderMessages($this->getAcumulusContainer()->getMessageCollection()->createAndAddMessage($message, Severity::Exception));
+            } catch (Throwable $e2) {
+                $exceptionMessage = $e->getMessage() . "<br>\n" . $e2->getMessage() . "<br>\n";
             }
         }
-        $messagesHtml = $this->renderMessages($form);
-        return $messagesHtml . $formHtml;
+        return $exceptionMessage . $messageHtml . $messagesHtml . $formHtml;
+    }
+
+    /**
+     * Checks for a new release and if there is one, renders a message.
+     *
+     * @return string
+     *   The HTML with the message about a new release or the empty string if no message
+     *   is to be displayed.
+     */
+    public function checkForNewRelease(): string
+    {
+        $checkNewRelease = $this->getAcumulusContainer()->getCheckNewRelease();
+        if ($checkNewRelease->doCheck()) {
+            $this->getAcumulusContainer()->addTranslations('MessageFormTranslations', 'Shop');
+            /** @var \Siel\Acumulus\Shop\MessageForm $messageForm */
+            $messageForm = $this->getAcumulusContainer()->getForm('message');
+            $messageForm->setConfigKey('showNewReleaseMessage')
+                ->setLater(3)
+                ->setMessage($checkNewRelease->formatMessage());
+            $messageHtml = $this->renderSubForm($messageForm);
+        }
+        return $messageHtml ?? '';
     }
 
     /**
@@ -439,10 +449,7 @@ class Acumulus extends Module
      */
     protected function renderForm(Form $form): string
     {
-        $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
-        $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
-
-        // Create and initialize form helper.
+        // Create and initialise form helper.
         $helper = new HelperForm();
         // Module, token and currentIndex.
         $helper->module = $this;
@@ -483,6 +490,39 @@ class Acumulus extends Module
             'id_language' => $this->context->language->id,
         ];
         return $helper->generateForm($fields_form);
+    }
+
+    /**
+     * Renders a sub-form.
+     *
+     * Unlike the {@see renderForm()} method, this method does not use PrestaShop's form
+     * helper and our FormMapper but uses our FormRenderer (Our PrestaShop namespace
+     * contains both ways to get a form).
+     *
+     * If $form is an InvoiceStatusForm, this method will be called by either
+     * - {@see hookDisplayAdminOrderTabContent()}, (via {@see hookDisplayAdminOrderLeft()}
+     *   before 1.7.7),
+     * - or by the {@see AdminAcumulusInvoiceController::renderForm()} (on submit).
+     *
+     * If $form is an MessageForm, this method will be called by either
+     * - {@see checkForNewRelease()} (new),
+     * - or by the {@see AdminAcumulusMessageController::renderForm()} (on submit).
+     *
+     * @return string
+     *   The rendered form HTML.
+     */
+    public function renderSubForm(Form $form): string
+    {
+        $this->addCssAndJs();
+        $action = $this->getAcumulusContainer()->getShopCapabilities()->getLink($form->getType());
+        $id = 'acumulus-' . $form->getType();
+        $wait = $this->t('wait');
+        $formRenderer = $this->getAcumulusContainer()->getFormRenderer();
+        $output = '';
+        $output .= "<form method='POST' action='$action' id='$id' class='form-horizontal acumulus-area' data-acumulus-wait='$wait'>";
+        $output .= $formRenderer->render($form);
+        $output .= '</form>';
+        return $output;
     }
 
     /**
@@ -623,12 +663,7 @@ class Acumulus extends Module
     {
         $controller = Tools::getValue('controller');
         if ($controller === 'AdminOrders') {
-            if (version_compare($this->getVersion(), '1.7.7.0', '>=')) {
-                $this->context->controller->addCSS($this->_path . 'views/css/acumulus.css');
-            } else {
-                $this->context->controller->addCSS($this->_path . 'views/css/acumulus-176-.css');
-            }
-            $this->context->controller->addJS($this->_path . 'views/js/acumulus-ajax.js');
+            $this->addCssAndJs();
         }
     }
 
@@ -708,7 +743,6 @@ class Acumulus extends Module
     {
         $this->init();
         if ($this->getAcumulusContainer()->getConfig()->getInvoiceStatusSettings()['showInvoiceStatus']) {
-
             // Create the form to already load form translations and to set the Source.
             /** @var \Siel\Acumulus\Shop\InvoiceStatusForm $form */
             $form = $this->getAcumulusContainer()->getForm('invoice');
@@ -716,35 +750,29 @@ class Acumulus extends Module
             $source = $this->getAcumulusContainer()->createSource(Source::Order, $orderId);
             $form->setSource($source);
 
-            return $this->renderFormInvoice($form);
+            return $this->renderSubForm($form);
         }
         return '';
     }
 
-    /**
-     * Renders the form.
-     *
-     * This method is called by either {@see hookDisplayAdminOrderTabContent()},
-     * {@see hookDisplayAdminOrderLeft()} (before 1.7.7), or by the
-     * {@see AdminAcumulusInvoiceController::renderForm()} and should return the
-     * rendered form.
-     *
-     * @param \Siel\Acumulus\Shop\InvoiceStatusForm $form
-     *
-     * @return string
-     *   The rendered form.
-     */
-    public function renderFormInvoice(InvoiceStatusForm $form): string
+    public function addCssAndJs(): void
     {
-        $id = 'acumulus-' . $form->getType();
-        $url = $this->getAcumulusContainer()->getShopCapabilities()->getLink('invoice');
-        $wait = $this->t('wait');
-        $formRenderer = $this->getAcumulusContainer()->getFormRenderer();
-        $output = '';
-        $output .= "<form method='POST' action='$url' id='$id' class='form-horizontal acumulus-area' data-acumulus-wait='$wait'>";
-        $output .= $formRenderer->render($form);
-        $output .= '</form>';
-        return $output;
+        if (version_compare($this->getVersion(), '1.7.7.0', '>=')) {
+            $this->context->controller->addCSS($this->getPathUri() . 'views/css/acumulus.css');
+        } else {
+            $this->context->controller->addCSS($this->getPathUri() . 'views/css/acumulus-176-.css');
+        }
+        // Forms can contain fieldsets that should behave as 'details', sub-forms tend to
+        // be Ajax-based, so always add our js.
+        $this->context->controller->addJS($this->getPathUri() . 'views/js/acumulus-ajax.js');
+    }
+
+    /**
+     * Returns the version of PrestaShop.
+     */
+    private function getVersion(): string
+    {
+        return Version::VERSION;
     }
 
     /**
@@ -789,13 +817,5 @@ class Acumulus extends Module
     protected function dropTables(): bool
     {
         return $this->getAcumulusContainer()->getAcumulusEntryManager()->uninstall();
-    }
-
-    /**
-     * Returns the version of PrestaShop.
-     */
-    private function getVersion(): string
-    {
-        return Version::VERSION;
     }
 }

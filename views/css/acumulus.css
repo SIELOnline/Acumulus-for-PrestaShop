@@ -33,7 +33,7 @@
   position: absolute;
   top: 14px;
   left: 18px;
-  background-image: url("../img/siel-logo.svg");
+  background-image: url("../img/acumulus-logo.svg");
   background-size: 100%;
   width: 32px;
   height: 32px;
@@ -137,6 +137,53 @@
 
 #acumulus-invoice [class*="acumulus-document-packing-slip"] {
   background-image: url("../img/acumulus-packing-slip.png");
+}
+
+
+/*
+ * Message form.
+ */
+#acumulus-message {
+    position: relative;
+}
+
+#acumulus-message .panel {
+    min-height: calc(2.4rem + 102px);
+}
+
+#acumulus-message .panel-heading {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.2rem;
+    padding-bottom: 1.2rem;
+    width: auto; /* prevents it being set to 100% and flowing ober the border */
+}
+
+#acumulus-message .form-group:first-child .col-lg-9 {
+    margin-left: calc(1.5rem + 100px);
+    margin-right: 0;
+    width: 90%;
+}
+
+#acumulus-message .form-group .col-lg-3 {
+    display: none;
+}
+
+#acumulus-message .form-group:not(:first-child) {
+    display: inline-block;
+}
+
+#acumulus-message .form-group:nth-child(2) {
+    margin-left: calc(1.2rem + 100px);
+    margin-right: 0;
+}
+
+#acumulus-message .form-group:not(:first-child) .col-lg-9 {
+    width: auto;
+}
+
+#acumulus-message .form-group:nth-child(3) {
+    margin-left: 0;
 }
 
 /*

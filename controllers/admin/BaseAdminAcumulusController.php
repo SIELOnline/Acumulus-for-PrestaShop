@@ -21,7 +21,6 @@ use Siel\Acumulus\Helpers\Message;
  *
  * Proudly copied from AdminPreferencesController.
  *
- * Specify more specific type for property $module:
  * @property Acumulus $module
  */
 class BaseAdminAcumulusController extends ModuleAdminController
@@ -38,7 +37,7 @@ class BaseAdminAcumulusController extends ModuleAdminController
 
         parent::__construct();
 
-        // Initializes the translations.
+        // Initialises the translations.
         $this->getForm();
     }
 
@@ -84,8 +83,9 @@ class BaseAdminAcumulusController extends ModuleAdminController
      *
      * @throws \Throwable
      *
-     * @noinspection PhpMissingParentCallCommonInspection This is not an insert or update,
-     *   so parent method should not be used.
+     * @noinspection PhpMissingParentCallCommonInspection Parent method assumes a
+     *   controller handles 1 class and that an object of this class is to be inserted or
+     *   updated.
      */
     public function processSave(): void
     {
@@ -122,10 +122,10 @@ class BaseAdminAcumulusController extends ModuleAdminController
         $this->show_form_cancel_button = false;
         $this->multiple_fieldsets = true;
         $form = $this->getForm();
+        $exceptionMessage = $formHtml = $messageHtml = '';
         try {
             if (!$this->ajax) {
-                Context::getContext()->controller->addCSS(__PS_BASE_URI__ . 'modules/acumulus/views/css/acumulus.css');
-                $this->context->controller->addJS(__PS_BASE_URI__ . 'modules/acumulus/views/js/acumulus.js');
+                $this->module->addCssAndJs();
             }
             $formMapper = $this->module->getAcumulusContainer()->getFormMapper();
             $this->fields_form = $formMapper->map($form);
@@ -143,30 +143,33 @@ class BaseAdminAcumulusController extends ModuleAdminController
                     'title' => $this->t("button_submit_$this->formType"),
                     'icon' => $this->icon,
                 ];
+                $messageHtml = $this->module->checkForNewRelease();
+                $formHtml = parent::renderForm();
+            } else {
+                if (in_array($this->formType, ['invoice', 'message'])) {
+                    $formHtml = $this->module->renderSubForm($form);
+                }
+            }
+            foreach ($form->getMessages() as $message) {
+                if (($message->getSeverity() & Severity::WarningOrWorse) !== 0) {
+                    $this->displayWarning($message->format(Message::Format_PlainWithSeverity));
+                } else {
+                    $this->displayInformation($message->format(Message::Format_PlainWithSeverity));
+                }
             }
         } catch (Throwable $e) {
-            // We handle our "own" exceptions but only when we can process them
-            // as we want, i.e. show it as an error at the beginning of the
-            // form. That's why we start catching only after we have a form, and
-            // stop catching just before display...() our messages in
-            // processSave().
+            // We process our "own" exceptions, i.e. mail it and show it as an error at
+            // the beginning of the form.
             try {
                 $message = $this->module->getAcumulusContainer()->getCrashReporter()->logAndMail($e);
-                $form->createAndAddMessage($message, Severity::Exception);
-            } catch (Throwable) {
-                // We do not know if we have informed the user per mail or
-                // screen, so assume not, and rethrow the original exception.
-                throw $e;
+                $exceptionMessage = $this->module->renderMessages(
+                    $this->module->getAcumulusContainer()->getMessageCollection()->createAndAddMessage($message, Severity::Exception)
+                );
+            } catch (Throwable $e2) {
+                $exceptionMessage = '<div>' . $e->getMessage() . "<br>\n" . $e2->getMessage() . "</div>\n";
             }
         }
-        foreach ($form->getMessages() as $message) {
-            if (($message->getSeverity() & Severity::WarningOrWorse) !== 0) {
-                $this->displayWarning($message->format(Message::Format_PlainWithSeverity));
-            } else {
-                $this->displayInformation($message->format(Message::Format_PlainWithSeverity));
-            }
-        }
-        return parent::renderForm() ?? '';
+        return $exceptionMessage . $messageHtml .$formHtml;
     }
 
     /**
