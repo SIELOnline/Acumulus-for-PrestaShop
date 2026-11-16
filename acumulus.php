@@ -88,10 +88,8 @@ class Acumulus extends Module
     protected function init(string $shopNameSpace = 'PrestaShop'): void
     {
         if (!isset($this->acumulusContainer)) {
-            // Load our autoloader
+            // Load our autoloader and Container.
             require_once __DIR__ . '/vendor/autoload.php';
-
-            // Load our Container.
             $languageCode = isset(Context::getContext()->language) ? Context::getContext()->language->iso_code : 'nl';
             $this->acumulusContainer = new Container($shopNameSpace, $languageCode);
 
