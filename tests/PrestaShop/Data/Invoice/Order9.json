@@ -15,6 +15,7 @@
         "countryautoname": 2,
         "meta-sub-type": "ShippingAddress",
         "meta-shop-country-code": 8,
+        "meta-address-id": 10,
         "meta-shop-country-name": "Frankrijk",
         "altfullname": "Consument Frankrijk",
         "altaddress1": "5 Chemin d' Ailleurs",
@@ -24,6 +25,7 @@
         "altcountryautoname": 2,
         "altmeta-sub-type": "ShippingAddress",
         "altmeta-shop-country-code": 8,
+        "altmeta-address-id": 10,
         "altmeta-shop-country-name": "Frankrijk",
         "meta-shop-vat-based-on": "id_address_delivery",
         "meta-main-address-type": "ShippingAddress",
@@ -50,15 +52,14 @@
                     "unitpriceinc": 12.0,
                     "meta-line-amount": 20.0,
                     "meta-line-amountinc": 24.0,
-                    "meta-vatrate-source": "exact",
+                    "meta-vatrate-source": "mapped",
+                    "vatamount": 2.0,
+                    "meta-line-vatamount": 4.0,
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 20.0,
                     "meta-vatrate-lookup-label": "TVA FR 20%",
-                    "meta-margin-line": false,
-                    "vatamount": 2.0,
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-vattypes-possible": "[6]"
+                    "meta-margin-line": false
                 },
                 {
                     "itemnumber": "demo_3",
@@ -73,15 +74,14 @@
                     "unitpriceinc": 34.56,
                     "meta-line-amount": 57.6,
                     "meta-line-amountinc": 69.12,
-                    "meta-vatrate-source": "exact",
+                    "meta-vatrate-source": "mapped",
+                    "vatamount": 5.76,
+                    "meta-line-vatamount": 11.52,
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 20.0,
                     "meta-vatrate-lookup-label": "TVA FR 20%",
-                    "meta-margin-line": false,
-                    "vatamount": 5.760000000000001,
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-vattypes-possible": "[6]"
+                    "meta-margin-line": false
                 },
                 {
                     "product": "My carrier",
@@ -90,14 +90,16 @@
                     "quantity": 1.0,
                     "meta-sub-type": "ShippingLine",
                     "unitpriceinc": 8.4,
-                    "vatamount": 1.3999999999999995,
-                    "meta-vatrate-source": "exact",
-                    "meta-fields-calculated": "['unitprice','vatamount']",
+                    "meta-vatrate-source": "mapped",
+                    "meta-recalculate-price": "unitprice",
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 20.0,
                     "meta-vatrate-lookup-label": "TVA FR 20%",
-                    "meta-vattypes-possible": "[6]"
+                    "meta-recalculate-old-price": 7.0,
+                    "meta-did-recalculate": true,
+                    "vatamount": 1.4000000000000004,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']"
                 }
             ],
             "meta-source-type": "Order",
@@ -116,10 +118,7 @@
             "meta-lines-amount": 84.6,
             "meta-lines-amountinc": 101.52000000000001,
             "meta-lines-vatamount": 16.92,
-            "meta-vattype-source": "Completor::completeVatType: Only 1 choice fits all",
-            "meta-vattypes-possible-invoice": "[1,6]",
-            "meta-vattypes-possible-lines-intersection": "[6]",
-            "meta-vattypes-possible-lines-union": "[6]"
+            "meta-vattype-source": "Completor::checkForKnownVatType: only 1 possible vat type"
         }
     }
 }

@@ -15,6 +15,7 @@
         "countryautoname": 2,
         "meta-sub-type": "ShippingAddress",
         "meta-shop-country-code": 3,
+        "meta-address-id": 9,
         "meta-shop-country-name": "België",
         "altfullname": "Consument Belgie",
         "altaddress1": "Kade 7",
@@ -24,12 +25,13 @@
         "altcountryautoname": 2,
         "altmeta-sub-type": "ShippingAddress",
         "altmeta-shop-country-code": 3,
+        "altmeta-address-id": 9,
         "altmeta-shop-country-name": "België",
         "meta-shop-vat-based-on": "id_address_delivery",
         "meta-main-address-type": "ShippingAddress",
         "invoice": {
             "concept": 0,
-            "vattype": 1,
+            "vattype": 6,
             "issuedate": "2025-10-02",
             "costcenter": 48663,
             "accountnumber": 70582,
@@ -50,15 +52,14 @@
                     "unitpriceinc": 12.1,
                     "meta-line-amount": 10.0,
                     "meta-line-amountinc": 12.1,
-                    "meta-vatrate-source": "exact",
+                    "meta-vatrate-source": "mapped",
+                    "vatamount": 2.1,
+                    "meta-line-vatamount": 2.1,
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "TVA BE 21%",
-                    "meta-margin-line": false,
-                    "vatamount": 2.1,
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-vattypes-possible": "[1,6]"
+                    "meta-margin-line": false
                 },
                 {
                     "itemnumber": "demo_7",
@@ -73,15 +74,14 @@
                     "unitpriceinc": 35.09,
                     "meta-line-amount": 29.0,
                     "meta-line-amountinc": 35.09,
-                    "meta-vatrate-source": "exact",
+                    "meta-vatrate-source": "mapped",
+                    "vatamount": 6.09,
+                    "meta-line-vatamount": 6.09,
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "TVA BE 21%",
-                    "meta-margin-line": false,
-                    "vatamount": 6.09,
-                    "meta-fields-calculated": "['vatamount (from vatrate)']",
-                    "meta-vattypes-possible": "[1,6]"
+                    "meta-margin-line": false
                 },
                 {
                     "product": "My cheap carrier",
@@ -90,14 +90,16 @@
                     "quantity": 1.0,
                     "meta-sub-type": "ShippingLine",
                     "unitpriceinc": 4.84,
-                    "vatamount": 0.8399999999999999,
-                    "meta-vatrate-source": "exact",
-                    "meta-fields-calculated": "['unitprice','vatamount']",
+                    "meta-vatrate-source": "mapped",
+                    "meta-recalculate-price": "unitprice",
                     "meta-vatclass-id": 5,
                     "meta-vatclass-name": "EU VAT",
                     "meta-vatrate-lookup": 21.0,
                     "meta-vatrate-lookup-label": "TVA BE 21%",
-                    "meta-vattypes-possible": "[1,6]"
+                    "meta-recalculate-old-price": 4.0,
+                    "meta-did-recalculate": true,
+                    "vatamount": 0.84,
+                    "meta-fields-calculated": "['vatamount (from vatrate)']"
                 }
             ],
             "meta-source-type": "Order",
@@ -116,9 +118,7 @@
             "meta-lines-amount": 43.0,
             "meta-lines-amountinc": 52.03,
             "meta-lines-vatamount": 9.03,
-            "meta-vattypes-possible-invoice": "[1,6]",
-            "meta-vattypes-possible-lines-intersection": "[1,6]",
-            "meta-vattypes-possible-lines-union": "[1,6]"
+            "meta-vattype-source": "Completor::checkForKnownVatType: only 1 possible vat type"
         }
     }
 }
